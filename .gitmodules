@@ -1,0 +1,12 @@
+[submodule "research/STS2-Agent"]
+	path = research/STS2-Agent
+	url = https://github.com/CharTyr/STS2-Agent.git
+[submodule "research/STS2MCP"]
+	path = research/STS2MCP
+	url = https://github.com/Gennadiyev/STS2MCP.git
+[submodule "research/open-agent-sdk-go"]
+	path = research/open-agent-sdk-go
+	url = https://github.com/codeany-ai/open-agent-sdk-go
+[submodule "research/bubbletea"]
+	path = research/bubbletea
+	url = https://github.com/charmbracelet/bubbletea
