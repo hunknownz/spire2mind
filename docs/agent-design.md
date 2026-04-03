@@ -266,7 +266,122 @@ func main() {
 }
 ```
 
-## 7. 未来扩展
+## 7. Harness 增强机制
+
+基于 [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) 的 Harness 工程方法论，在核心 Agent Loop（s01）和工具分发（s02）之上，补充 4 个 Harness 机制。
+
+核心理念：**Agent is the model. Harness 提供环境，不编码智能。** 以下机制都是给 LLM 的工具/能力，不替 LLM 做决策。
+
+### 7.1 上下文压缩（对应 s06）
+
+一局杀戮尖塔有 50+ 场战斗，每场多个回合，每回合多次 tool_call。不压缩，context window 很快就满。
+
+**三层压缩策略**：
+
+```
+微压缩（每轮自动，静默）：
+  将 3 轮前的 get_game_state 工具结果替换为：
+    "[Previous: read game state — floor 7, combat turn 3]"
+  保留 get_game_data 结果（卡牌/遗物定义是静态的，有复用价值）
+
+自动压缩（token 估算超阈值时触发）：
+  保存完整对话历史到 .transcripts/ 文件
+  调 LLM 总结："第7层，58HP，力量流牌组，核心牌: Bash/Inflame/Heavy Blade"
+  用总结替换所有历史消息
+
+手动压缩（Agent 主动调用 compact 工具）：
+  Boss 战前清空非关键上下文
+  为复杂决策腾出最大 context 空间
+```
+
+**实现方式**：在 open-agent-sdk-go 的 `runLoop` 每轮迭代前插入压缩检查，或注册一个 `compact` Custom Tool 让 LLM 主动调用。
+
+### 7.2 技能按需加载（对应 s05）
+
+避免在 system prompt 里塞满游戏知识（卡牌效果、怪物模式、事件结果），改为两层加载：
+
+**第一层（system prompt，始终存在，约 500 token）**：
+
+```
+可用技能目录：
+- combat-basics: 战斗机制、能量系统、卡牌类型
+- boss-strategies: Boss 行为模式和弱点
+- deck-archetypes: 各角色牌组流派和构建方向
+- event-guide: 事件选项及结果
+- relic-synergies: 遗物组合效果
+```
+
+**第二层（按需加载，通过 load_skill 工具）**：
+
+```
+Agent 遇到不熟悉的 Boss → 调 load_skill("boss-strategies")
+→ 返回完整的 Boss 攻略作为 tool_result
+→ Agent 据此决策
+→ 下次上下文压缩时清掉
+```
+
+**技能文件格式**：Markdown + YAML frontmatter，存放在 `data/skills/` 目录：
+
+```
+data/skills/
+├── combat-basics/SKILL.md
+├── boss-strategies/SKILL.md
+├── deck-archetypes/SKILL.md
+├── event-guide/SKILL.md
+└── relic-synergies/SKILL.md
+```
+
+### 7.3 自我规划 / TodoManager（对应 s03）
+
+Agent 维护一个结构化的战略计划，追踪长期目标：
+
+```
+[x] #1: 选铁甲战士
+[>] #2: Act 1 走精英路线攒遗物
+[ ] #3: 优先拿力量相关牌
+[ ] #4: Boss 战前确保 HP > 60%
+```
+
+**nag 机制**：如果 Agent 连续 3+ 轮没有更新 todo，注入提醒消息：
+
+```
+<reminder>你的战略计划有 3 轮没更新了。请检查当前目标是否需要调整。</reminder>
+```
+
+防止 Agent 在长局中迷失方向，忘记整体策略只关注当前一步。
+
+**实现方式**：注册 `todo_update` Custom Tool，Agent 调用它更新计划。TodoManager 维护一个内存中的列表，渲染后注入到 system prompt 末尾。
+
+### 7.4 子 Agent 上下文隔离（对应 s04）
+
+复杂决策（难的战斗、关键路线选择）可以委托给一个子 Agent 分析，分析完只返回结论，不污染主 Agent 的上下文。
+
+```
+主 Agent 遇到复杂战斗：
+  → 启动子 Agent（空上下文 + 当前游戏状态）
+  → 子 Agent 读状态、分析手牌组合、研究敌人弱点
+  → 子 Agent 最多运行 30 轮
+  → 返回一句结论到主 Agent："出 Bash(target=0) 再出 Strike(target=0)"
+  → 子 Agent 上下文丢弃
+  → 主 Agent 上下文保持干净
+```
+
+**实现方式**：利用 open-agent-sdk-go 的 `spawnSubagent` 机制。子 Agent 拿到基础工具（get_game_state, act, get_game_data）但不能再启动子 Agent（防止递归）。
+
+### Harness 机制层级总览
+
+```
+s01 Agent Loop          ← open-agent-sdk-go 的 runLoop（已有）
+s02 Tool Dispatch       ← 5 个 Custom Tool（已有）
+s03 TodoManager         ← 运行级战略追踪（新增）
+s04 SubAgent            ← 复杂分析隔离（新增）
+s05 Skill Loading       ← 游戏知识按需加载（新增）
+s06 Context Compact     ← 三层上下文压缩（新增）
+```
+
+每个机制独立实现，独立生效，可逐步添加。核心 Agent Loop 不变。
+
+## 8. 未来扩展
 
 ### 自写 Harness 模式（省 Token）
 

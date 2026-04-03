@@ -146,9 +146,21 @@ spire2mind/
 │   └── scripts/
 ├── internal/                   ← Go 私有包
 │   ├── tui/                    ← bubbletea TUI
-│   └── game/                   ← 游戏工具 + 客户端
+│   ├── game/                   ← 游戏工具 + 客户端
+│   ├── harness/                ← Harness 增强机制
+│   │   ├── compact.go          ← 三层上下文压缩 (s06)
+│   │   ├── skills.go           ← 技能按需加载 (s05)
+│   │   ├── todo.go             ← 战略规划 TodoManager (s03)
+│   │   └── subagent.go         ← 子 Agent 隔离 (s04)
+│   └── strategy/               ← 规则引擎（不需要 LLM 的决策）
+│       └── rules.go
 ├── data/
-│   └── eng/                    ← 游戏元数据 JSON
+│   ├── eng/                    ← 游戏元数据 JSON
+│   └── skills/                 ← 游戏知识技能文件
+│       ├── combat-basics/SKILL.md
+│       ├── boss-strategies/SKILL.md
+│       ├── deck-archetypes/SKILL.md
+│       └── event-guide/SKILL.md
 ├── cmd/
 │   └── spire2mind/
 │       └── main.go             ← Go 入口
@@ -158,13 +170,34 @@ spire2mind/
 └── README.md
 ```
 
+## Harness 工程理念
+
+参考 [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) 的 Harness 工程方法论：
+
+> Agent is the model. Not frameworks, not prompt chains.
+> Harness = Tools + Knowledge + Observation + Action Interfaces + Permissions
+
+spire2mind 的 Harness 由 6 个递进机制组成：
+
+| 层级 | 机制 | 说明 |
+|------|------|------|
+| s01 | Agent Loop | open-agent-sdk-go 的 runLoop（核心循环） |
+| s02 | Tool Dispatch | 5 个 Custom Tool（游戏操作） |
+| s03 | TodoManager | 运行级战略规划 + nag 提醒 |
+| s04 | SubAgent | 复杂战斗分析的上下文隔离 |
+| s05 | Skill Loading | 游戏知识按需加载（不塞 system prompt） |
+| s06 | Context Compact | 三层上下文压缩（微压缩/自动/手动） |
+
+每个机制独立实现，独立生效，核心 Agent Loop 不变。详细设计见 [agent-design.md](agent-design.md)。
+
 ## 设计原则
 
-1. **Bridge 尽可能薄** — 只做翻译，不做智能。越薄越稳定，越容易跟游戏版本同步
-2. **Agent 层可编程** — 区别于 STS2-Agent 的"裸 LLM 调工具"模式，Go 代码控制流程
+1. **Agent is the model** — Harness 提供环境，不编码智能。模型做决策，Harness 执行
+2. **Bridge 尽可能薄** — 只做翻译，不做智能。越薄越稳定，越容易跟游戏版本同步
 3. **关注点分离** — Bridge 不知道 AI，Agent 不知道游戏内部，TUI 不知道游戏逻辑
 4. **降级容错** — SSE 不可用时降级到轮询，动作超时时返回 pending 状态
 5. **公平性** — 抽牌堆打乱，不给 AI 超出人类玩家的信息优势
+6. **上下文可持续** — 通过三层压缩保证长局（50+ 战斗）不爆 context window
 
 ## 参考项目
 
@@ -172,3 +205,4 @@ spire2mind/
 - [STS2MCP](../research/STS2MCP) — 借鉴 Markdown 输出、InstantMode、抽牌堆打乱
 - [open-agent-sdk-go](../research/open-agent-sdk-go) — Agent 框架
 - [bubbletea](../research/bubbletea) — TUI 框架
+- [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) — Harness 工程方法论，12 课递进模式
