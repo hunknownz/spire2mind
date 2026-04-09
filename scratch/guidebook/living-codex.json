@@ -1,0 +1,1512 @@
+{
+  "updated_at": "2026-04-09T20:37:04.7327354+08:00",
+  "runs_scanned": 11,
+  "reflections_scanned": 2,
+  "run_quality": {
+    "complete_runs": 2,
+    "provider_backed_complete_runs": 2,
+    "clean_complete_runs": 2,
+    "recent_complete_runs": 2,
+    "recent_provider_backed_runs": 2,
+    "recent_clean_runs": 2,
+    "recent_fallback_runs": 0,
+    "recent_provider_retry_runs": 0,
+    "recent_tool_error_runs": 0,
+    "recent_median_floor": 7,
+    "recent_best_floor": 7,
+    "recent_floor7_plus_runs": 2,
+    "recent_act2_entry_runs": 0,
+    "recent_died_with_gold_runs": 2,
+    "recent_average_death_gold": 122
+  },
+  "rl_readiness": {
+    "ready": false,
+    "status": "not ready yet: complete runs 2/100, floor\u003e=15 runs 0/20, provider-backed runs 2/60, recent clean runs 2/4, stable runtime=false",
+    "blockers": [
+      "complete runs 2/100",
+      "floor\u003e=15 runs 0/20",
+      "provider-backed runs 2/60",
+      "recent clean runs 2/4",
+      "stable runtime=false"
+    ],
+    "complete_runs": 2,
+    "floor15_plus_runs": 0,
+    "provider_backed_runs": 2,
+    "recent_clean_runs": 2,
+    "required_runs": 100,
+    "required_floor15": 20,
+    "required_provider_backed_runs": 60,
+    "required_recent_clean_runs": 4,
+    "stable_runtime": false,
+    "knowledge_assets_ok": true
+  },
+  "seen_content": {
+    "updated_at": "2026-04-09T20:37:04.2541726+08:00",
+    "cards": [
+      {
+        "category": "cards",
+        "id": "anger",
+        "name": "Anger",
+        "raw_name": "愤怒",
+        "name_en": "Anger",
+        "first_seen_at": "2026-04-09T19:41:40.3157864+08:00",
+        "last_seen_at": "2026-04-09T19:41:40.3157864+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 2,
+        "last_floor": 2,
+        "seen_count": 1,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Anger when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "ashen_strike",
+        "name": "Ashen Strike",
+        "raw_name": "灰烬打击",
+        "name_en": "Ashen Strike",
+        "first_seen_at": "2026-04-09T20:32:48.2337865+08:00",
+        "last_seen_at": "2026-04-09T20:32:48.2337865+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 1,
+        "last_floor": 1,
+        "seen_count": 1,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Ashen Strike when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "bash",
+        "name": "Bash",
+        "raw_name": "痛击",
+        "name_en": "Bash",
+        "first_seen_at": "2026-04-09T15:24:03.6814286+08:00",
+        "last_seen_at": "2026-04-09T20:34:07.1163387+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 2,
+        "last_floor": 2,
+        "seen_count": 10,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Bash when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "body_slam",
+        "name": "Body Slam",
+        "raw_name": "全身撞击",
+        "name_en": "Body Slam",
+        "first_seen_at": "2026-04-09T19:21:53.7518845+08:00",
+        "last_seen_at": "2026-04-09T19:21:53.7518845+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 6,
+        "last_floor": 6,
+        "seen_count": 1,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Body Slam when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "breakthrough",
+        "name": "Breakthrough",
+        "raw_name": "突破",
+        "name_en": "Breakthrough",
+        "first_seen_at": "2026-04-09T19:33:08.549738+08:00",
+        "last_seen_at": "2026-04-09T20:24:30.6737096+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "COMBAT",
+        "first_floor": 1,
+        "last_floor": 7,
+        "seen_count": 1,
+        "risk_tags": [
+          "damage_tool",
+          "aoe_tool"
+        ],
+        "response_hints": [
+          "Lean on Breakthrough when it secures lethal or trims a high-threat enemy.",
+          "Upgrade the value of Breakthrough when multiple enemies are alive."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "bully",
+        "name": "Bully",
+        "raw_name": "欺凌",
+        "name_en": "Bully",
+        "first_seen_at": "2026-04-09T16:19:20.3910341+08:00",
+        "last_seen_at": "2026-04-09T16:19:20.3910341+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 3,
+        "last_floor": 3,
+        "seen_count": 8,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Bully when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "defend_ironclad",
+        "name": "Defend",
+        "raw_name": "防御",
+        "name_en": "Defend",
+        "first_seen_at": "2026-04-09T15:22:35.7982202+08:00",
+        "last_seen_at": "2026-04-09T20:36:46.0134696+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 2,
+        "last_floor": 2,
+        "seen_count": 10,
+        "risk_tags": [
+          "survival_tool"
+        ],
+        "response_hints": [
+          "Treat Defend as a stabilizer when HP is low or incoming damage is not covered.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "dismantle",
+        "name": "Dismantle",
+        "raw_name": "拆卸",
+        "name_en": "Dismantle",
+        "first_seen_at": "2026-04-09T18:57:46.4585665+08:00",
+        "last_seen_at": "2026-04-09T18:57:46.4585665+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 3,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Dismantle when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "fight_me",
+        "name": "Fight Me!",
+        "raw_name": "与我一战！",
+        "name_en": "Fight Me!",
+        "first_seen_at": "2026-04-09T19:51:40.3459563+08:00",
+        "last_seen_at": "2026-04-09T19:51:40.3459563+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 3,
+        "last_floor": 3,
+        "seen_count": 1,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Fight Me! when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "grapple",
+        "name": "Grapple",
+        "raw_name": "擒拿",
+        "name_en": "Grapple",
+        "first_seen_at": "2026-04-09T16:07:14.5282048+08:00",
+        "last_seen_at": "2026-04-09T18:57:46.4585665+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 2,
+        "last_floor": 5,
+        "seen_count": 8,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Grapple when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "headbutt",
+        "name": "Headbutt",
+        "raw_name": "头槌",
+        "name_en": "Headbutt",
+        "first_seen_at": "2026-04-09T19:33:08.549738+08:00",
+        "last_seen_at": "2026-04-09T20:06:40.5738572+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 1,
+        "last_floor": 4,
+        "seen_count": 1,
+        "risk_tags": [
+          "damage_tool",
+          "draw_tool"
+        ],
+        "response_hints": [
+          "Lean on Headbutt when it secures lethal or trims a high-threat enemy.",
+          "Use Headbutt to smooth the turn before ending with unspent energy."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "howl_from_beyond",
+        "name": "Howl from Beyond",
+        "raw_name": "彼岸咆哮",
+        "name_en": "Howl from Beyond",
+        "first_seen_at": "2026-04-09T16:19:20.3910341+08:00",
+        "last_seen_at": "2026-04-09T16:19:20.3910341+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 3,
+        "last_floor": 3,
+        "seen_count": 8,
+        "risk_tags": [
+          "damage_tool",
+          "aoe_tool"
+        ],
+        "response_hints": [
+          "Lean on Howl from Beyond when it secures lethal or trims a high-threat enemy.",
+          "Upgrade the value of Howl from Beyond when multiple enemies are alive."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "inflame",
+        "name": "Inflame",
+        "raw_name": "燃烧",
+        "name_en": "Inflame",
+        "first_seen_at": "2026-04-09T18:54:02.1907164+08:00",
+        "last_seen_at": "2026-04-09T19:24:42.6194814+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 5,
+        "last_floor": 7,
+        "seen_count": 5,
+        "risk_tags": [
+          "scaling_tool"
+        ],
+        "response_hints": [
+          "Only invest in Inflame when the current turn is already safe.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "iron_wave",
+        "name": "Iron Wave",
+        "raw_name": "铁斩波",
+        "name_en": "Iron Wave",
+        "first_seen_at": "2026-04-09T19:21:53.7518845+08:00",
+        "last_seen_at": "2026-04-09T20:32:48.2337865+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 6,
+        "last_floor": 1,
+        "seen_count": 1,
+        "risk_tags": [
+          "survival_tool",
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Treat Iron Wave as a stabilizer when HP is low or incoming damage is not covered.",
+          "Lean on Iron Wave when it secures lethal or trims a high-threat enemy."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "perfected_strike",
+        "name": "Perfected Strike",
+        "raw_name": "完美打击",
+        "name_en": "Perfected Strike",
+        "first_seen_at": "2026-04-09T19:41:40.3157864+08:00",
+        "last_seen_at": "2026-04-09T20:36:46.0134696+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "COMBAT",
+        "first_floor": 2,
+        "last_floor": 2,
+        "seen_count": 2,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Perfected Strike when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "pommel_strike",
+        "name": "Pommel Strike",
+        "raw_name": "剑柄打击",
+        "name_en": "Pommel Strike",
+        "first_seen_at": "2026-04-09T19:41:40.3157864+08:00",
+        "last_seen_at": "2026-04-09T19:41:40.3157864+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 2,
+        "last_floor": 2,
+        "seen_count": 1,
+        "risk_tags": [
+          "damage_tool",
+          "draw_tool"
+        ],
+        "response_hints": [
+          "Lean on Pommel Strike when it secures lethal or trims a high-threat enemy.",
+          "Use Pommel Strike to smooth the turn before ending with unspent energy."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "setup_strike",
+        "name": "Setup Strike",
+        "raw_name": "预备打击",
+        "name_en": "Setup Strike",
+        "first_seen_at": "2026-04-09T19:21:53.7518845+08:00",
+        "last_seen_at": "2026-04-09T19:51:40.3459563+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 6,
+        "last_floor": 3,
+        "seen_count": 1,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Setup Strike when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "shrug_it_off",
+        "name": "Shrug It Off",
+        "raw_name": "耸肩无视",
+        "name_en": "Shrug It Off",
+        "first_seen_at": "2026-04-09T18:50:59.1688239+08:00",
+        "last_seen_at": "2026-04-09T20:21:27.792472+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 5,
+        "last_floor": 7,
+        "seen_count": 5,
+        "risk_tags": [
+          "survival_tool",
+          "draw_tool"
+        ],
+        "response_hints": [
+          "Treat Shrug It Off as a stabilizer when HP is low or incoming damage is not covered.",
+          "Use Shrug It Off to smooth the turn before ending with unspent energy."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "slimed",
+        "name": "Slimed",
+        "raw_name": "黏液",
+        "name_en": "Slimed",
+        "first_seen_at": "2026-04-09T15:25:49.8664277+08:00",
+        "last_seen_at": "2026-04-09T19:49:27.073349+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 2,
+        "last_floor": 3,
+        "seen_count": 10,
+        "risk_tags": [
+          "draw_tool",
+          "deck_clogger"
+        ],
+        "response_hints": [
+          "Use Slimed to smooth the turn before ending with unspent energy.",
+          "Treat Slimed as a dead draw unless it solves the immediate turn."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "strike_ironclad",
+        "name": "Strike",
+        "raw_name": "打击",
+        "name_en": "Strike",
+        "first_seen_at": "2026-04-09T15:22:35.7982202+08:00",
+        "last_seen_at": "2026-04-09T20:36:29.0145641+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 2,
+        "last_floor": 2,
+        "seen_count": 10,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Strike when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "sword_boomerang",
+        "name": "Sword Boomerang",
+        "raw_name": "飞剑回旋镖",
+        "name_en": "Sword Boomerang",
+        "first_seen_at": "2026-04-09T18:57:46.4585665+08:00",
+        "last_seen_at": "2026-04-09T19:25:10.0235707+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "COMBAT",
+        "first_floor": 5,
+        "last_floor": 7,
+        "seen_count": 3,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Sword Boomerang when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "thunderclap",
+        "name": "Thunderclap",
+        "raw_name": "闪电霹雳",
+        "name_en": "Thunderclap",
+        "first_seen_at": "2026-04-09T16:07:14.5282048+08:00",
+        "last_seen_at": "2026-04-09T19:33:08.549738+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 2,
+        "last_floor": 1,
+        "seen_count": 8,
+        "risk_tags": [
+          "damage_tool",
+          "aoe_tool"
+        ],
+        "response_hints": [
+          "Lean on Thunderclap when it secures lethal or trims a high-threat enemy.",
+          "Upgrade the value of Thunderclap when multiple enemies are alive."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "tremble",
+        "name": "Tremble",
+        "raw_name": "战栗",
+        "name_en": "Tremble",
+        "first_seen_at": "2026-04-09T16:07:14.5282048+08:00",
+        "last_seen_at": "2026-04-09T16:07:14.5282048+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 2,
+        "last_floor": 2,
+        "seen_count": 8,
+        "risk_tags": [
+          "utility_tool"
+        ],
+        "response_hints": [
+          "Use Tremble to keep sequencing flexible rather than forcing a greedy line.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "twin_strike",
+        "name": "Twin Strike",
+        "raw_name": "双重打击",
+        "name_en": "Twin Strike",
+        "first_seen_at": "2026-04-09T15:22:35.7982202+08:00",
+        "last_seen_at": "2026-04-09T19:23:43.6993404+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 2,
+        "last_floor": 7,
+        "seen_count": 10,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Twin Strike when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "uppercut",
+        "name": "Uppercut",
+        "raw_name": "上勾拳",
+        "name_en": "Uppercut",
+        "first_seen_at": "2026-04-09T19:51:40.3459563+08:00",
+        "last_seen_at": "2026-04-09T20:23:15.3321167+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "COMBAT",
+        "first_floor": 3,
+        "last_floor": 7,
+        "seen_count": 1,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Uppercut when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "whirlwind",
+        "name": "Whirlwind",
+        "raw_name": "旋风斩",
+        "name_en": "Whirlwind",
+        "first_seen_at": "2026-04-09T20:06:40.5738572+08:00",
+        "last_seen_at": "2026-04-09T20:06:40.5738572+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 4,
+        "last_floor": 4,
+        "seen_count": 1,
+        "risk_tags": [
+          "damage_tool",
+          "aoe_tool"
+        ],
+        "response_hints": [
+          "Lean on Whirlwind when it secures lethal or trims a high-threat enemy.",
+          "Upgrade the value of Whirlwind when multiple enemies are alive."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      }
+    ],
+    "monsters": [
+      {
+        "category": "monsters",
+        "id": "eye_with_teeth",
+        "name": "Eye With Teeth",
+        "raw_name": "利齿之眼",
+        "name_en": "Eye With Teeth",
+        "first_seen_at": "2026-04-09T19:00:14.5845502+08:00",
+        "last_seen_at": "2026-04-09T19:21:22.1733571+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 6,
+        "last_floor": 6,
+        "seen_count": 3,
+        "risk_tags": [
+          "combat_threat",
+          "punishes_low_hp"
+        ],
+        "response_hints": [
+          "Track Eye With Teeth's intent first, then decide whether to race, block, or set up.",
+          "At low HP, do not leave Eye With Teeth alive without a clear survival plan."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "flyconid",
+        "name": "Flyconid",
+        "raw_name": "飞蝇菌子",
+        "name_en": "Flyconid",
+        "first_seen_at": "2026-04-09T20:17:27.7161393+08:00",
+        "last_seen_at": "2026-04-09T20:23:52.8585007+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 7,
+        "last_floor": 7,
+        "seen_count": 1,
+        "risk_tags": [
+          "combat_threat",
+          "burst_threat",
+          "punishes_low_hp",
+          "early_run_gatekeeper"
+        ],
+        "response_hints": [
+          "Track Flyconid's intent first, then decide whether to race, block, or set up.",
+          "Respect Flyconid's burst turn; block or kill before trying to race.",
+          "At low HP, do not leave Flyconid alive without a clear survival plan.",
+          "Treat Flyconid as an early consistency check; do not enter underpowered."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "fogmog",
+        "name": "Fogmog",
+        "raw_name": "雾菇",
+        "name_en": "Fogmog",
+        "first_seen_at": "2026-04-09T18:58:44.0734532+08:00",
+        "last_seen_at": "2026-04-09T19:21:22.1733571+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 6,
+        "last_floor": 6,
+        "seen_count": 3,
+        "risk_tags": [
+          "combat_threat",
+          "burst_threat",
+          "multi_attack",
+          "punishes_low_hp",
+          "early_run_gatekeeper"
+        ],
+        "response_hints": [
+          "Track Fogmog's intent first, then decide whether to race, block, or set up.",
+          "Respect Fogmog's burst turn; block or kill before trying to race.",
+          "Against Fogmog, value block and AOE more highly than a single greedy hit.",
+          "At low HP, do not leave Fogmog alive without a clear survival plan."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "fuzzy_wurm_crawler",
+        "name": "Fuzzy Wurm Crawler",
+        "raw_name": "毛绒伏地虫",
+        "name_en": "Fuzzy Wurm Crawler",
+        "first_seen_at": "2026-04-09T16:08:58.110511+08:00",
+        "last_seen_at": "2026-04-09T16:17:53.176364+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 3,
+        "last_floor": 3,
+        "seen_count": 8,
+        "risk_tags": [
+          "combat_threat",
+          "punishes_low_hp"
+        ],
+        "response_hints": [
+          "Track Fuzzy Wurm Crawler's intent first, then decide whether to race, block, or set up.",
+          "At low HP, do not leave Fuzzy Wurm Crawler alive without a clear survival plan."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "leaf_slime_m",
+        "name": "Leaf Slime (M)",
+        "raw_name": "树叶史莱姆（中）",
+        "name_en": "Leaf Slime (M)",
+        "first_seen_at": "2026-04-09T15:22:35.7982202+08:00",
+        "last_seen_at": "2026-04-09T16:06:32.3427652+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 2,
+        "last_floor": 2,
+        "seen_count": 10,
+        "risk_tags": [
+          "combat_threat",
+          "punishes_low_hp",
+          "early_run_gatekeeper"
+        ],
+        "response_hints": [
+          "Track Leaf Slime (M)'s intent first, then decide whether to race, block, or set up.",
+          "At low HP, do not leave Leaf Slime (M) alive without a clear survival plan.",
+          "Treat Leaf Slime (M) as an early consistency check; do not enter underpowered."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "leaf_slime_s",
+        "name": "Leaf Slime (S)",
+        "raw_name": "树叶史莱姆（小）",
+        "name_en": "Leaf Slime (S)",
+        "first_seen_at": "2026-04-09T15:22:35.7982202+08:00",
+        "last_seen_at": "2026-04-09T19:48:49.3810795+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 2,
+        "last_floor": 3,
+        "seen_count": 10,
+        "risk_tags": [
+          "combat_threat",
+          "punishes_low_hp",
+          "setup_window"
+        ],
+        "response_hints": [
+          "Track Leaf Slime (S)'s intent first, then decide whether to race, block, or set up.",
+          "At low HP, do not leave Leaf Slime (S) alive without a clear survival plan.",
+          "Use Leaf Slime (S) as a setup window only when the current turn is otherwise safe."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "nibbit",
+        "name": "Nibbit",
+        "raw_name": "小啃兽",
+        "name_en": "Nibbit",
+        "first_seen_at": "2026-04-09T19:23:12.6151482+08:00",
+        "last_seen_at": "2026-04-09T20:32:13.5026249+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 7,
+        "last_floor": 1,
+        "seen_count": 1,
+        "risk_tags": [
+          "combat_threat",
+          "burst_threat",
+          "punishes_low_hp",
+          "early_run_gatekeeper"
+        ],
+        "response_hints": [
+          "Track Nibbit's intent first, then decide whether to race, block, or set up.",
+          "Respect Nibbit's burst turn; block or kill before trying to race.",
+          "At low HP, do not leave Nibbit alive without a clear survival plan.",
+          "Treat Nibbit as an early consistency check; do not enter underpowered."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "shrinker_beetle",
+        "name": "Shrinker Beetle",
+        "raw_name": "缩小甲虫",
+        "name_en": "Shrinker Beetle",
+        "first_seen_at": "2026-04-09T19:28:08.1574029+08:00",
+        "last_seen_at": "2026-04-09T20:36:46.0134696+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 1,
+        "last_floor": 2,
+        "seen_count": 2,
+        "risk_tags": [
+          "combat_threat",
+          "burst_threat",
+          "punishes_low_hp",
+          "early_run_gatekeeper"
+        ],
+        "response_hints": [
+          "Track Shrinker Beetle's intent first, then decide whether to race, block, or set up.",
+          "Respect Shrinker Beetle's burst turn; block or kill before trying to race.",
+          "At low HP, do not leave Shrinker Beetle alive without a clear survival plan.",
+          "Treat Shrinker Beetle as an early consistency check; do not enter underpowered."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "slithering_strangler",
+        "name": "Slithering Strangler",
+        "raw_name": "蛇行扼杀者",
+        "name_en": "Slithering Strangler",
+        "first_seen_at": "2026-04-09T18:50:59.1688239+08:00",
+        "last_seen_at": "2026-04-09T18:57:20.6018442+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 5,
+        "risk_tags": [
+          "combat_threat",
+          "burst_threat",
+          "punishes_low_hp",
+          "early_run_gatekeeper"
+        ],
+        "response_hints": [
+          "Track Slithering Strangler's intent first, then decide whether to race, block, or set up.",
+          "Respect Slithering Strangler's burst turn; block or kill before trying to race.",
+          "At low HP, do not leave Slithering Strangler alive without a clear survival plan.",
+          "Treat Slithering Strangler as an early consistency check; do not enter underpowered."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "snapping_jaxfruit",
+        "name": "Snapping Jaxfruit",
+        "raw_name": "闪光贾克斯果",
+        "name_en": "Snapping Jaxfruit",
+        "first_seen_at": "2026-04-09T20:17:27.7161393+08:00",
+        "last_seen_at": "2026-04-09T20:24:30.6737096+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 7,
+        "last_floor": 7,
+        "seen_count": 1,
+        "risk_tags": [
+          "combat_threat",
+          "punishes_low_hp",
+          "setup_window"
+        ],
+        "response_hints": [
+          "Track Snapping Jaxfruit's intent first, then decide whether to race, block, or set up.",
+          "At low HP, do not leave Snapping Jaxfruit alive without a clear survival plan.",
+          "Use Snapping Jaxfruit as a setup window only when the current turn is otherwise safe."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "twig_slime_m",
+        "name": "Twig Slime (M)",
+        "raw_name": "树枝史莱姆（中）",
+        "name_en": "Twig Slime (M)",
+        "first_seen_at": "2026-04-09T19:45:49.7483545+08:00",
+        "last_seen_at": "2026-04-09T19:50:25.5749753+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 3,
+        "last_floor": 3,
+        "seen_count": 1,
+        "risk_tags": [
+          "combat_threat",
+          "burst_threat",
+          "punishes_low_hp",
+          "early_run_gatekeeper"
+        ],
+        "response_hints": [
+          "Track Twig Slime (M)'s intent first, then decide whether to race, block, or set up.",
+          "Respect Twig Slime (M)'s burst turn; block or kill before trying to race.",
+          "At low HP, do not leave Twig Slime (M) alive without a clear survival plan.",
+          "Treat Twig Slime (M) as an early consistency check; do not enter underpowered."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "twig_slime_s",
+        "name": "Twig Slime (S)",
+        "raw_name": "树枝史莱姆（小）",
+        "name_en": "Twig Slime (S)",
+        "first_seen_at": "2026-04-09T15:22:35.7982202+08:00",
+        "last_seen_at": "2026-04-09T19:46:18.93041+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 2,
+        "last_floor": 3,
+        "seen_count": 10,
+        "risk_tags": [
+          "combat_threat",
+          "punishes_low_hp",
+          "setup_window"
+        ],
+        "response_hints": [
+          "Track Twig Slime (S)'s intent first, then decide whether to race, block, or set up.",
+          "At low HP, do not leave Twig Slime (S) alive without a clear survival plan.",
+          "Use Twig Slime (S) as a setup window only when the current turn is otherwise safe."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      }
+    ],
+    "events": [
+      {
+        "category": "events",
+        "id": "morphic_grove",
+        "name": "Morphic Grove",
+        "raw_name": "变形灵林谷",
+        "name_en": "Morphic Grove",
+        "first_seen_at": "2026-04-09T16:21:08.3066325+08:00",
+        "last_seen_at": "2026-04-09T18:50:23.0763239+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "L2ZHQ4MU8Y",
+        "first_screen": "EVENT",
+        "last_screen": "EVENT",
+        "first_floor": 4,
+        "last_floor": 4,
+        "seen_count": 8,
+        "risk_tags": [
+          "event_tradeoff",
+          "resource_tradeoff",
+          "hp_tradeoff",
+          "deck_mutation",
+          "route_pressure"
+        ],
+        "response_hints": [
+          "Treat Morphic Grove as a tradeoff screen, not an automatic click.",
+          "Use Morphic Grove only when the current gold and relic economy can absorb the trade.",
+          "Only take Morphic Grove HP trades when the deck can survive the next few rooms.",
+          "Use Morphic Grove to clean weak starters or key deck gaps, not to add random bulk."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "events",
+        "id": "wellspring",
+        "name": "Wellspring",
+        "raw_name": "泉水",
+        "name_en": "Wellspring",
+        "first_seen_at": "2026-04-09T20:10:11.8101947+08:00",
+        "last_seen_at": "2026-04-09T20:13:10.5626946+08:00",
+        "first_run_id": "A6RYL65D6T",
+        "last_run_id": "A6RYL65D6T",
+        "first_screen": "EVENT",
+        "last_screen": "EVENT",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 1,
+        "risk_tags": [
+          "event_tradeoff",
+          "resource_tradeoff",
+          "deck_mutation",
+          "route_pressure"
+        ],
+        "response_hints": [
+          "Treat Wellspring as a tradeoff screen, not an automatic click.",
+          "Use Wellspring only when the current gold and relic economy can absorb the trade.",
+          "Use Wellspring to clean weak starters or key deck gaps, not to add random bulk.",
+          "Treat Wellspring as a route-pressure decision; preserve safer exits if HP is shaky."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      }
+    ],
+    "characters": [
+      {
+        "category": "characters",
+        "id": "defect",
+        "name": "The Defect",
+        "raw_name": "故障机器人",
+        "name_en": "The Defect",
+        "first_seen_at": "2026-04-09T19:27:11.5050314+08:00",
+        "last_seen_at": "2026-04-09T20:25:13.5113703+08:00",
+        "first_run_id": "run_unknown",
+        "last_run_id": "run_unknown",
+        "first_screen": "CHARACTER_SELECT",
+        "last_screen": "CHARACTER_SELECT",
+        "seen_count": 1,
+        "risk_tags": [
+          "baseline_run_context"
+        ],
+        "response_hints": [
+          "Use The Defect as the baseline context for card, relic, and event evaluation in this run.",
+          "At low health, bias toward shorter and safer routes with rest or lower-variance rooms."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "characters",
+        "id": "ironclad",
+        "name": "The Ironclad",
+        "raw_name": "IRONCLAD",
+        "name_en": "The Ironclad",
+        "first_seen_at": "2026-04-09T19:26:12.4117241+08:00",
+        "last_seen_at": "2026-04-09T20:25:13.5113703+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "run_unknown",
+        "first_screen": "GAME_OVER",
+        "last_screen": "CHARACTER_SELECT",
+        "first_floor": 7,
+        "seen_count": 1,
+        "risk_tags": [
+          "baseline_run_context"
+        ],
+        "response_hints": [
+          "Use The Ironclad as the baseline context for card, relic, and event evaluation in this run.",
+          "At low health, bias toward shorter and safer routes with rest or lower-variance rooms."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "characters",
+        "id": "name:铁甲战士",
+        "name": "铁甲战士",
+        "raw_name": "铁甲战士",
+        "first_seen_at": "2026-04-09T15:22:35.7982202+08:00",
+        "last_seen_at": "2026-04-09T20:37:04.2541726+08:00",
+        "first_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "COMBAT",
+        "last_screen": "REWARD",
+        "first_floor": 2,
+        "last_floor": 2,
+        "seen_count": 10,
+        "risk_tags": [
+          "baseline_run_context"
+        ],
+        "response_hints": [
+          "Use 铁甲战士 as the baseline context for card, relic, and event evaluation in this run.",
+          "At low health, bias toward shorter and safer routes with rest or lower-variance rooms."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "characters",
+        "id": "necrobinder",
+        "name": "The Necrobinder",
+        "raw_name": "亡灵契约师",
+        "name_en": "The Necrobinder",
+        "first_seen_at": "2026-04-09T19:27:11.5050314+08:00",
+        "last_seen_at": "2026-04-09T20:25:13.5113703+08:00",
+        "first_run_id": "run_unknown",
+        "last_run_id": "run_unknown",
+        "first_screen": "CHARACTER_SELECT",
+        "last_screen": "CHARACTER_SELECT",
+        "seen_count": 1,
+        "risk_tags": [
+          "baseline_run_context"
+        ],
+        "response_hints": [
+          "Use The Necrobinder as the baseline context for card, relic, and event evaluation in this run.",
+          "At low health, bias toward shorter and safer routes with rest or lower-variance rooms."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "characters",
+        "id": "random_character",
+        "name": "随机",
+        "raw_name": "随机",
+        "first_seen_at": "2026-04-09T19:27:11.5050314+08:00",
+        "last_seen_at": "2026-04-09T20:25:13.5113703+08:00",
+        "first_run_id": "run_unknown",
+        "last_run_id": "run_unknown",
+        "first_screen": "CHARACTER_SELECT",
+        "last_screen": "CHARACTER_SELECT",
+        "seen_count": 1,
+        "risk_tags": [
+          "baseline_run_context"
+        ],
+        "response_hints": [
+          "Use 随机 as the baseline context for card, relic, and event evaluation in this run.",
+          "At low health, bias toward shorter and safer routes with rest or lower-variance rooms."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "characters",
+        "id": "regent",
+        "name": "The Regent",
+        "raw_name": "储君",
+        "name_en": "The Regent",
+        "first_seen_at": "2026-04-09T19:27:11.5050314+08:00",
+        "last_seen_at": "2026-04-09T20:25:13.5113703+08:00",
+        "first_run_id": "run_unknown",
+        "last_run_id": "run_unknown",
+        "first_screen": "CHARACTER_SELECT",
+        "last_screen": "CHARACTER_SELECT",
+        "seen_count": 1,
+        "risk_tags": [
+          "baseline_run_context"
+        ],
+        "response_hints": [
+          "Use The Regent as the baseline context for card, relic, and event evaluation in this run.",
+          "At low health, bias toward shorter and safer routes with rest or lower-variance rooms."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "characters",
+        "id": "silent",
+        "name": "The Silent",
+        "raw_name": "静默猎手",
+        "name_en": "The Silent",
+        "first_seen_at": "2026-04-09T19:27:11.5050314+08:00",
+        "last_seen_at": "2026-04-09T20:25:13.5113703+08:00",
+        "first_run_id": "run_unknown",
+        "last_run_id": "run_unknown",
+        "first_screen": "CHARACTER_SELECT",
+        "last_screen": "CHARACTER_SELECT",
+        "seen_count": 1,
+        "risk_tags": [
+          "baseline_run_context"
+        ],
+        "response_hints": [
+          "Use The Silent as the baseline context for card, relic, and event evaluation in this run.",
+          "At low health, bias toward shorter and safer routes with rest or lower-variance rooms."
+        ],
+        "failure_links": [
+          "GAME_OVER: 1 available actions",
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier"
+        ]
+      }
+    ]
+  },
+  "lesson_buckets": {
+    "pathing": [
+      "At low health, bias toward shorter and safer routes with rest or lower-variance rooms."
+    ],
+    "shop_economy": [
+      "Convert gold earlier: prioritize card removal, strong relics, or key shop cards before gold becomes useless."
+    ],
+    "combat_survival": [
+      "Play safer at low health: value block over damage and stop spending HP to race."
+    ]
+  },
+  "failure_patterns": [
+    "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+    "Died with 82 unspent gold — convert resources into survivability or power earlier",
+    "Died with 163 unspent gold — convert resources into survivability or power earlier"
+  ],
+  "story_seeds": [
+    "Attempt 1 on floor 7: Died at critical HP (0/80) — the run collapsed with no safety margin left",
+    "Attempt 2 on floor 7: Died at critical HP (0/80) — the run collapsed with no safety margin left"
+  ],
+  "recent_recovery_window": 6,
+  "recent_attempts": [
+    {
+      "time": "2026-04-09T20:24:35.9566928+08:00",
+      "attempt": 2,
+      "run_id": "A6RYL65D6T",
+      "outcome": "defeat",
+      "floor": 7,
+      "character_id": "IRONCLAD",
+      "headline": "GAME_OVER: 1 available actions",
+      "next_plan": "Stabilize the next few rooms before taking greedy lines, and Play safer at low health: value block over damage and stop spending HP to race"
+    },
+    {
+      "time": "2026-04-09T19:26:12.5561944+08:00",
+      "attempt": 1,
+      "run_id": "L2ZHQ4MU8Y",
+      "outcome": "defeat",
+      "floor": 7,
+      "character_id": "IRONCLAD",
+      "headline": "GAME_OVER: 1 available actions",
+      "next_plan": "Stabilize the next few rooms before taking greedy lines, and Play safer at low health: value block over damage and stop spending HP to race"
+    }
+  ]
+}
