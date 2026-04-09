@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"spire2mind/internal/game"
+	"spire2mind/internal/i18n"
 )
 
 func TestTodoManagerProceedsAfterResolvedCardReward(t *testing.T) {
@@ -98,5 +99,27 @@ func TestTodoManagerAppliesReflectionToPromptBlock(t *testing.T) {
 	}
 	if !strings.Contains(block, "Combat survival:") || !strings.Contains(block, "Shop economy:") {
 		t.Fatalf("expected lesson categories in prompt block, got %q", block)
+	}
+}
+
+func TestTodoManagerPromptBlockCompactForLanguageChinese(t *testing.T) {
+	todo := NewTodoManager()
+	state := &game.StateSnapshot{
+		RunID:            "RUN-ZH",
+		Screen:           "SHOP",
+		AvailableActions: []string{"buy_card", "buy_relic", "proceed"},
+	}
+	todo.Update(state)
+
+	block := todo.PromptBlockCompactForLanguage(i18n.LanguageChinese)
+
+	if !strings.Contains(block, "当前目标:") {
+		t.Fatalf("expected Chinese current goal heading, got %q", block)
+	}
+	if !strings.Contains(block, "房间目标:") {
+		t.Fatalf("expected Chinese room goal heading, got %q", block)
+	}
+	if strings.Contains(block, "Current goal:") {
+		t.Fatalf("did not expect English heading in Chinese block, got %q", block)
 	}
 }

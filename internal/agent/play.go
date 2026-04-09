@@ -52,6 +52,8 @@ func renderHeadlessEvent(output io.Writer, event SessionEvent) {
 		fmt.Fprintf(output, "[tool] cycle=%d attempt=%d %s %s\n", event.Cycle, event.Attempt, event.Tool, event.Action)
 	case SessionEventAssistant:
 		fmt.Fprintf(output, "[assistant] cycle=%d attempt=%d %s\n", event.Cycle, event.Attempt, event.Message)
+	case SessionEventStreamer:
+		fmt.Fprintf(output, "[streamer] cycle=%d attempt=%d %s\n", event.Cycle, event.Attempt, event.Message)
 	case SessionEventToolError:
 		fmt.Fprintf(output, "[tool-error] cycle=%d attempt=%d %s\n", event.Cycle, event.Attempt, event.Message)
 	case SessionEventCompact:

@@ -5,7 +5,7 @@ param(
     [int]$MaxCycles = 0,
     [int]$TimeoutSeconds = 900,
     [int]$IdleTimeoutSeconds = 120,
-    [string]$Language = "bi",
+    [string]$Language = "zh",
     [string]$FastMode = "instant",
     [string]$Planner = "mcts",
     [string]$ApiBaseUrl = "",
@@ -21,8 +21,10 @@ param(
 $ErrorActionPreference = "Stop"
 
 $scriptRoot = $PSScriptRoot
+. (Join-Path $PSScriptRoot "tts-profile-utils.ps1")
 $resolvedForceModelEval = $ForceModelEval -match '^(1|true|yes|on)$'
 $resolvedReplaceExisting = $ReplaceExisting -match '^(1|true|yes|on)$'
+$resolvedTTSProfile = Resolve-TTSProfile -RepoRoot (Split-Path -Parent $scriptRoot)
 
 function Start-VisibleTuiProcess {
     param(
@@ -74,6 +76,37 @@ function Start-VisibleTuiProcess {
     }
 
     Start-Process -FilePath "powershell.exe" -ArgumentList $powershellArgs[1..($powershellArgs.Length - 1)] | Out-Null
+}
+
+function Start-TTSPlayerIfEnabled {
+    param(
+        [string]$ScriptRoot
+    )
+
+    if ($env:SPIRE2MIND_TTS_AUTO_SPEAK -notmatch '^(1|true|yes|on)$') {
+        return
+    }
+
+    $launcher = Join-Path $ScriptRoot "start-tts-player.ps1"
+    if (-not (Test-Path $launcher)) {
+        Write-Warning "TTS player launcher not found: $launcher"
+        return
+    }
+
+    $ttsArgs = @(
+        "-ExecutionPolicy", "Bypass",
+        "-File", $launcher,
+        "-ReplaceExisting"
+    )
+    if ($env:SPIRE2MIND_TTS_PROVIDER) { $ttsArgs += @("-Provider", $env:SPIRE2MIND_TTS_PROVIDER) }
+    if ($env:SPIRE2MIND_TTS_FALLBACK_PROVIDER) { $ttsArgs += @("-FallbackProvider", $env:SPIRE2MIND_TTS_FALLBACK_PROVIDER) }
+    if ($env:SPIRE2MIND_TTS_BASE_URL) { $ttsArgs += @("-BaseUrl", $env:SPIRE2MIND_TTS_BASE_URL) }
+    if ($env:SPIRE2MIND_TTS_API_KEY) { $ttsArgs += @("-ApiKey", $env:SPIRE2MIND_TTS_API_KEY) }
+    if ($env:SPIRE2MIND_TTS_MODEL) { $ttsArgs += @("-Model", $env:SPIRE2MIND_TTS_MODEL) }
+    if ($env:SPIRE2MIND_TTS_VOICE) { $ttsArgs += @("-Voice", $env:SPIRE2MIND_TTS_VOICE) }
+    if ($env:SPIRE2MIND_TTS_SPEED) { $ttsArgs += @("-Speed", $env:SPIRE2MIND_TTS_SPEED) }
+
+    & powershell.exe @ttsArgs
 }
 
 function Stop-ExistingSpire2MindInstances {
@@ -251,9 +284,13 @@ if (-not [string]::IsNullOrWhiteSpace($resolvedApiDecisionMode)) {
 }
 $env:SPIRE2MIND_MODEL = $resolvedModel
 $env:SPIRE2MIND_FORCE_MODEL_EVAL = if ($resolvedForceModelEval) { "1" } else { "0" }
+if (-not $env:SPIRE2MIND_STREAMER_STYLE -and $resolvedTTSProfile.streamerStyle) {
+    $env:SPIRE2MIND_STREAMER_STYLE = [string]$resolvedTTSProfile.streamerStyle
+}
 
 switch ($Mode) {
     "tui" {
+        Start-TTSPlayerIfEnabled -ScriptRoot $scriptRoot
         Start-VisibleTuiProcess `
             -RunTuiScript (Join-Path $scriptRoot "run-tui.ps1") `
             -Attempts $Attempts `

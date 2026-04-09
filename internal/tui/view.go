@@ -15,12 +15,15 @@ import (
 func (m *Model) View() tea.View {
 	width := m.width
 	if width <= 0 {
-		width = 140
+		width = 168
 	}
 
 	header := m.renderHeader(width)
 	body := m.renderBody(width)
-	footer := footerStyle.Render(m.loc.Label("q quit | ctrl+c stop | this TUI mirrors the live autoplay runtime", "q 退出 | ctrl+c 停止 | 这个 TUI 镜像显示实时自动游玩运行时"))
+	footer := footerStyle.Render(m.loc.Label(
+		"p pause/resume | q quit | ctrl+c stop | this TUI mirrors the live autoplay runtime",
+		"p 暂停/恢复 | q 退出 | ctrl+c 停止 | 这个 TUI 镜像实时自动游玩运行时",
+	))
 
 	return tea.NewView(rootStyle.Width(width).Render(lipgloss.JoinVertical(
 		lipgloss.Left,
@@ -33,15 +36,20 @@ func (m *Model) View() tea.View {
 
 func (m *Model) renderHeader(width int) string {
 	title := headerStyle.Render("Spire2Mind")
-	subtitle := subtitleStyle.Render(m.loc.Label("STS2 autoplay cockpit", "STS2 自动游玩驾驶舱"))
+	subtitle := subtitleStyle.Render(m.loc.Label("Live STS2 cockpit", "实时 STS2 驾驶舱"))
 	left := lipgloss.JoinVertical(lipgloss.Left, title, subtitle)
 	screen, _, _ := m.currentStateHeader()
 
+	status := m.status
+	if m.paused {
+		status = "paused"
+	}
+
 	right := lipgloss.JoinHorizontal(
 		lipgloss.Left,
-		statusBadgeStyle(m.status).Render(m.loc.Label("status", "状态")+" "+compactValue(m.status)),
+		statusBadgeStyle(status).Render(m.loc.Label("status", "状态")+" "+compactValue(status)),
 		" ",
-		statusBadgeStyle(m.providerState).Render(m.loc.Label("provider", "提供方")+" "+compactValue(m.providerState)),
+		statusBadgeStyle(m.providerState).Render(m.loc.Label("provider", "模型")+" "+compactValue(m.providerState)),
 		" ",
 		infoBadgeStyle().Render(m.loc.Label("screen", "界面")+" "+compactValue(screen)),
 		" ",
@@ -61,43 +69,47 @@ func (m *Model) renderHeader(width int) string {
 }
 
 func (m *Model) renderBody(width int) string {
-	if width < 120 {
+	if width < 140 {
 		return lipgloss.JoinVertical(
 			lipgloss.Left,
 			m.renderOverviewPanel(width),
-			m.renderModelTelemetryPanel(width),
 			m.renderGoalsPanel(width),
+			m.renderBoardPanel(width),
 			m.renderGuidebookPanel(width),
-			m.renderTacticalPanel(width),
+			m.renderStreamerPanel(width),
 			m.renderSignalsPanel(width),
 			m.renderPromptPanel(width),
 			m.renderAssistantPanel(width),
-			"",
 			m.renderLogsPanel(width),
 		)
 	}
 
-	leftWidth := max(50, int(float64(width)*0.56))
-	rightWidth := max(42, width-leftWidth-2)
+	leftWidth := max(58, int(float64(width)*0.40))
+	midWidth := max(54, int(float64(width)*0.30))
+	rightWidth := max(48, width-leftWidth-midWidth-4)
 
 	left := lipgloss.JoinVertical(
 		lipgloss.Left,
 		m.renderOverviewPanel(leftWidth),
-		m.renderModelTelemetryPanel(leftWidth),
 		m.renderGoalsPanel(leftWidth),
 		m.renderGuidebookPanel(leftWidth),
-		m.renderTacticalPanel(leftWidth),
+	)
+	mid := lipgloss.JoinVertical(
+		lipgloss.Left,
+		m.renderBoardPanel(midWidth),
+		m.renderStreamerPanel(midWidth),
+		m.renderSignalsPanel(midWidth),
 	)
 	right := lipgloss.JoinVertical(
 		lipgloss.Left,
-		m.renderSignalsPanel(rightWidth),
+		m.renderModelTelemetryPanel(rightWidth),
 		m.renderPromptPanel(rightWidth),
 		m.renderAssistantPanel(rightWidth),
 	)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		lipgloss.JoinHorizontal(lipgloss.Top, left, right),
+		lipgloss.JoinHorizontal(lipgloss.Top, left, "  ", mid, "  ", right),
 		"",
 		m.renderLogsPanel(width),
 	)
@@ -105,36 +117,34 @@ func (m *Model) renderBody(width int) string {
 
 func (m *Model) renderOverviewPanel(width int) string {
 	screen, headline, runID := m.currentStateHeader()
-
 	lines := []string{
 		renderKV(m.loc.Label("Screen", "界面"), screen),
-		renderKV(m.loc.Label("Run", "Run"), runID),
+		renderKV(m.loc.Label("Run", "对局"), runID),
 		renderKV(m.loc.Label("Headline", "摘要"), headline),
 		renderKV(m.loc.Label("Mode", "模式"), m.mode),
-		renderKV(m.loc.Label("Provider", "提供方"), m.provider),
-		renderKV(m.loc.Label("Provider state", "提供方状态"), m.providerState),
+		renderKV(m.loc.Label("Provider", "后端"), m.provider),
+		renderKV(m.loc.Label("Provider state", "后端状态"), m.providerState),
 		renderKV(m.loc.Label("Agent available", "模型可用"), fmt.Sprintf("%t", m.agentAvailable)),
 		renderKV(m.loc.Label("Forced deterministic", "强制确定性"), fmt.Sprintf("%t", m.forceDeterministic)),
-		renderKV(m.loc.Label("Game fast mode", "游戏加速模式"), m.gameFastMode),
+		renderKV(m.loc.Label("Fast mode", "加速模式"), m.gameFastMode),
 		renderKV(m.loc.Label("Model", "模型"), m.model),
-		renderKV(m.loc.Label("Backend", "后端"), compactValue(m.endpoint)),
+		renderKV(m.loc.Label("Backend", "地址"), compactValue(m.endpoint)),
 		renderKV(m.loc.Label("Cost", "成本"), fmt.Sprintf("%.4f", m.cost)),
 		"",
-		labelStyle.Render(m.loc.Label("Actions", "动作")),
-		renderActionChips(m.state, max(20, width-6)),
+		labelStyle.Render(m.loc.Label("Available actions", "可用动作")),
+		renderActionChips(m.state, max(24, width-6)),
 		"",
 		labelStyle.Render(m.loc.Label("State summary", "状态摘要")),
 		strings.Join(agentruntime.StateSummaryLinesFor(m.state, m.loc.Language()), "\n"),
 	}
-
 	return renderPanel(m.loc.Label("Live Run", "实时对局"), strings.Join(lines, "\n"), width)
 }
 
 func (m *Model) renderGoalsPanel(width int) string {
 	lines := []string{
-		renderKV(m.loc.Label("Current", "当前"), compactValue(m.currentGoal)),
-		renderKV(m.loc.Label("Room", "房间"), compactValue(m.roomGoal)),
-		renderKV(m.loc.Label("Intent", "意图"), compactValue(m.nextIntent)),
+		renderKV(m.loc.Label("Current goal", "当前目标"), compactValue(m.currentGoal)),
+		renderKV(m.loc.Label("Room goal", "房间目标"), compactValue(m.roomGoal)),
+		renderKV(m.loc.Label("Next intent", "下一步意图"), compactValue(m.nextIntent)),
 		renderKV(m.loc.Label("Recent failure", "最近失败"), compactValue(m.lastFailure)),
 		renderKV(m.loc.Label("Carry plan", "跨局计划"), compactValue(m.carryForwardPlan)),
 	}
@@ -149,56 +159,55 @@ func (m *Model) renderGoalsPanel(width int) string {
 		}
 	}
 
-	remaining := agentruntime.UncategorizedLessons(m.carryForwardLessons, m.carryForwardBuckets, 8)
-	if len(remaining) > 0 {
-		lines = append(lines, "", labelStyle.Render(m.loc.Label("Other lessons", "其他经验")))
-		for _, lesson := range remaining {
-			lines = append(lines, "- "+lesson)
-		}
-	}
-
-	return renderPanel(m.loc.Label("Intent & Memory", "意图与记忆"), strings.Join(lines, "\n"), width)
+	return renderPanel(m.loc.Label("Plan & Memory", "计划与记忆"), strings.Join(lines, "\n"), width)
 }
 
-func (m *Model) renderTacticalPanel(width int) string {
-	lines := []string{labelStyle.Render(m.loc.Label("Tactical hints", "战术提示"))}
-	if len(m.tacticalHints) == 0 {
-		lines = append(lines, mutedStyle.Render("-"))
-	} else {
+func (m *Model) renderBoardPanel(width int) string {
+	lines := []string{}
+	if len(m.tacticalHints) > 0 {
+		lines = append(lines, labelStyle.Render(m.loc.Label("Tactical hints", "战术提示")))
 		for _, hint := range m.tacticalHints {
 			lines = append(lines, hintStyle().Render("- "+hint))
 		}
-	}
-	if m.combatPlanSummary != "" || m.combatPlanGoal != "" || m.combatPlanTarget != "" || len(m.combatPlanReasons) > 0 {
 		lines = append(lines, "")
+	}
+
+	if m.combatPlanSummary != "" || m.combatPlanGoal != "" || m.combatPlanTarget != "" || len(m.combatPlanCandidates) > 0 {
 		lines = append(lines, labelStyle.Render(m.loc.Label("Combat planner", "战斗规划器")))
 		lines = append(lines, renderKV(m.loc.Label("Mode", "模式"), compactValue(m.combatPlannerMode)))
 		lines = append(lines, renderKV(m.loc.Label("Summary", "摘要"), compactValue(m.combatPlanSummary)))
 		if strings.TrimSpace(m.combatPlanGoal) != "" {
-			lines = append(lines, renderKV(m.loc.Label("Primary goal", "主要目标"), compactValue(m.combatPlanGoal)))
+			lines = append(lines, renderKV(m.loc.Label("Primary goal", "主目标"), compactValue(m.combatPlanGoal)))
 		}
 		if strings.TrimSpace(m.combatPlanTarget) != "" {
-			lines = append(lines, renderKV(m.loc.Label("Target bias", "目标倾向"), compactValue(m.combatPlanTarget)))
+			lines = append(lines, renderKV(m.loc.Label("Target bias", "目标偏置"), compactValue(m.combatPlanTarget)))
 		}
 		for _, reason := range m.combatPlanReasons {
-			lines = append(lines, hintStyle().Render("- "+reason))
+			lines = append(lines, "- "+reason)
 		}
 		for _, candidate := range m.combatPlanCandidates {
 			lines = append(lines, mutedStyle.Render("  -> "+candidate))
 		}
+		lines = append(lines, "")
 	}
 
-	lines = append(lines, "", labelStyle.Render(m.loc.Label("Room detail", "房间细节")))
-	lines = append(lines, agentruntime.StateDetailLinesFor(m.state, 6, m.loc.Language())...)
+	lines = append(lines, labelStyle.Render(m.loc.Label("Room detail", "房间细节")))
+	lines = append(lines, agentruntime.StateDetailLinesFor(m.state, 8, m.loc.Language())...)
 	return renderPanel(m.loc.Label("Board Read", "局面解读"), strings.Join(lines, "\n"), width)
 }
 
 func (m *Model) renderGuidebookPanel(width int) string {
 	lines := []string{
-		renderKV(m.loc.Label("Recent window", "近期窗口"), fmt.Sprintf("%d", m.guideRecentWindow)),
+		renderKV(m.loc.Label("Recent median floor", "最近中位层数"), fmt.Sprintf("%d", m.guideRunQualityRecentMedianFloor)),
+		renderKV(m.loc.Label("Recent best floor", "最近最佳层数"), fmt.Sprintf("%d", m.guideRunQualityRecentBestFloor)),
+		renderKV(m.loc.Label("Floor >= 7", "到达 7 层及以上"), fmt.Sprintf("%d", m.guideRunQualityRecentFloor7PlusRuns)),
+		renderKV(m.loc.Label("Act 2 entries", "进入 Act 2"), fmt.Sprintf("%d", m.guideRunQualityRecentAct2EntryRuns)),
+		renderKV(m.loc.Label("Died with gold", "带钱阵亡"), fmt.Sprintf("%d", m.guideRunQualityRecentDiedWithGoldRuns)),
+		renderKV(m.loc.Label("Average death gold", "阵亡平均金币"), fmt.Sprintf("%d", m.guideRunQualityRecentAverageDeathGold)),
 		"",
 		labelStyle.Render(m.loc.Label("Recovery hotspots", "恢复热点")),
 	}
+
 	if len(m.guideRecentHotspots) == 0 {
 		lines = append(lines, mutedStyle.Render("-"))
 	} else {
@@ -216,42 +225,31 @@ func (m *Model) renderGuidebookPanel(width int) string {
 		}
 	}
 
-	lines = append(lines, "", labelStyle.Render(m.loc.Label("Known world", "已见世界")))
+	lines = append(lines, "", labelStyle.Render(m.loc.Label("Known world", "已知世界")))
 	if len(m.seenContentCounts) == 0 {
 		lines = append(lines, mutedStyle.Render("-"))
 	} else {
-		for _, line := range m.seenContentCountLines() {
-			lines = append(lines, line)
-		}
+		lines = append(lines, m.seenContentCountLines()...)
 	}
 
-	lines = append(lines, "", labelStyle.Render(m.loc.Label("Recent discoveries", "最近发现")))
-	if len(m.recentDiscoveries) == 0 {
-		lines = append(lines, mutedStyle.Render("-"))
-	} else {
-		for _, discovery := range m.recentDiscoveries {
-			lines = append(lines, positiveStyle().Render("- "+discovery))
-		}
+	return renderPanel(m.loc.Label("World & Progress", "世界与进度"), strings.Join(lines, "\n"), width)
+}
+
+func (m *Model) renderStreamerPanel(width int) string {
+	lines := []string{
+		renderKV(m.loc.Label("TTS profile", "TTS 方案"), compactValue(m.ttsProfileName)),
+		renderKV(m.loc.Label("TTS provider", "TTS 后端"), compactValue(m.ttsProfileProvider)),
+		renderKV(m.loc.Label("Voice", "音色"), compactValue(m.ttsProfileVoice)),
+		renderKV(m.loc.Label("Speed", "语速"), compactValue(m.ttsProfileSpeed)),
+		renderKV(m.loc.Label("Streamer style", "主播风格"), compactValue(m.streamerStyle)),
+		"",
+		renderKV(m.loc.Label("Mood", "情绪"), compactValue(m.lastStreamerMood)),
+		renderKV(m.loc.Label("Commentary", "解说"), compactValue(m.lastStreamerCommentary)),
+		renderKV(m.loc.Label("Game insight", "游戏见解"), compactValue(m.lastStreamerInsight)),
+		renderKV(m.loc.Label("Life reflection", "人生感慨"), compactValue(m.lastStreamerReflection)),
+		renderKV(m.loc.Label("TTS text", "播报文本"), compactValue(m.lastStreamerTTS)),
 	}
-
-	lines = append(lines, "", labelStyle.Render(m.loc.Label("RL readiness", "RL 就绪度")))
-	lines = append(lines,
-		renderKV(m.loc.Label("Ready", "就绪"), fmt.Sprintf("%t", m.guideRLReady)),
-		renderKV(m.loc.Label("Status", "状态"), compactValue(m.guideRLStatus)),
-		renderKV(m.loc.Label("Runs", "完整 run"), fmt.Sprintf("%d / %d", m.guideRLCompleteRuns, m.guideRLRequiredRuns)),
-		renderKV(m.loc.Label("Floor >= 15", "15层以上"), fmt.Sprintf("%d / %d", m.guideRLFloor15Runs, m.guideRLRequiredFloor)),
-		renderKV(m.loc.Label("Provider-backed", "Provider-backed"), fmt.Sprintf("%d / %d", m.guideRLProviderBackedRuns, m.guideRLRequiredProviderBackedRuns)),
-		renderKV(m.loc.Label("Recent clean", "Recent clean"), fmt.Sprintf("%d / %d", m.guideRLRecentCleanRuns, m.guideRLRequiredRecentCleanRuns)),
-		renderKV(m.loc.Label("Stable runtime", "运行稳定"), fmt.Sprintf("%t", m.guideRLStable)),
-		renderKV(m.loc.Label("Knowledge assets", "知识资产"), fmt.Sprintf("%t", m.guideRLKnowledgeOK)),
-		renderKV(m.loc.Label("Clean complete", "Clean complete"), fmt.Sprintf("%d", m.guideRunQualityCleanRuns)),
-		renderKV(m.loc.Label("Recent provider-backed", "Recent provider-backed"), fmt.Sprintf("%d", m.guideRunQualityRecentProviderBackedRuns)),
-		renderKV(m.loc.Label("Recent fallback", "Recent fallback"), fmt.Sprintf("%d", m.guideRunQualityRecentFallbackRuns)),
-		renderKV(m.loc.Label("Recent retries", "Recent retries"), fmt.Sprintf("%d", m.guideRunQualityRecentProviderRetryRuns)),
-		renderKV(m.loc.Label("Recent tool errors", "Recent tool errors"), fmt.Sprintf("%d", m.guideRunQualityRecentToolErrorRuns)),
-	)
-
-	return renderPanel(m.loc.Label("World & Trends", "世界与趋势"), strings.Join(lines, "\n"), width)
+	return renderPanel(m.loc.Label("Streamer Booth", "主播机位"), strings.Join(lines, "\n"), width)
 }
 
 func (m *Model) renderSignalsPanel(width int) string {
@@ -263,53 +261,38 @@ func (m *Model) renderSignalsPanel(width int) string {
 		renderKV(m.loc.Label("Tool error", "工具错误"), compactValue(m.lastToolError)),
 		renderKV(m.loc.Label("Recovery", "恢复"), compactValue(m.lastRecoveryKind)),
 		renderKV(m.loc.Label("Drift kind", "漂移类型"), compactValue(m.lastDriftKind)),
-		renderKV(m.loc.Label("Attempt lifecycle", "尝试生命周期"), compactValue(m.lastAttemptLifecycle)),
-		renderKV(m.loc.Label("Provider recovery", "提供方恢复"), compactValue(m.lastProviderRecovery)),
-		renderKV(m.loc.Label("Game fast mode", "游戏加速模式"), compactValue(m.gameFastMode)),
+		renderKV(m.loc.Label("Provider recovery", "模型恢复"), compactValue(m.lastProviderRecovery)),
 		renderKV(m.loc.Label("Compact", "压缩"), compactValue(m.lastCompact)),
 		renderKV(m.loc.Label("Reflection", "反思"), compactValue(m.lastReflection)),
-		renderKV(m.loc.Label("Stop", "停止"), compactValue(m.lastStop)),
-		"",
-		labelStyle.Render(m.loc.Label("Drift expected", "预期状态")),
-		compactValue(m.lastDriftExpected),
-		"",
-		labelStyle.Render(m.loc.Label("Drift live", "实际状态")),
-		compactValue(m.lastDriftLive),
 	}
-	if m.gameFastModeChanged {
-		lines = append(lines, renderKV(m.loc.Label("Fast mode change", "加速模式变更"), compactValue(m.gameFastModePrevious+" -> "+m.gameFastMode)))
-	}
-
 	return renderPanel(m.loc.Label("Signals & Recovery", "信号与恢复"), strings.Join(lines, "\n"), width)
 }
 
 func (m *Model) renderModelTelemetryPanel(width int) string {
 	lines := []string{
-		renderKV("Latency", formatDurationMs(m.lastCycleDurationMs)),
-		renderKV("Input tokens", fmt.Sprintf("%d", m.lastInputTokens)),
-		renderKV("Output tokens", fmt.Sprintf("%d", m.lastOutputTokens)),
-		renderKV("Prompt size", formatBytes(m.lastPromptSizeBytes)),
+		renderKV(m.loc.Label("Latency", "延迟"), formatDurationMs(m.lastCycleDurationMs)),
+		renderKV(m.loc.Label("Input tokens", "输入 tokens"), fmt.Sprintf("%d", m.lastInputTokens)),
+		renderKV(m.loc.Label("Output tokens", "输出 tokens"), fmt.Sprintf("%d", m.lastOutputTokens)),
+		renderKV(m.loc.Label("Prompt size", "提示词大小"), formatBytes(m.lastPromptSizeBytes)),
 	}
-
-	return renderPanel("Model Telemetry", strings.Join(lines, "\n"), width)
+	return renderPanel(m.loc.Label("Model Telemetry", "模型遥测"), strings.Join(lines, "\n"), width)
 }
 
 func (m *Model) renderPromptPanel(width int) string {
-	body := previewStyle().Width(max(20, width-6)).Render(strings.Join(previewBlock(m.lastPrompt, 12), "\n"))
+	body := previewStyle().Width(max(24, width-6)).Render(strings.Join(previewBlock(m.lastPrompt, 18), "\n"))
 	return renderPanel(m.loc.Label("Prompt Preview", "提示词预览"), body, width)
 }
 
 func (m *Model) renderAssistantPanel(width int) string {
 	lines := []string{
-		previewStyle().Width(max(20, width-6)).Render(strings.Join(previewBlock(m.lastAssistant, 10), "\n")),
+		previewStyle().Width(max(24, width-6)).Render(strings.Join(previewBlock(m.lastAssistant, 14), "\n")),
 	}
 	if strings.TrimSpace(m.lastReflectionStory) != "" {
 		lines = append(lines, "")
-		lines = append(lines, labelStyle.Render(m.loc.Label("Latest reflection echo", "最近反思回声")))
-		lines = append(lines, previewStyle().Width(max(20, width-6)).Render(strings.Join(previewBlock(m.lastReflectionStory, 8), "\n")))
+		lines = append(lines, labelStyle.Render(m.loc.Label("Latest reflection story", "最近反思故事")))
+		lines = append(lines, previewStyle().Width(max(24, width-6)).Render(strings.Join(previewBlock(m.lastReflectionStory, 10), "\n")))
 	}
-
-	return renderPanel(m.loc.Label("Assistant & Story", "模型与故事"), strings.Join(lines, "\n"), width)
+	return renderPanel(m.loc.Label("Model & Story", "模型与故事"), strings.Join(lines, "\n"), width)
 }
 
 func (m *Model) renderLogsPanel(width int) string {
@@ -321,7 +304,6 @@ func (m *Model) renderLogsPanel(width int) string {
 			lines = append(lines, renderLogLine(line))
 		}
 	}
-
 	return renderPanel(m.loc.Label("Recent Event Stream", "最近事件流"), strings.Join(lines, "\n"), width)
 }
 
@@ -370,7 +352,7 @@ func renderLogLine(line string) string {
 		return negativeStyle().Render(trimmed)
 	case strings.HasPrefix(trimmed, "[reflection]"), strings.HasPrefix(trimmed, "[compact]"):
 		return accentTextStyle().Render(trimmed)
-	case strings.HasPrefix(trimmed, "[assistant]"):
+	case strings.HasPrefix(trimmed, "[assistant]"), strings.HasPrefix(trimmed, "[streamer]"):
 		return positiveStyle().Render(trimmed)
 	case strings.HasPrefix(trimmed, "[action]"):
 		return infoBadgeStyle().Render(trimmed)
@@ -426,10 +408,11 @@ func compactValue(value string) string {
 	if value == "" {
 		return "-"
 	}
-	if len(value) <= 64 {
+	runes := []rune(value)
+	if len(runes) <= 80 {
 		return value
 	}
-	return value[:61] + "..."
+	return string(runes[:77]) + "..."
 }
 
 func formatDurationMs(ms int64) string {

@@ -140,6 +140,24 @@ For a cross-run view, inspect `scratch\guidebook\`:
 - `guidebook.md` for merged strategy, recovery hotspots, and recent attempts
 - `living-codex.json` for the structured world/discovery snapshot across recent runs
 
+## Cleaning runtime logs
+
+To reset disposable runtime logs after a large change while preserving the
+cross-run knowledge base, run:
+
+```powershell
+pwsh .\scripts\clean-logs.ps1
+```
+
+This preserves:
+
+- `scratch\guidebook\`
+- `scratch\wdac\`
+
+Artifact retention policy:
+
+- `docs\artifact-policy.md`
+
 ## Current validation target
 
 The current project target is:

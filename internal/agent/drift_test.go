@@ -78,10 +78,10 @@ func TestClassifyStateDriftIgnoresDisplayNameNoiseWhenIDsMatch(t *testing.T) {
 		AvailableActions: []string{"play_card", "end_turn"},
 		Combat: map[string]any{
 			"hand": []any{
-				map[string]any{"index": 0, "cardId": "STRIKE_RED", "name": "鎵撳嚮", "playable": true},
+				map[string]any{"index": 0, "cardId": "STRIKE_RED", "name": "打击", "playable": true},
 			},
 			"enemies": []any{
-				map[string]any{"index": 0, "enemyId": "SLIME_RED", "name": "绾㈠彶鑾卞", "isHittable": true, "currentHp": 18},
+				map[string]any{"index": 0, "enemyId": "SLIME_RED", "name": "红色史莱姆", "isHittable": true, "currentHp": 18},
 			},
 		},
 	}

@@ -171,6 +171,12 @@ func (s *Session) appendGuideSnapshotData(data map[string]interface{}) map[strin
 	data["guide_run_quality_recent_fallback_runs"] = s.guideSnapshot.RunQuality.RecentFallbackRuns
 	data["guide_run_quality_recent_provider_retry_runs"] = s.guideSnapshot.RunQuality.RecentProviderRetryRuns
 	data["guide_run_quality_recent_tool_error_runs"] = s.guideSnapshot.RunQuality.RecentToolErrorRuns
+	data["guide_run_quality_recent_median_floor"] = s.guideSnapshot.RunQuality.RecentMedianFloor
+	data["guide_run_quality_recent_best_floor"] = s.guideSnapshot.RunQuality.RecentBestFloor
+	data["guide_run_quality_recent_floor7_plus_runs"] = s.guideSnapshot.RunQuality.RecentFloor7PlusRuns
+	data["guide_run_quality_recent_act2_entry_runs"] = s.guideSnapshot.RunQuality.RecentAct2EntryRuns
+	data["guide_run_quality_recent_died_with_gold_runs"] = s.guideSnapshot.RunQuality.RecentDiedWithGoldRuns
+	data["guide_run_quality_recent_average_death_gold"] = s.guideSnapshot.RunQuality.RecentAverageDeathGold
 
 	return data
 }

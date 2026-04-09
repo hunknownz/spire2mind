@@ -125,7 +125,7 @@ JSON 规则：
 			parts = append(parts, strings.Join(stateBlock, "\n"))
 		}
 	}
-	if block := strings.TrimSpace(TacticalHintsBlock(state)); block != "" {
+	if block := strings.TrimSpace(TacticalHintsBlockForLanguage(state, language)); block != "" {
 		parts = append(parts, block)
 	}
 	if planner != nil {
@@ -135,17 +135,17 @@ JSON 规则：
 	}
 
 	if todo != nil {
-		if block := strings.TrimSpace(todo.PromptBlock()); block != "" {
+		if block := strings.TrimSpace(todo.PromptBlockForLanguage(language)); block != "" {
 			parts = append(parts, block)
 		}
 	}
 	if compact != nil {
-		if block := strings.TrimSpace(compact.PromptBlock()); block != "" {
+		if block := strings.TrimSpace(compact.PromptBlockForLanguage(language)); block != "" {
 			parts = append(parts, block)
 		}
 	}
 	if skills != nil {
-		if block := strings.TrimSpace(skills.PromptBlock(state)); block != "" {
+		if block := strings.TrimSpace(skills.PromptBlockForLanguage(state, language)); block != "" {
 			parts = append(parts, block)
 		}
 	}

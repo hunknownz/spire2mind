@@ -5,7 +5,7 @@ param(
     [int]$MaxCycles = 0,
     [int]$TimeoutSeconds = 900,
     [int]$IdleTimeoutSeconds = 120,
-    [string]$Language = "bi",
+    [string]$Language = "zh",
     [string]$FastMode = "instant",
     [string]$Planner = "mcts",
     [switch]$ReplaceExisting = $true

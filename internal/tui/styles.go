@@ -3,16 +3,16 @@ package tui
 import "github.com/charmbracelet/lipgloss"
 
 var (
-	appBackground = lipgloss.Color("#0B1020")
-	panelBg       = lipgloss.Color("#11182A")
-	panelBorder   = lipgloss.Color("#2B3859")
-	mutedText     = lipgloss.Color("#8CA0C7")
-	brightText    = lipgloss.Color("#E8F0FF")
-	hotText       = lipgloss.Color("#F7C66A")
-	dangerText    = lipgloss.Color("#FF7D7D")
-	successText   = lipgloss.Color("#7EE0B1")
-	infoText      = lipgloss.Color("#74C0FC")
-	accentText    = lipgloss.Color("#C39BFF")
+	appBackground = lipgloss.Color("#0A1224")
+	panelBg       = lipgloss.Color("#121B30")
+	panelBorder   = lipgloss.Color("#34507A")
+	mutedText     = lipgloss.Color("#93A9D1")
+	brightText    = lipgloss.Color("#F4F7FF")
+	hotText       = lipgloss.Color("#F6C76D")
+	dangerText    = lipgloss.Color("#FF8A8A")
+	successText   = lipgloss.Color("#85E2B8")
+	infoText      = lipgloss.Color("#82CBFF")
+	accentText    = lipgloss.Color("#8BC5FF")
 )
 
 var (
@@ -37,7 +37,8 @@ var (
 
 	panelTitleStyle = lipgloss.NewStyle().
 			Foreground(hotText).
-			Bold(true)
+			Bold(true).
+			Underline(true)
 
 	labelStyle = lipgloss.NewStyle().
 			Foreground(mutedText)
@@ -66,6 +67,8 @@ func statusBadgeStyle(value string) lipgloss.Style {
 	switch value {
 	case "running", "healthy":
 		return style.Background(lipgloss.Color("#1E4D3A")).Foreground(successText)
+	case "paused":
+		return style.Background(lipgloss.Color("#374565")).Foreground(hotText)
 	case "error", "fallback":
 		return style.Background(lipgloss.Color("#5A1E2A")).Foreground(dangerText)
 	case "done":
@@ -106,8 +109,8 @@ func positiveStyle() lipgloss.Style {
 func previewStyle() lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(brightText).
-		Background(lipgloss.Color("#0C1322")).
+		Background(lipgloss.Color("#0C1427")).
 		Border(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("#23314D")).
+		BorderForeground(lipgloss.Color("#294266")).
 		Padding(0, 1)
 }

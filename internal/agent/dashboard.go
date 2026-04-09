@@ -32,6 +32,11 @@ type DebugDashboard struct {
 	lastStatus                              string
 	lastPrompt                              string
 	lastAssistant                           string
+	lastStreamerMood                        string
+	lastStreamerCommentary                  string
+	lastStreamerInsight                     string
+	lastStreamerReflection                  string
+	lastStreamerTTS                         string
 	lastDecision                            string
 	lastAction                              string
 	lastTool                                string
@@ -83,6 +88,12 @@ type DebugDashboard struct {
 	guideRunQualityRecentFallbackRuns       int
 	guideRunQualityRecentProviderRetryRuns  int
 	guideRunQualityRecentToolErrorRuns      int
+	guideRunQualityRecentMedianFloor        int
+	guideRunQualityRecentBestFloor          int
+	guideRunQualityRecentFloor7PlusRuns     int
+	guideRunQualityRecentAct2EntryRuns      int
+	guideRunQualityRecentDiedWithGoldRuns   int
+	guideRunQualityRecentAverageDeathGold   int
 	tacticalHints                           []string
 	combatPlannerMode                       string
 	combatPlanSummary                       string
@@ -301,6 +312,42 @@ func (d *DebugDashboard) ApplyEvent(event SessionEvent) string {
 	if runs, ok := event.Data["guide_run_quality_recent_tool_error_runs"].(float64); ok {
 		d.guideRunQualityRecentToolErrorRuns = int(runs)
 	}
+	if runs, ok := event.Data["guide_run_quality_recent_median_floor"].(int); ok {
+		d.guideRunQualityRecentMedianFloor = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_median_floor"].(float64); ok {
+		d.guideRunQualityRecentMedianFloor = int(runs)
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_best_floor"].(int); ok {
+		d.guideRunQualityRecentBestFloor = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_best_floor"].(float64); ok {
+		d.guideRunQualityRecentBestFloor = int(runs)
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_floor7_plus_runs"].(int); ok {
+		d.guideRunQualityRecentFloor7PlusRuns = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_floor7_plus_runs"].(float64); ok {
+		d.guideRunQualityRecentFloor7PlusRuns = int(runs)
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_act2_entry_runs"].(int); ok {
+		d.guideRunQualityRecentAct2EntryRuns = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_act2_entry_runs"].(float64); ok {
+		d.guideRunQualityRecentAct2EntryRuns = int(runs)
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_died_with_gold_runs"].(int); ok {
+		d.guideRunQualityRecentDiedWithGoldRuns = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_died_with_gold_runs"].(float64); ok {
+		d.guideRunQualityRecentDiedWithGoldRuns = int(runs)
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_average_death_gold"].(int); ok {
+		d.guideRunQualityRecentAverageDeathGold = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_average_death_gold"].(float64); ok {
+		d.guideRunQualityRecentAverageDeathGold = int(runs)
+	}
 	if gameFastMode, ok := event.Data["game_fast_mode"].(string); ok && strings.TrimSpace(gameFastMode) != "" {
 		d.gameFastMode = gameFastMode
 	}
@@ -403,6 +450,21 @@ func (d *DebugDashboard) ApplyEvent(event SessionEvent) string {
 	case SessionEventAssistant:
 		d.lastAssistant = event.Message
 		d.appendLog("[assistant] " + event.Message)
+	case SessionEventStreamer:
+		d.lastStreamerCommentary = event.Message
+		if mood, ok := event.Data["mood"].(string); ok {
+			d.lastStreamerMood = mood
+		}
+		if insight, ok := event.Data["game_insight"].(string); ok {
+			d.lastStreamerInsight = insight
+		}
+		if reflection, ok := event.Data["life_reflection"].(string); ok {
+			d.lastStreamerReflection = reflection
+		}
+		if tts, ok := event.Data["tts_text"].(string); ok {
+			d.lastStreamerTTS = tts
+		}
+		d.appendLog("[streamer] " + event.Message)
 	case SessionEventTool:
 		d.lastTool = strings.TrimSpace(strings.TrimSpace(event.Tool + " " + event.Action))
 		d.appendLog("[tool] " + d.lastTool)
@@ -530,6 +592,12 @@ func (d *DebugDashboard) RenderMarkdown() string {
 		fmt.Sprintf("- %s: `%d`", loc.Label("Recent fallback runs", "Recent fallback runs"), d.guideRunQualityRecentFallbackRuns),
 		fmt.Sprintf("- %s: `%d`", loc.Label("Recent provider-retry runs", "Recent provider-retry runs"), d.guideRunQualityRecentProviderRetryRuns),
 		fmt.Sprintf("- %s: `%d`", loc.Label("Recent tool-error runs", "Recent tool-error runs"), d.guideRunQualityRecentToolErrorRuns),
+		fmt.Sprintf("- %s: `%d`", loc.Label("Recent median floor", "Recent median floor"), d.guideRunQualityRecentMedianFloor),
+		fmt.Sprintf("- %s: `%d`", loc.Label("Recent best floor", "Recent best floor"), d.guideRunQualityRecentBestFloor),
+		fmt.Sprintf("- %s: `%d / %d`", loc.Label("Recent floor >= 7 runs", "Recent floor >= 7 runs"), d.guideRunQualityRecentFloor7PlusRuns, d.guideRecentWindow),
+		fmt.Sprintf("- %s: `%d / %d`", loc.Label("Recent Act 2 entry runs", "Recent Act 2 entry runs"), d.guideRunQualityRecentAct2EntryRuns, d.guideRecentWindow),
+		fmt.Sprintf("- %s: `%d`", loc.Label("Recent died-with-gold runs", "Recent died-with-gold runs"), d.guideRunQualityRecentDiedWithGoldRuns),
+		fmt.Sprintf("- %s: `%d`", loc.Label("Recent average death gold", "Recent average death gold"), d.guideRunQualityRecentAverageDeathGold),
 	)
 
 	lines = append(lines, "", "## "+loc.Label("Tactical Hints", "战术提示"), "")
@@ -566,6 +634,15 @@ func (d *DebugDashboard) RenderMarkdown() string {
 		fmt.Sprintf("- %s: `%d`", "Input tokens", d.lastInputTokens),
 		fmt.Sprintf("- %s: `%d`", "Output tokens", d.lastOutputTokens),
 		fmt.Sprintf("- %s: `%s`", "Prompt size", formatDashboardBytes(d.lastPromptSizeBytes)),
+	)
+
+	lines = append(lines, "", "## "+loc.Label("Streamer Booth", "主播机位"), "")
+	lines = append(lines,
+		fmt.Sprintf("- %s: %s", loc.Label("Mood", "情绪"), valueOrDash(d.lastStreamerMood)),
+		fmt.Sprintf("- %s: %s", loc.Label("Commentary", "解说"), valueOrDash(d.lastStreamerCommentary)),
+		fmt.Sprintf("- %s: %s", loc.Label("Game insight", "游戏见解"), valueOrDash(d.lastStreamerInsight)),
+		fmt.Sprintf("- %s: %s", loc.Label("Life reflection", "人生感慨"), valueOrDash(d.lastStreamerReflection)),
+		fmt.Sprintf("- %s: %s", loc.Label("TTS text", "播报文本"), valueOrDash(d.lastStreamerTTS)),
 	)
 
 	lines = append(lines, "", "## "+loc.Label("Latest Signals", "最近信号"), "")
@@ -654,11 +731,14 @@ func compactText(value string, max int) string {
 	if value == "" {
 		return "-"
 	}
-	if max <= 0 || len(value) <= max {
+	runes := []rune(value)
+	if max <= 0 || len(runes) <= max {
 		return value
 	}
-
-	return value[:max-3] + "..."
+	if max <= 3 {
+		return string(runes[:max])
+	}
+	return string(runes[:max-3]) + "..."
 }
 
 func formatDashboardDurationMs(ms int64) string {

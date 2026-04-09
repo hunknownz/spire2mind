@@ -121,6 +121,13 @@ func (s *Session) executeDirectAction(ctx context.Context, expectedState *game.S
 		},
 	})
 
+	s.maybeEmitStreamerBeatForMoment(ctx, StreamerMoment{
+		BeforeState: beforeState,
+		AfterState:  &result.State,
+		Action:      request.Action,
+		Outcome:     result.Message,
+	})
+
 	return nil
 }
 

@@ -145,7 +145,7 @@ func RunDoctor(ctx context.Context, cfg config.Config) error {
 		probeOptions.APIKey = cfg.APIKey
 		probeOptions.BaseURL = cfg.APIBaseURL
 		probeOptions.APIProvider = cfg.APIProvider
-		if cfg.UsesStructuredAPIDecisions() {
+		if cfg.UsesSchemaStructuredOutput() {
 			probeOptions.JSONSchema = ActionDecisionJSONSchema()
 			probeOptions.AllowedTools = []string{openagent.StructuredOutputToolName}
 			probeOptions.CanUseTool = func(tool openagenttypes.Tool, input map[string]interface{}) (*openagenttypes.PermissionDecision, error) {

@@ -527,6 +527,8 @@ func shouldBuyCardRemoval(state *game.StateSnapshot) bool {
 		return true
 	case floor <= 12 && gold >= 120:
 		return true
+	case hpRatio(state) < 0.60 && gold >= 90:
+		return true
 	case gold >= 160:
 		return true
 	default:
@@ -580,6 +582,8 @@ func scoreShopCardChoice(state *game.StateSnapshot, card map[string]any) float64
 	score := scoreRewardCardChoice(state, card)
 	price := fieldIntValue(card, "price")
 	score -= float64(price) / 35.0
+	floor := fieldIntValue(state.Run, "floor")
+	hp := hpRatio(state)
 
 	deckCount := fieldIntValue(state.Run, "deckCount")
 	if deckCount >= 16 {
@@ -592,6 +596,9 @@ func scoreShopCardChoice(state *game.StateSnapshot, card map[string]any) float64
 	cardID := strings.ToUpper(strings.TrimSpace(firstNonEmpty(fieldString(card, "cardId"), fieldString(card, "id"))))
 	if containsAny(cardID, "STRIKE", "DEFEND") {
 		score -= 4.0
+	}
+	if floor <= 10 && hp < 0.60 && containsAny(cardID, "SHRUG_IT_OFF", "TRUE_GRIT", "IRON_WAVE", "CLOTHESLINE", "HEADBUTT") {
+		score += 1.5
 	}
 
 	return score
@@ -609,6 +616,9 @@ func scoreShopRelicChoice(state *game.StateSnapshot, relic map[string]any) float
 	}
 	if gold-price >= 80 {
 		score += 0.8
+	}
+	if hpRatio(state) < 0.55 {
+		score += 0.5
 	}
 
 	label := strings.ToLower(strings.TrimSpace(firstNonEmpty(fieldString(relic, "name"), fieldString(relic, "relicId"), fieldString(relic, "id"))))
@@ -710,10 +720,12 @@ func preferredMapNodeIndex(state *game.StateSnapshot) *int {
 		}
 		remainingGold := fieldIntValue(state.Run, "gold")
 		floor := fieldIntValue(state.Run, "floor")
+		currentHP := fieldIntValue(state.Run, "currentHp")
+		maxHP := fieldIntValue(state.Run, "maxHp")
 
 		ranked = append(ranked, rankedNode{
 			index:    index,
-			priority: mapNodePriority(fieldString(node, "nodeType"), hp, remainingGold, floor),
+			priority: mapNodePriority(fieldString(node, "nodeType"), hp, remainingGold, floor, currentHP, maxHP),
 		})
 	}
 
@@ -731,15 +743,15 @@ func preferredMapNodeIndex(state *game.StateSnapshot) *int {
 	return &best.index
 }
 
-func mapNodePriority(nodeType string, hpRatio float64, gold int, floor int) int {
+func mapNodePriority(nodeType string, hpRatio float64, gold int, floor int, currentHP int, maxHP int) int {
 	normalized := strings.ToLower(strings.TrimSpace(nodeType))
-	if hpRatio >= 0.65 && gold >= 120 && floor <= 10 {
+	if hpRatio >= 0.70 && gold >= 120 && floor <= 10 {
 		switch normalized {
 		case "shop":
 			return 0
-		case "combat":
-			return 1
 		case "event":
+			return 1
+		case "combat":
 			return 2
 		case "rest":
 			return 3
@@ -755,13 +767,13 @@ func mapNodePriority(nodeType string, hpRatio float64, gold int, floor int) int 
 		switch normalized {
 		case "rest":
 			return 0
-		case "chest":
+		case "shop":
 			return 1
 		case "event":
 			return 2
-		case "shop":
-			return 3
 		case "combat":
+			return 3
+		case "chest":
 			return 4
 		case "elite":
 			return 5
@@ -773,15 +785,29 @@ func mapNodePriority(nodeType string, hpRatio float64, gold int, floor int) int 
 			return 9
 		}
 	}
+	if floor <= 8 && hpRatio < 0.70 && currentHP > 0 && maxHP > 0 {
+		switch normalized {
+		case "event":
+			return 0
+		case "combat":
+			return 1
+		case "rest":
+			return 2
+		case "shop":
+			return 3
+		case "elite":
+			return 6
+		}
+	}
 
 	switch normalized {
-	case "chest":
+	case "shop":
 		return 0
 	case "event":
 		return 1
-	case "shop":
-		return 2
 	case "combat":
+		return 2
+	case "chest":
 		return 3
 	case "rest":
 		return 4
@@ -887,6 +913,9 @@ func scoreRewardCardChoice(state *game.StateSnapshot, card map[string]any) float
 	if hp < 0.55 {
 		score += survivalCardBonus(cardID, name)
 	}
+	if floor <= 12 {
+		score += immediatePowerBonus(cardID, name)
+	}
 
 	switch {
 	case containsAny(cardID, "SHRUG_IT_OFF", "IRON_WAVE", "POMMEL_STRIKE", "THUNDERCLAP", "SWORD_BOOMERANG", "CLOTHESLINE", "HEADBUTT", "TRUE_GRIT"):
@@ -907,6 +936,9 @@ func scoreRewardCardChoice(state *game.StateSnapshot, card map[string]any) float
 	}
 	if containsAny(cardID, "DEFEND", "STRIKE") {
 		score -= 1.0
+	}
+	if hp < 0.50 && containsAny(cardID, "LIMIT_BREAK", "BARRICADE", "JUGGERNAUT", "DEMON_FORM") {
+		score -= 3.5
 	}
 	if strings.Contains(name, "upgrade") || strings.Contains(name, "ritual") {
 		score -= 0.5
@@ -944,6 +976,22 @@ func survivalCardBonus(cardID string, name string) float64 {
 	default:
 		if strings.Contains(name, "block") {
 			return 2.0
+		}
+		return 0
+	}
+}
+
+func immediatePowerBonus(cardID string, name string) float64 {
+	switch {
+	case containsAny(cardID, "SHRUG_IT_OFF", "IRON_WAVE", "POMMEL_STRIKE", "THUNDERCLAP", "HEADBUTT", "CLOTHESLINE", "TRUE_GRIT"):
+		return 2.5
+	case containsAny(cardID, "BATTLE_TRANCE", "ARMAMENTS", "RAGE", "SPOT_WEAKNESS"):
+		return 0.8
+	case containsAny(cardID, "LIMIT_BREAK", "BARRICADE", "JUGGERNAUT", "DEMON_FORM", "SEARING_BLOW"):
+		return -2.5
+	default:
+		if strings.Contains(name, "draw") || strings.Contains(name, "block") || strings.Contains(name, "damage") {
+			return 0.5
 		}
 		return 0
 	}

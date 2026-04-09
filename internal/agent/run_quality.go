@@ -19,6 +19,12 @@ type RunQualitySummary struct {
 	RecentFallbackRuns         int `json:"recent_fallback_runs"`
 	RecentProviderRetryRuns    int `json:"recent_provider_retry_runs"`
 	RecentToolErrorRuns        int `json:"recent_tool_error_runs"`
+	RecentMedianFloor          int `json:"recent_median_floor"`
+	RecentBestFloor            int `json:"recent_best_floor"`
+	RecentFloor7PlusRuns       int `json:"recent_floor7_plus_runs"`
+	RecentAct2EntryRuns        int `json:"recent_act2_entry_runs"`
+	RecentDiedWithGoldRuns     int `json:"recent_died_with_gold_runs"`
+	RecentAverageDeathGold     int `json:"recent_average_death_gold"`
 }
 
 type attemptQuality struct {
@@ -32,6 +38,8 @@ type attemptQuality struct {
 
 func buildRunQualitySummary(reflections []*AttemptReflection, qualities map[string]attemptQuality, recentWindow int) RunQualitySummary {
 	summary := RunQualitySummary{}
+	recentFloors := make([]int, 0, recentWindow)
+	recentDeathGoldTotal := 0
 	for index, reflection := range reflections {
 		if reflection == nil {
 			continue
@@ -52,6 +60,19 @@ func buildRunQualitySummary(reflections []*AttemptReflection, qualities map[stri
 		}
 
 		summary.RecentCompleteRuns++
+		if reflection.Floor != nil {
+			floor := *reflection.Floor
+			recentFloors = append(recentFloors, floor)
+			if floor > summary.RecentBestFloor {
+				summary.RecentBestFloor = floor
+			}
+			if floor >= 7 {
+				summary.RecentFloor7PlusRuns++
+			}
+			if floor >= 17 {
+				summary.RecentAct2EntryRuns++
+			}
+		}
 		if quality.ProviderBacked {
 			summary.RecentProviderBackedRuns++
 		}
@@ -67,6 +88,16 @@ func buildRunQualitySummary(reflections []*AttemptReflection, qualities map[stri
 		if quality.ToolError {
 			summary.RecentToolErrorRuns++
 		}
+		if gold, ok := unspentGoldFromReflection(reflection); ok {
+			summary.RecentDiedWithGoldRuns++
+			recentDeathGoldTotal += gold
+		}
+	}
+	if len(recentFloors) > 0 {
+		summary.RecentMedianFloor = medianInt(recentFloors)
+	}
+	if summary.RecentDiedWithGoldRuns > 0 {
+		summary.RecentAverageDeathGold = recentDeathGoldTotal / summary.RecentDiedWithGoldRuns
 	}
 
 	return summary
@@ -158,4 +189,42 @@ func isCleanAttemptQuality(quality attemptQuality) bool {
 		!quality.ProviderFallback &&
 		!quality.ProviderRetry &&
 		!quality.ToolError
+}
+
+func medianInt(values []int) int {
+	if len(values) == 0 {
+		return 0
+	}
+	sorted := append([]int(nil), values...)
+	for i := 1; i < len(sorted); i++ {
+		current := sorted[i]
+		j := i - 1
+		for j >= 0 && sorted[j] > current {
+			sorted[j+1] = sorted[j]
+			j--
+		}
+		sorted[j+1] = current
+	}
+	mid := len(sorted) / 2
+	if len(sorted)%2 == 1 {
+		return sorted[mid]
+	}
+	return (sorted[mid-1] + sorted[mid]) / 2
+}
+
+func unspentGoldFromReflection(reflection *AttemptReflection) (int, bool) {
+	if reflection == nil || !strings.EqualFold(strings.TrimSpace(reflection.Outcome), "defeat") {
+		return 0, false
+	}
+	for _, risk := range reflection.Risks {
+		risk = strings.TrimSpace(risk)
+		if risk == "" {
+			continue
+		}
+		var gold int
+		if _, err := fmt.Sscanf(risk, "Died with %d unspent gold", &gold); err == nil && gold > 0 {
+			return gold, true
+		}
+	}
+	return 0, false
 }

@@ -14,6 +14,7 @@ import (
 )
 
 type Model struct {
+	repoRoot                                string
 	session                                 *agentruntime.Session
 	loc                                     i18n.Localizer
 	state                                   *game.StateSnapshot
@@ -37,6 +38,16 @@ type Model struct {
 	lastStatus                              string
 	lastPrompt                              string
 	lastAssistant                           string
+	lastStreamerMood                        string
+	lastStreamerCommentary                  string
+	lastStreamerInsight                     string
+	lastStreamerReflection                  string
+	lastStreamerTTS                         string
+	ttsProfileName                          string
+	ttsProfileProvider                      string
+	ttsProfileVoice                         string
+	ttsProfileSpeed                         string
+	streamerStyle                           string
 	lastDecision                            string
 	lastAction                              string
 	lastTool                                string
@@ -82,6 +93,12 @@ type Model struct {
 	guideRunQualityRecentFallbackRuns       int
 	guideRunQualityRecentProviderRetryRuns  int
 	guideRunQualityRecentToolErrorRuns      int
+	guideRunQualityRecentMedianFloor        int
+	guideRunQualityRecentBestFloor          int
+	guideRunQualityRecentFloor7PlusRuns     int
+	guideRunQualityRecentAct2EntryRuns      int
+	guideRunQualityRecentDiedWithGoldRuns   int
+	guideRunQualityRecentAverageDeathGold   int
 	tacticalHints                           []string
 	combatPlannerMode                       string
 	combatPlanSummary                       string
@@ -111,7 +128,8 @@ func New(ctx context.Context, cfg config.Config) (*Model, error) {
 		return nil, err
 	}
 
-	return &Model{
+	model := &Model{
+		repoRoot:       cfg.RepoRoot,
 		session:       session,
 		loc:           i18n.New(cfg.Language),
 		status:        "running",
@@ -120,7 +138,10 @@ func New(ctx context.Context, cfg config.Config) (*Model, error) {
 		providerState: initialProviderState(cfg),
 		model:         cfg.Model,
 		endpoint:      providerEndpoint(cfg),
-	}, nil
+		streamerStyle: cfg.StreamerStyle,
+	}
+	model.refreshTTSProfile()
+	return model, nil
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -189,6 +210,7 @@ func (m *Model) Close() {
 }
 
 func (m *Model) handleSessionEvent(event agentruntime.SessionEvent) {
+	m.refreshTTSProfile()
 	m.cycle = event.Cycle
 	if event.Attempt > 0 {
 		m.attempt = event.Attempt
@@ -365,6 +387,42 @@ func (m *Model) handleSessionEvent(event agentruntime.SessionEvent) {
 	if runs, ok := event.Data["guide_run_quality_recent_tool_error_runs"].(float64); ok {
 		m.guideRunQualityRecentToolErrorRuns = int(runs)
 	}
+	if runs, ok := event.Data["guide_run_quality_recent_median_floor"].(int); ok {
+		m.guideRunQualityRecentMedianFloor = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_median_floor"].(float64); ok {
+		m.guideRunQualityRecentMedianFloor = int(runs)
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_best_floor"].(int); ok {
+		m.guideRunQualityRecentBestFloor = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_best_floor"].(float64); ok {
+		m.guideRunQualityRecentBestFloor = int(runs)
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_floor7_plus_runs"].(int); ok {
+		m.guideRunQualityRecentFloor7PlusRuns = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_floor7_plus_runs"].(float64); ok {
+		m.guideRunQualityRecentFloor7PlusRuns = int(runs)
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_act2_entry_runs"].(int); ok {
+		m.guideRunQualityRecentAct2EntryRuns = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_act2_entry_runs"].(float64); ok {
+		m.guideRunQualityRecentAct2EntryRuns = int(runs)
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_died_with_gold_runs"].(int); ok {
+		m.guideRunQualityRecentDiedWithGoldRuns = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_died_with_gold_runs"].(float64); ok {
+		m.guideRunQualityRecentDiedWithGoldRuns = int(runs)
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_average_death_gold"].(int); ok {
+		m.guideRunQualityRecentAverageDeathGold = runs
+	}
+	if runs, ok := event.Data["guide_run_quality_recent_average_death_gold"].(float64); ok {
+		m.guideRunQualityRecentAverageDeathGold = int(runs)
+	}
 	if tacticalHints, ok := event.Data["tactical_hints"].([]string); ok {
 		m.tacticalHints = append([]string(nil), tacticalHints...)
 	}
@@ -473,6 +531,21 @@ func (m *Model) handleSessionEvent(event agentruntime.SessionEvent) {
 	case agentruntime.SessionEventAssistant:
 		m.lastAssistant = event.Message
 		m.logs = appendTrimmed(m.logs, "[assistant] "+event.Message, 32)
+	case agentruntime.SessionEventStreamer:
+		m.lastStreamerCommentary = event.Message
+		if mood, ok := event.Data["mood"].(string); ok {
+			m.lastStreamerMood = mood
+		}
+		if insight, ok := event.Data["game_insight"].(string); ok {
+			m.lastStreamerInsight = insight
+		}
+		if reflection, ok := event.Data["life_reflection"].(string); ok {
+			m.lastStreamerReflection = reflection
+		}
+		if tts, ok := event.Data["tts_text"].(string); ok {
+			m.lastStreamerTTS = tts
+		}
+		m.logs = appendTrimmed(m.logs, "[streamer] "+event.Message, 32)
 	case agentruntime.SessionEventTool:
 		label := event.Tool
 		if event.Action != "" {

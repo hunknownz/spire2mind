@@ -508,3 +508,87 @@ func TestChooseDeterministicActionSkipsOpeningShopWithoutMeaningfulPurchase(t *t
 		t.Fatalf("expected proceed when no meaningful purchase exists, got %+v", request)
 	}
 }
+
+func TestPreferredMapNodeIndexAvoidsEliteWhenLowHP(t *testing.T) {
+	t.Parallel()
+
+	state := &game.StateSnapshot{
+		Screen: "MAP",
+		Run: map[string]any{
+			"floor":     7,
+			"gold":      145,
+			"currentHp": 24,
+			"maxHp":     80,
+		},
+		Map: map[string]any{
+			"availableNodes": []any{
+				map[string]any{"index": 0, "nodeType": "elite"},
+				map[string]any{"index": 1, "nodeType": "shop"},
+			},
+		},
+	}
+
+	index := preferredMapNodeIndex(state)
+	if index == nil || *index != 1 {
+		t.Fatalf("expected low-HP pathing to prefer shop over elite, got %v", index)
+	}
+}
+
+func TestShouldBuyCardRemovalWhenLowHPAndAffordable(t *testing.T) {
+	t.Parallel()
+
+	state := &game.StateSnapshot{
+		Screen: "SHOP",
+		Run: map[string]any{
+			"floor":     6,
+			"gold":      95,
+			"deckCount": 18,
+			"currentHp": 34,
+			"maxHp":     80,
+		},
+		Shop: map[string]any{
+			"cardRemoval": map[string]any{
+				"available":  true,
+				"enoughGold": true,
+				"price":      75,
+			},
+		},
+	}
+
+	if !shouldBuyCardRemoval(state) {
+		t.Fatalf("expected low-HP affordable card removal to be prioritized")
+	}
+}
+
+func TestChooseDeterministicActionAvoidsGreedyRewardWhenLowHP(t *testing.T) {
+	t.Parallel()
+
+	state := &game.StateSnapshot{
+		RunID:            "RUN-REWARD-LOW-HP",
+		Screen:           "REWARD",
+		AvailableActions: []string{"choose_reward_card", "skip_reward_cards"},
+		Run: map[string]any{
+			"floor":     8,
+			"currentHp": 24,
+			"maxHp":     80,
+		},
+		Reward: map[string]any{
+			"pendingCardChoice": true,
+			"cardOptions": []any{
+				map[string]any{"index": 0, "cardId": "BARRICADE", "name": "Barricade"},
+				map[string]any{"index": 1, "cardId": "SHRUG_IT_OFF", "name": "Shrug It Off"},
+			},
+		},
+	}
+
+	request, _, ok := ChooseDeterministicAction(state, 0, 1, newActionFailureMemory())
+	if !ok {
+		t.Fatal("expected deterministic reward action")
+	}
+	if request.Action != "choose_reward_card" {
+		t.Fatalf("expected choose_reward_card, got %+v", request)
+	}
+	if request.OptionIndex == nil || *request.OptionIndex != 1 {
+		t.Fatalf("expected low-HP reward choice to prefer immediate block at index 1, got %+v", request)
+	}
+}

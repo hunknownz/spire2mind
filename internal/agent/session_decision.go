@@ -515,6 +515,11 @@ func classifyProviderRecovery(err error) string {
 
 	lower := strings.ToLower(err.Error())
 	switch {
+	case strings.Contains(lower, "deadline exceeded"),
+		strings.Contains(lower, "context deadline exceeded"),
+		strings.Contains(lower, "timeout"),
+		strings.Contains(lower, "timed out"):
+		return "provider_timeout"
 	case strings.Contains(lower, "structured decision contract failure"):
 		return "decision_contract_failure"
 	case strings.Contains(lower, "claude cli transport unavailable"),

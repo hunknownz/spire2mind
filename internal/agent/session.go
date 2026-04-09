@@ -33,6 +33,7 @@ const (
 	SessionEventState      SessionEventKind = "state"
 	SessionEventPrompt     SessionEventKind = "prompt"
 	SessionEventAssistant  SessionEventKind = "assistant"
+	SessionEventStreamer   SessionEventKind = "streamer"
 	SessionEventTool       SessionEventKind = "tool"
 	SessionEventToolError  SessionEventKind = "tool_error"
 	SessionEventAction     SessionEventKind = "action"
@@ -66,6 +67,7 @@ type Session struct {
 	planner  CombatPlanner
 	resolver *ActionResolutionPipeline
 	gate     *StableStateGate
+	streamer *StreamerDirector
 
 	events chan SessionEvent
 	errs   chan error
@@ -99,6 +101,8 @@ type Session struct {
 	gameFastModePrevious   string
 	gameFastModeWarning    string
 	lastGuideRefresh       time.Time
+	streamerHistory        []string
+	lastStreamerSignature  string
 	pauseMu                sync.Mutex
 	paused                 bool
 	pauseSignal            chan struct{}
@@ -146,6 +150,7 @@ func StartSession(ctx context.Context, cfg config.Config) (*Session, error) {
 		planner:              NewCombatPlanner(cfg),
 		resolver:             NewActionResolutionPipeline(),
 		gate:                 NewStableStateGate(runtime.Client),
+		streamer:             NewStreamerDirector(cfg, runtime),
 		promptBuilder:        NewPromptAssemblyPipeline(),
 		events:               make(chan SessionEvent, 128),
 		errs:                 make(chan error, 1),
@@ -345,14 +350,14 @@ func (s *Session) run(ctx context.Context) {
 			"provider_state":       s.providerState,
 			"agent_available":      s.runtime != nil && s.runtime.Agent != nil,
 			"force_deterministic":  s.forceDeterministic,
-			"current_goal":         snapshot.CurrentGoal,
-			"room_goal":            snapshot.RoomGoal,
-			"next_intent":          snapshot.NextIntent,
-			"last_failure":         snapshot.LastFailure,
-			"carry_forward_plan":   snapshot.CarryForwardPlan,
+			"current_goal":         localizeTodoText(snapshot.CurrentGoal, s.localizer()),
+			"room_goal":            localizeTodoText(snapshot.RoomGoal, s.localizer()),
+			"next_intent":          localizeTodoText(snapshot.NextIntent, s.localizer()),
+			"last_failure":         localizeTodoText(snapshot.LastFailure, s.localizer()),
+			"carry_forward_plan":   localizeTodoText(snapshot.CarryForwardPlan, s.localizer()),
 			"carry_forward_lessons": append(
 				[]string(nil),
-				snapshot.CarryForwardLessons...,
+				localizeTodoSlice(snapshot.CarryForwardLessons, s.localizer())...,
 			),
 			"carry_forward_buckets":   snapshot.CarryForwardBuckets.ToDataMap(),
 			"seen_content_counts":     seenContentCountsData(s.world.Snapshot()),
@@ -420,6 +425,7 @@ func (s *Session) loop(ctx context.Context) error {
 
 		s.recordState(state)
 		s.reflectIfNeeded(state)
+		s.maybeEmitPassiveStreamerBeat(ctx, state)
 		if strings.EqualFold(state.Screen, "GAME_OVER") && s.shouldStopAtGameOver(state) {
 			s.writeRunArtifacts(nil)
 			s.emit(SessionEvent{
@@ -741,6 +747,10 @@ func attemptLifecycleForState(state *game.StateSnapshot) string {
 
 func (s *Session) say(english string, chinese string) string {
 	return i18n.New(s.cfg.Language).Label(english, chinese)
+}
+
+func (s *Session) localizer() i18n.Localizer {
+	return i18n.New(s.cfg.Language)
 }
 
 func (s *Session) sayf(english string, chinese string, args ...interface{}) string {

@@ -116,7 +116,7 @@ func TestDecisionStateDigestIgnoresCombatDisplayNameNoiseWhenIDsMatch(t *testing
 			map[string]any{
 				"index":      0,
 				"cardId":     "STRIKE_RED",
-				"name":       "鎵撳嚮",
+				"name":       "打击",
 				"energyCost": 1,
 				"playable":   true,
 			},
@@ -125,7 +125,7 @@ func TestDecisionStateDigestIgnoresCombatDisplayNameNoiseWhenIDsMatch(t *testing
 			map[string]any{
 				"index":      0,
 				"enemyId":    "SLIME_RED",
-				"name":       "绾㈠彶鑾卞",
+				"name":       "红色史莱姆",
 				"currentHp":  18,
 				"isHittable": true,
 			},

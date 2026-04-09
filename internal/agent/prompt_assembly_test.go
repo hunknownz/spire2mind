@@ -257,6 +257,56 @@ func TestPromptAssemblyPipelineStructuredRewardUsesSurvivalGuidance(t *testing.T
 	}
 }
 
+func TestPromptAssemblyPipelineStructuredPreservesChineseEntities(t *testing.T) {
+	state := &game.StateSnapshot{
+		RunID:            "RUN-ZH",
+		Screen:           "REWARD",
+		AvailableActions: []string{"choose_reward_card", "skip_reward_cards"},
+		Run: map[string]any{
+			"floor":     5,
+			"currentHp": 47,
+			"maxHp":     80,
+			"gold":      45,
+		},
+		AgentView: map[string]any{
+			"headline": "REWARD: 防御 / 蛮兽猛击",
+		},
+		Reward: map[string]any{
+			"pendingCardChoice": true,
+			"cardOptions": []map[string]any{
+				{
+					"index": 0,
+					"id":    "DEFEND_IRONCLAD",
+					"name":  "防御",
+					"cost":  1,
+				},
+				{
+					"index": 1,
+					"id":    "MAWLER_STRIKE",
+					"name":  "蛮兽猛击",
+					"cost":  1,
+				},
+			},
+		},
+	}
+
+	assembly := NewPromptAssemblyPipeline().Build(
+		PromptModeStructured,
+		state,
+		NewTodoManager(),
+		NewSkillLibrary("C:\\Users\\klerc\\spire2mind"),
+		NewCompactMemory(),
+		nil,
+		i18n.LanguageEnglish,
+	)
+
+	for _, fragment := range []string{"防御", "蛮兽猛击"} {
+		if !strings.Contains(assembly.Text, fragment) {
+			t.Fatalf("expected prompt to preserve Chinese entity %q, got:\n%s", fragment, assembly.Text)
+		}
+	}
+}
+
 func TestPromptAssemblyPipelineStructuredRewardAppliesPromptBudget(t *testing.T) {
 	state := &game.StateSnapshot{
 		RunID:            "RUN-BUDGET-REWARD",
@@ -377,6 +427,58 @@ func TestPromptAssemblyPipelineStructuredCombatAppliesPromptBudget(t *testing.T)
 	}
 	if !strings.Contains(assembly.Text, "Run objective:") {
 		t.Fatalf("expected run objective to be preserved, got:\n%s", assembly.Text)
+	}
+}
+
+func TestPromptAssemblyPipelineStructuredChineseUsesLocalizedBlocks(t *testing.T) {
+	state := &game.StateSnapshot{
+		RunID:            "RUN-ZH-COMBAT",
+		Screen:           "COMBAT",
+		AvailableActions: []string{"play_card", "end_turn"},
+		Turn:             promptAssemblyIntPtr(1),
+		Run: map[string]any{
+			"floor":     3,
+			"currentHp": 17,
+			"maxHp":     80,
+			"gold":      145,
+		},
+		Combat: map[string]any{
+			"player": map[string]any{
+				"currentHp": 17,
+				"maxHp":     80,
+				"block":     2,
+				"energy":    3,
+			},
+			"hand": []map[string]any{
+				{"index": 0, "id": "bash", "name": "重击", "cost": 2, "playable": true, "requiresTarget": true, "validTargetIndices": []int{0}},
+			},
+			"enemies": []map[string]any{
+				{"index": 0, "id": "slime", "name": "酸液史莱姆", "currentHp": 9, "block": 0, "intent": "Attack", "isHittable": true, "intents": []map[string]any{{"type": "Attack", "totalDamage": 10}}},
+				{"index": 1, "id": "louse", "name": "小啃兽", "currentHp": 12, "block": 0, "intent": "Attack", "isHittable": true, "intents": []map[string]any{{"type": "Attack", "totalDamage": 9}}},
+			},
+		},
+	}
+
+	todo := NewTodoManager()
+	todo.Update(state)
+
+	assembly := NewPromptAssemblyPipeline().Build(
+		PromptModeStructured,
+		state,
+		todo,
+		NewSkillLibrary("C:\\Users\\klerc\\spire2mind"),
+		NewCompactMemory(),
+		nil,
+		i18n.LanguageChinese,
+	)
+
+	for _, fragment := range []string{"当前目标", "战术提示", "技能参考", "当前能量较高"} {
+		if !strings.Contains(assembly.Text, fragment) {
+			t.Fatalf("expected Chinese fragment %q in prompt, got:\n%s", fragment, assembly.Text)
+		}
+	}
+	if strings.Contains(assembly.Text, "Current goal:") {
+		t.Fatalf("did not expect English todo heading in Chinese prompt, got:\n%s", assembly.Text)
 	}
 }
 

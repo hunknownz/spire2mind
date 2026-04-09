@@ -262,7 +262,7 @@ func truncateTextBytes(text string, maxBytes int) string {
 }
 
 func (p *PromptAssemblyPipeline) appendCycleStateBlocks(blocks *[]promptBlock, state *game.StateSnapshot, todo *TodoManager, skills *SkillLibrary, compact *CompactMemory, planner *CombatPlan, language i18n.Language) {
-	if block := strings.TrimSpace(TacticalHintsBlock(state)); block != "" {
+	if block := strings.TrimSpace(TacticalHintsBlockForLanguage(state, language)); block != "" {
 		*blocks = append(*blocks, promptBlock{Name: "tactical_hints", Text: block})
 	}
 	if planner != nil {
@@ -271,17 +271,17 @@ func (p *PromptAssemblyPipeline) appendCycleStateBlocks(blocks *[]promptBlock, s
 		}
 	}
 	if todo != nil {
-		if block := strings.TrimSpace(todo.PromptBlockCompact()); block != "" {
+		if block := strings.TrimSpace(todo.PromptBlockCompactForLanguage(language)); block != "" {
 			*blocks = append(*blocks, promptBlock{Name: "todo", Text: block})
 		}
 	}
 	if compact != nil {
-		if block := strings.TrimSpace(compact.PromptBlockForState(state)); block != "" {
+		if block := strings.TrimSpace(compact.PromptBlockForStateLanguage(state, language)); block != "" {
 			*blocks = append(*blocks, promptBlock{Name: "compact_memory", Text: block})
 		}
 	}
 	if skills != nil {
-		if block := strings.TrimSpace(skills.PromptBlockForState(state)); block != "" {
+		if block := strings.TrimSpace(skills.PromptBlockForStateLanguage(state, language)); block != "" {
 			*blocks = append(*blocks, promptBlock{Name: "entity_knowledge", Text: block})
 		}
 	}
@@ -296,22 +296,22 @@ func (p *PromptAssemblyPipeline) appendStructuredStateBlocks(blocks *[]promptBlo
 		}
 	}
 	if policy.IncludeTacticalHints {
-		if block := strings.TrimSpace(TacticalHintsBlock(state)); block != "" {
+		if block := strings.TrimSpace(TacticalHintsBlockForLanguage(state, language)); block != "" {
 			*blocks = append(*blocks, promptBlock{Name: "tactical_hints", Text: block})
 		}
 	}
 	if policy.IncludeTodo && todo != nil {
-		if block := strings.TrimSpace(todo.PromptBlockCompact()); block != "" {
+		if block := strings.TrimSpace(todo.PromptBlockCompactForLanguage(language)); block != "" {
 			*blocks = append(*blocks, promptBlock{Name: "todo", Text: block})
 		}
 	}
 	if policy.IncludeCompact && compact != nil {
-		if block := strings.TrimSpace(compact.PromptBlockForState(state)); block != "" {
+		if block := strings.TrimSpace(compact.PromptBlockForStateLanguage(state, language)); block != "" {
 			*blocks = append(*blocks, promptBlock{Name: "compact_memory", Text: block})
 		}
 	}
 	if policy.IncludeKnowledge && skills != nil {
-		if block := strings.TrimSpace(skills.PromptBlockForState(state)); block != "" {
+		if block := strings.TrimSpace(skills.PromptBlockForStateLanguage(state, language)); block != "" {
 			*blocks = append(*blocks, promptBlock{Name: "entity_knowledge", Text: block})
 		}
 	}
@@ -522,33 +522,40 @@ func (p *PromptAssemblyPipeline) runObjectiveBlock(state *game.StateSnapshot, lo
 	maxHP, _ := fieldInt(state.Run, "maxHp")
 	lowHP := maxHP > 0 && currentHP*100 <= maxHP*45
 
-	stageObjective := "Build a run that can keep climbing: take stable lines, convert resources into immediate power, and avoid unnecessary HP loss."
+	stageObjectiveEN := "Build a run that can keep climbing: take stable lines, convert resources into immediate power, and avoid unnecessary HP loss."
+	stageObjectiveZH := "先把这局打稳：走稳定路线，把资源尽快换成即战力，避免不必要的掉血。"
 	switch {
 	case floor <= 3:
-		stageObjective = "Early floors decide whether the run stabilizes. Prioritize immediate combat power, reliable block, and low-variance progress."
+		stageObjectiveEN = "Early floors decide whether the run stabilizes. Prioritize immediate combat power, reliable block, and low-variance progress."
+		stageObjectiveZH = "前几层决定这局能不能站稳。优先拿立刻提升战力的东西，重视稳定格挡和低方差推进。"
 	case floor <= 10:
-		stageObjective = "Keep the run stable through early Act 1. Preserve HP while adding enough damage, defense, and consistency for the next few rooms."
+		stageObjectiveEN = "Keep the run stable through early Act 1. Preserve HP while adding enough damage, defense, and consistency for the next few rooms."
+		stageObjectiveZH = "在 Act 1 前段先把基本盘打稳。保住血量，同时补足接下来几层需要的输出、防御和稳定性。"
 	case floor <= 17:
-		stageObjective = "Prepare for stronger fights ahead. Favor coherent picks that preserve HP and add scaling or burst when they are worth the risk."
+		stageObjectiveEN = "Prepare for stronger fights ahead. Favor coherent picks that preserve HP and add scaling or burst when they are worth the risk."
+		stageObjectiveZH = "开始为更强的战斗做准备。优先选择能保血、能成体系、并在值得冒险时补上成长或爆发的方案。"
 	case floor > 17:
-		stageObjective = "Protect a viable winning run. Avoid unnecessary risk and keep turning gold, HP, and choices into consistency."
+		stageObjectiveEN = "Protect a viable winning run. Avoid unnecessary risk and keep turning gold, HP, and choices into consistency."
+		stageObjectiveZH = "这时要把能赢的局守住。减少没必要的风险，把金币、血量和选择都持续换成稳定性。"
 	}
 
-	riskDirective := "Current risk posture: normal. Do not waste HP or gold, but take strong legal lines when they clearly improve the run."
+	riskDirectiveEN := "Current risk posture: normal. Do not waste HP or gold, but take strong legal lines when they clearly improve the run."
+	riskDirectiveZH := "当前风险姿态：正常。不要乱浪费血和金币，但只要明显变强，就果断走强线。"
 	if lowHP {
-		riskDirective = "Current risk posture: fragile. Bias toward preserving HP, safer routes, defensive rewards, and lower-variance combat lines."
+		riskDirectiveEN = "Current risk posture: fragile. Bias toward preserving HP, safer routes, defensive rewards, and lower-variance combat lines."
+		riskDirectiveZH = "当前风险姿态：脆弱。明显偏向保血、保守路线、防御型奖励和低方差战斗线。"
 	}
 
 	return loc.Paragraph(
 		"Run objective:\n"+
 			"- The main goal is to reach deeper floors and eventually win, not to maximize flashy short-term value.\n"+
-			"- "+stageObjective+"\n"+
-			"- "+riskDirective+"\n"+
+			"- "+stageObjectiveEN+"\n"+
+			"- "+riskDirectiveEN+"\n"+
 			"- When two legal actions are close, prefer the one that improves survival, deck stability, or future room quality.",
 		"对局目标：\n"+
 			"- 主要目标是打到更深的层数并最终通关，不是只追求眼前漂亮的一步。\n"+
-			"- "+stageObjective+"\n"+
-			"- "+riskDirective+"\n"+
+			"- "+stageObjectiveZH+"\n"+
+			"- "+riskDirectiveZH+"\n"+
 			"- 当两个合法动作差距不大时，优先选择更能提高生存、牌组稳定性或后续房间质量的那条。",
 	)
 }
@@ -564,8 +571,8 @@ func (p *PromptAssemblyPipeline) screenSummaryBlock(state *game.StateSnapshot, l
 		fmt.Sprintf("%s: %s", loc.Label("Available actions", "当前可用动作"), strings.Join(state.AvailableActions, ", ")),
 	}
 
-	summaryLines := StateSummaryLines(state)
-	detailLines := StateDetailLines(state, 4)
+	summaryLines := StateSummaryLinesFor(state, loc.Language())
+	detailLines := StateDetailLinesFor(state, 4, loc.Language())
 	if len(summaryLines) > 0 {
 		lines = append(lines, "", loc.Label("State overview", "状态总览")+":")
 		lines = append(lines, summaryLines...)

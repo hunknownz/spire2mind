@@ -3,4 +3,15 @@ bridge/obj/
 bridge/build/
 .tools/
 spire2mind.exe
-scratch/
+.cache/
+research/airi/
+research/MeloTTS/
+research/kokoro/
+tools/local-tts/__pycache__/
+scratch/*
+!scratch/guidebook/
+scratch/guidebook/*
+!scratch/guidebook/combat-playbook.md
+!scratch/guidebook/event-playbook.md
+!scratch/guidebook/guidebook.md
+!scratch/guidebook/living-codex.json

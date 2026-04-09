@@ -117,6 +117,15 @@ func TestLoadReadsAPIDecisionModeOverride(t *testing.T) {
 	}
 }
 
+func TestLoadReadsStreamerStyleOverride(t *testing.T) {
+	t.Setenv("SPIRE2MIND_STREAMER_STYLE", "cute")
+
+	cfg := Load(`C:\repo\spire2mind`)
+	if cfg.StreamerStyle != "cute" {
+		t.Fatalf("StreamerStyle = %q, want cute", cfg.StreamerStyle)
+	}
+}
+
 func TestLoadDefaultsModelContextTo8K(t *testing.T) {
 	t.Setenv("SPIRE2MIND_MODEL_PROVIDER", "api")
 	t.Setenv("SPIRE2MIND_API_BASE_URL", "http://127.0.0.1:11434")
@@ -137,6 +146,39 @@ func TestLoadReadsModelContextOverride(t *testing.T) {
 	cfg := Load(`C:\repo\spire2mind`)
 	if cfg.ModelContext != 16384 {
 		t.Fatalf("ModelContext = %d, want 16384", cfg.ModelContext)
+	}
+}
+
+func TestLoadUsesLANProviderProfileDefaults(t *testing.T) {
+	t.Setenv("SPIRE2MIND_MODEL_PROVIDER", "api")
+	t.Setenv("SPIRE2MIND_API_BASE_URL", "http://192.168.3.23:11434")
+	t.Setenv("SPIRE2MIND_MODEL", "qwen3.5:35b-a3b-coding-nvfp4")
+
+	cfg := Load(`C:\repo\spire2mind`)
+	if cfg.APITimeoutMs != 30*60*1000 {
+		t.Fatalf("APITimeoutMs = %d, want %d", cfg.APITimeoutMs, 30*60*1000)
+	}
+	if cfg.APIMaxRetries != 1 {
+		t.Fatalf("APIMaxRetries = %d, want 1", cfg.APIMaxRetries)
+	}
+	if !cfg.UsesTrustedLANAPI() {
+		t.Fatal("expected trusted LAN API to be detected")
+	}
+}
+
+func TestLoadAllowsExplicitProviderProfileOverrides(t *testing.T) {
+	t.Setenv("SPIRE2MIND_MODEL_PROVIDER", "api")
+	t.Setenv("SPIRE2MIND_API_BASE_URL", "http://192.168.3.23:11434")
+	t.Setenv("SPIRE2MIND_MODEL", "qwen3.5:35b-a3b-coding-nvfp4")
+	t.Setenv("SPIRE2MIND_API_TIMEOUT_MS", "123456")
+	t.Setenv("SPIRE2MIND_API_MAX_RETRIES", "4")
+
+	cfg := Load(`C:\repo\spire2mind`)
+	if cfg.APITimeoutMs != 123456 {
+		t.Fatalf("APITimeoutMs = %d, want 123456", cfg.APITimeoutMs)
+	}
+	if cfg.APIMaxRetries != 4 {
+		t.Fatalf("APIMaxRetries = %d, want 4", cfg.APIMaxRetries)
 	}
 }
 
@@ -230,5 +272,21 @@ func TestUsesStructuredAPIDecisionsDefaultsToTools(t *testing.T) {
 	}
 	if cfg.UsesStructuredAPIDecisions() {
 		t.Fatal("expected tools mode to keep API tool-agent behavior")
+	}
+}
+
+func TestUsesSchemaStructuredOutputSkipsOpenAICompatibleLAN(t *testing.T) {
+	cfg := Config{
+		ModelProvider:   ModelProviderAPI,
+		APIBaseURL:      "http://192.168.3.23:11434",
+		APIProvider:     "openai",
+		Model:           "qwen3.5:35b-a3b-coding-nvfp4",
+		APIDecisionMode: APIDecisionModeStructured,
+	}
+	if !cfg.UsesStructuredAPIDecisions() {
+		t.Fatal("expected structured decisions to stay enabled")
+	}
+	if cfg.UsesSchemaStructuredOutput() {
+		t.Fatal("expected OpenAI-compatible LAN backend to avoid schema tool mode")
 	}
 }

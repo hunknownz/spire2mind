@@ -82,7 +82,7 @@ func TestRunStoreWritesMarkdownArtifactsAsUTF8WithBOM(t *testing.T) {
 	if err := store.WriteDashboard("# 仪表盘\n\n- 当前屏幕: `COMBAT`"); err != nil {
 		t.Fatalf("write dashboard: %v", err)
 	}
-	if err := store.WriteRunStory("# 故事\n\n这是一次中文回放。"); err != nil {
+	if err := store.WriteRunStory("# 故事\n\n这是一段中文回放。"); err != nil {
 		t.Fatalf("write run story: %v", err)
 	}
 

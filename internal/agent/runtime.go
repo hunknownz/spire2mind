@@ -38,6 +38,8 @@ func New(ctx context.Context, cfg config.Config) (*Runtime, error) {
 		ContextWindow:  cfg.ModelContext,
 		CWD:            cfg.RepoRoot,
 		MaxTurns:       24,
+		TimeoutMs:      cfg.APITimeoutMs,
+		MaxRetries:     cfg.APIMaxRetries,
 		PermissionMode: openagenttypes.PermissionModeBypassPermissions,
 	}
 
@@ -50,16 +52,18 @@ func New(ctx context.Context, cfg config.Config) (*Runtime, error) {
 		if cfg.UsesStructuredAPIDecisions() {
 			agentOptions.SystemPrompt = game.ClaudeCLISystemPrompt
 			agentOptions.MaxTurns = 1
-			agentOptions.JSONSchema = ActionDecisionJSONSchema()
-			agentOptions.AllowedTools = []string{openagent.StructuredOutputToolName}
-			agentOptions.CanUseTool = func(tool openagenttypes.Tool, input map[string]interface{}) (*openagenttypes.PermissionDecision, error) {
-				if tool.Name() != openagent.StructuredOutputToolName {
-					return &openagenttypes.PermissionDecision{
-						Behavior: openagenttypes.PermissionDeny,
-						Reason:   fmt.Sprintf("tool %s is not enabled for structured spire2mind decisions", tool.Name()),
-					}, nil
+			if cfg.UsesSchemaStructuredOutput() {
+				agentOptions.JSONSchema = ActionDecisionJSONSchema()
+				agentOptions.AllowedTools = []string{openagent.StructuredOutputToolName}
+				agentOptions.CanUseTool = func(tool openagenttypes.Tool, input map[string]interface{}) (*openagenttypes.PermissionDecision, error) {
+					if tool.Name() != openagent.StructuredOutputToolName {
+						return &openagenttypes.PermissionDecision{
+							Behavior: openagenttypes.PermissionDeny,
+							Reason:   fmt.Sprintf("tool %s is not enabled for structured spire2mind decisions", tool.Name()),
+						}, nil
+					}
+					return &openagenttypes.PermissionDecision{Behavior: openagenttypes.PermissionAllow}, nil
 				}
-				return &openagenttypes.PermissionDecision{Behavior: openagenttypes.PermissionAllow}, nil
 			}
 		} else {
 			allowed := game.AllowedToolNames()

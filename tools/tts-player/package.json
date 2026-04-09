@@ -1,0 +1,6 @@
+{
+  "name": "spire2mind-tts-player",
+  "private": true,
+  "type": "module",
+  "description": "Standalone TTS sidecar for Spire2Mind. Watches streamer beats, applies queue/interrupt semantics, and plays audio locally."
+}

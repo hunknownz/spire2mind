@@ -17,14 +17,14 @@ func StateSummaryLinesFor(state *game.StateSnapshot, language i18n.Language) []s
 	if state == nil {
 		return []string{
 			fmt.Sprintf("- %s: `-`", loc.Label("Screen", "界面")),
-			fmt.Sprintf("- %s: `-`", loc.Label("Run", "Run")),
+			fmt.Sprintf("- %s: `-`", loc.Label("Run", "对局")),
 			fmt.Sprintf("- %s: `-`", loc.Label("Actions", "动作")),
 		}
 	}
 
 	lines := []string{
 		fmt.Sprintf("- %s: `%s`", loc.Label("Screen", "界面"), valueOrDash(state.Screen)),
-		fmt.Sprintf("- %s: `%s`", loc.Label("Run", "Run"), valueOrDash(state.RunID)),
+		fmt.Sprintf("- %s: `%s`", loc.Label("Run", "对局"), valueOrDash(state.RunID)),
 		fmt.Sprintf("- %s: `%s`", loc.Label("Actions", "动作"), valueOrDash(strings.Join(state.AvailableActions, ", "))),
 	}
 
@@ -99,7 +99,13 @@ func combatDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localiz
 			energy, _ := fieldInt(playerMap, "energy")
 			block, _ := fieldInt(playerMap, "block")
 			stars, _ := fieldInt(playerMap, "stars")
-			lines = append(lines, fmt.Sprintf("- %s: %s `%d`, %s `%d`, %s `%d`", loc.Label("Player", "玩家"), loc.Label("energy", "能量"), energy, loc.Label("block", "格挡"), block, loc.Label("stars", "星能"), stars))
+			lines = append(lines, fmt.Sprintf(
+				"- %s: %s `%d`, %s `%d`, %s `%d`",
+				loc.Label("Player", "玩家"),
+				loc.Label("energy", "能量"), energy,
+				loc.Label("block", "格挡"), block,
+				loc.Label("stars", "星能"), stars,
+			))
 		}
 	}
 
@@ -120,7 +126,14 @@ func combatDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localiz
 				intent = intent + " / " + label
 			}
 		}
-		lines = append(lines, fmt.Sprintf("- %s %d: %s `%d/%d` %s, `%d` %s, %s `%s`", loc.Label("Enemy", "敌人"), i, fallbackID(name, fieldString(enemy, "enemyId")), currentHP, maxHP, loc.Label("HP", "生命"), block, loc.Label("block", "格挡"), loc.Label("intent", "意图"), valueOrDash(intent)))
+		lines = append(lines, fmt.Sprintf(
+			"- %s %d: %s `%d/%d` %s, `%d` %s, %s `%s`",
+			loc.Label("Enemy", "敌人"), i,
+			fallbackID(name, fieldString(enemy, "enemyId")),
+			currentHP, maxHP, loc.Label("HP", "生命"),
+			block, loc.Label("block", "格挡"),
+			loc.Label("intent", "意图"), valueOrDash(intent),
+		))
 	}
 
 	hand := nestedList(state.Combat, "hand")
@@ -133,7 +146,14 @@ func combatDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localiz
 		cost, _ := fieldInt(card, "energyCost")
 		playable := fieldBool(card, "playable")
 		requiresTarget := cardRequiresTarget(state, card)
-		lines = append(lines, fmt.Sprintf("- %s %d: [%d] %s %s `%d` %s `%t` %s `%t`", loc.Label("Hand", "手牌"), i, index, fallbackID(fieldString(card, "name"), fieldString(card, "cardId")), loc.Label("cost", "费用"), cost, loc.Label("playable", "可打出"), playable, loc.Label("target", "需目标"), requiresTarget))
+		lines = append(lines, fmt.Sprintf(
+			"- %s %d: [%d] %s %s `%d` %s `%t` %s `%t`",
+			loc.Label("Hand", "手牌"), i, index,
+			fallbackID(fieldString(card, "name"), fieldString(card, "cardId")),
+			loc.Label("cost", "费用"), cost,
+			loc.Label("playable", "可打出"), playable,
+			loc.Label("target", "需目标"), requiresTarget,
+		))
 	}
 
 	return lines
@@ -144,9 +164,9 @@ func rewardDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localiz
 	if phase := fieldString(state.Reward, "phase"); phase != "" {
 		source := fieldString(state.Reward, "sourceScreen")
 		if source != "" {
-			lines = append(lines, fmt.Sprintf("- %s: `%s` (%s `%s`)", loc.Label("Reward phase", "濂栧姳闃舵"), phase, loc.Label("source", "鏉ユ簮"), source))
+			lines = append(lines, fmt.Sprintf("- %s: `%s` (%s `%s`)", loc.Label("Reward phase", "奖励阶段"), phase, loc.Label("source", "来源"), source))
 		} else {
-			lines = append(lines, fmt.Sprintf("- %s: `%s`", loc.Label("Reward phase", "濂栧姳闃舵"), phase))
+			lines = append(lines, fmt.Sprintf("- %s: `%s`", loc.Label("Reward phase", "奖励阶段"), phase))
 		}
 	}
 	rewards := nestedList(state.Reward, "rewards")
@@ -257,7 +277,7 @@ func restDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localizer
 
 func chestDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localizer) []string {
 	lines := []string{}
-	if opened := fieldBool(state.Chest, "isOpened"); opened {
+	if fieldBool(state.Chest, "isOpened") {
 		lines = append(lines, "- "+loc.Label("Chest: already opened", "宝箱：已打开"))
 	}
 	relics := nestedList(state.Chest, "relicOptions")
@@ -277,9 +297,9 @@ func selectionDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Loca
 	if kind := fieldString(state.Selection, "kind"); kind != "" {
 		source := fieldString(state.Selection, "sourceScreen")
 		if source != "" {
-			lines = append(lines, fmt.Sprintf("- %s: `%s` (%s `%s`)", loc.Label("Selection context", "閫夌墝涓婁笅鏂?"), kind, loc.Label("source", "鏉ユ簮"), source))
+			lines = append(lines, fmt.Sprintf("- %s: `%s` (%s `%s`)", loc.Label("Selection context", "选择上下文"), kind, loc.Label("source", "来源"), source))
 		} else {
-			lines = append(lines, fmt.Sprintf("- %s: `%s`", loc.Label("Selection context", "閫夌墝涓婁笅鏂?"), kind))
+			lines = append(lines, fmt.Sprintf("- %s: `%s`", loc.Label("Selection context", "选择上下文"), kind))
 		}
 	}
 	cards := nestedList(state.Selection, "cards")

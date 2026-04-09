@@ -5,7 +5,7 @@ param(
     [int]$MaxCycles = 0,
     [int]$TimeoutSeconds = 900,
     [int]$IdleTimeoutSeconds = 120,
-    [string]$Language = "en",
+    [string]$Language = "zh",
     [string]$FastMode = "instant",
     [string]$Planner = "mcts",
     [string]$BaseUrl = "http://127.0.0.1:11434",

@@ -22,15 +22,16 @@ func (s *Session) recordState(state *game.StateSnapshot) {
 	data := map[string]interface{}{}
 	if s.todo != nil {
 		snapshot := s.todo.Snapshot()
-		data["current_goal"] = snapshot.CurrentGoal
-		data["room_goal"] = snapshot.RoomGoal
-		data["next_intent"] = snapshot.NextIntent
-		data["last_failure"] = snapshot.LastFailure
-		data["carry_forward_plan"] = snapshot.CarryForwardPlan
-		data["carry_forward_lessons"] = snapshot.CarryForwardLessons
+		loc := s.localizer()
+		data["current_goal"] = localizeTodoText(snapshot.CurrentGoal, loc)
+		data["room_goal"] = localizeTodoText(snapshot.RoomGoal, loc)
+		data["next_intent"] = localizeTodoText(snapshot.NextIntent, loc)
+		data["last_failure"] = localizeTodoText(snapshot.LastFailure, loc)
+		data["carry_forward_plan"] = localizeTodoText(snapshot.CarryForwardPlan, loc)
+		data["carry_forward_lessons"] = localizeTodoSlice(snapshot.CarryForwardLessons, loc)
 		data["carry_forward_buckets"] = snapshot.CarryForwardBuckets.ToDataMap()
 	}
-	if hints := BuildTacticalHints(state); len(hints) > 0 {
+	if hints := BuildTacticalHintsForLanguage(state, s.cfg.Language); len(hints) > 0 {
 		data["tactical_hints"] = hints
 	}
 	if plan := s.currentCombatPlan(state); plan != nil {
@@ -95,6 +96,7 @@ func (s *Session) emit(event SessionEvent) {
 	if s.store != nil && s.dashboard != nil {
 		_ = s.store.WriteDashboard(s.dashboard.ApplyEvent(event))
 	}
+	s.appendStreamerHistory(event)
 
 	select {
 	case s.events <- event:

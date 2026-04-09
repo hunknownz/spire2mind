@@ -32,23 +32,30 @@ type Config struct {
 	ModelContext  int
 	ModelProvider ModelProvider
 	APIDecisionMode APIDecisionMode
-	CombatPlanner string
-	ForceModelEval bool
-	APIBaseURL    string
-	APIKey        string
-	APIProvider   string
+	CombatPlanner   string
+	ForceModelEval  bool
+	StreamerEnabled bool
+	StreamerMaxHistory int
+	StreamerStyle string
+	TTSQueueDir string
+	TTSAutoSpeak bool
+	APIBaseURL      string
+	APIKey          string
+	APIProvider     string
+	APITimeoutMs    int
+	APIMaxRetries   int
 	ClaudeCodeDisableNonessentialTraffic string
 	ClaudeCodeAttributionHeader          string
-	ClaudeCLIPath string
-	DataDir       string
-	GameDir       string
-	GameExePath   string
-	GamePrefsPath string
-	GameFastMode  string
-	ArtifactsDir  string
-	MaxAttempts   int
-	MaxCycles     int
-	Language      i18n.Language
+	ClaudeCLIPath                       string
+	DataDir                             string
+	GameDir                             string
+	GameExePath                         string
+	GamePrefsPath                       string
+	GameFastMode                        string
+	ArtifactsDir                        string
+	MaxAttempts                         int
+	MaxCycles                           int
+	Language                            i18n.Language
 }
 
 func Load(repoRoot string) Config {
@@ -60,7 +67,7 @@ func Load(repoRoot string) Config {
 	apiDecisionMode := normalizeAPIDecisionMode(firstNonEmpty(os.Getenv("SPIRE2MIND_API_DECISION_MODE"), os.Getenv("SPIRE2MIND_DECISION_MODE"), "tools"))
 	claudeCLIPath := resolveClaudeCLIPath()
 	provider := resolveModelProvider(apiBaseURL, apiKey, claudeCLIPath)
-	language := i18n.ParseLanguage(firstNonEmpty(os.Getenv("SPIRE2MIND_LANGUAGE"), os.Getenv("SPIRE2MIND_LANG"), "bi"))
+	language := i18n.ParseLanguage(firstNonEmpty(os.Getenv("SPIRE2MIND_LANGUAGE"), os.Getenv("SPIRE2MIND_LANG"), "zh"))
 
 	return Config{
 		RepoRoot:      repoRoot,
@@ -76,9 +83,16 @@ func Load(repoRoot string) Config {
 				os.Getenv("SPIRE2MIND_LOCAL_LLM_EVAL"),
 			),
 		),
+		StreamerEnabled: parseBoolWithDefault(firstNonEmpty(os.Getenv("SPIRE2MIND_STREAMER_ENABLED")), true),
+		StreamerMaxHistory: normalizeStreamerMaxHistory(parseIntWithDefault(firstNonEmpty(os.Getenv("SPIRE2MIND_STREAMER_MAX_HISTORY")), 8)),
+		StreamerStyle: normalizeStreamerStyle(firstNonEmpty(os.Getenv("SPIRE2MIND_STREAMER_STYLE"), "bright-cute")),
+		TTSQueueDir:    filepath.Join(repoRoot, "scratch", "tts"),
+		TTSAutoSpeak:   parseBoolEnv(firstNonEmpty(os.Getenv("SPIRE2MIND_TTS_AUTO_SPEAK"), os.Getenv("SPIRE2MIND_TTS_SPEAK"))),
 		APIBaseURL:    apiBaseURL,
 		APIKey:        apiKey,
 		APIProvider:   apiProvider,
+		APITimeoutMs:  resolveAPITimeoutMs(apiBaseURL),
+		APIMaxRetries: resolveAPIMaxRetries(apiBaseURL),
 		ClaudeCodeDisableNonessentialTraffic: firstNonEmpty(os.Getenv("CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC")),
 		ClaudeCodeAttributionHeader:          firstNonEmpty(os.Getenv("CLAUDE_CODE_ATTRIBUTION_HEADER")),
 		ClaudeCLIPath: claudeCLIPath,
@@ -92,6 +106,37 @@ func Load(repoRoot string) Config {
 		MaxCycles:     normalizeMaxCycles(parseIntWithDefault(firstNonEmpty(os.Getenv("SPIRE2MIND_MAX_CYCLES")), -1)),
 		Language:      language,
 	}
+}
+
+func normalizeStreamerMaxHistory(value int) int {
+	switch {
+	case value <= 0:
+		return 8
+	case value > 24:
+		return 24
+	default:
+		return value
+	}
+}
+
+func normalizeStreamerStyle(value string) string {
+	switch strings.TrimSpace(strings.ToLower(value)) {
+	case "", "bright-cute", "cute", "energetic", "warm", "calm":
+		if strings.TrimSpace(value) == "" {
+			return "bright-cute"
+		}
+		return strings.TrimSpace(strings.ToLower(value))
+	default:
+		return "bright-cute"
+	}
+}
+
+func parseBoolWithDefault(value string, fallback bool) bool {
+	trimmed := strings.TrimSpace(strings.ToLower(value))
+	if trimmed == "" {
+		return fallback
+	}
+	return parseBoolEnv(trimmed)
 }
 
 func NormalizeCombatPlanner(value string) string {
@@ -163,6 +208,19 @@ func (c Config) UsesStructuredAPIDecisions() bool {
 	}
 }
 
+func (c Config) UsesSchemaStructuredOutput() bool {
+	if !c.UsesStructuredAPIDecisions() {
+		return false
+	}
+	if strings.EqualFold(strings.TrimSpace(c.APIProvider), "openai") {
+		return false
+	}
+	if c.AllowsAnonymousAPI() {
+		return false
+	}
+	return true
+}
+
 func (c Config) ClaudeCLIEnv() map[string]string {
 	env := map[string]string{}
 	if c.APIBaseURL != "" {
@@ -185,6 +243,14 @@ func (c Config) ClaudeCLIEnv() map[string]string {
 
 func (c Config) AllowsAnonymousAPI() bool {
 	return isTrustedLocalAPIBaseURL(c.APIBaseURL)
+}
+
+func (c Config) UsesTrustedLANAPI() bool {
+	return isTrustedLANAPIBaseURL(c.APIBaseURL)
+}
+
+func (c Config) UsesLoopbackAPI() bool {
+	return isLoopbackAPIBaseURL(c.APIBaseURL)
 }
 
 func firstNonEmpty(values ...string) string {
@@ -256,6 +322,20 @@ func normalizeModelContext(value int) int {
 	return value
 }
 
+func normalizeAPITimeoutMs(value int) int {
+	if value <= 0 {
+		return 10 * 60 * 1000
+	}
+	return value
+}
+
+func normalizeAPIMaxRetries(value int) int {
+	if value < 0 {
+		return 0
+	}
+	return value
+}
+
 func normalizeAPIDecisionMode(value string) APIDecisionMode {
 	switch strings.ToLower(strings.TrimSpace(value)) {
 	case "", "tools", "tool", "agent", "tool-agent", "tool_agent":
@@ -299,6 +379,38 @@ func resolveModelProvider(apiBaseURL string, apiKey string, claudeCLIPath string
 	}
 
 	return ""
+}
+
+func resolveAPITimeoutMs(apiBaseURL string) int {
+	override := parseIntWithDefault(firstNonEmpty(os.Getenv("SPIRE2MIND_API_TIMEOUT_MS"), os.Getenv("API_TIMEOUT_MS")), 0)
+	if override > 0 {
+		return normalizeAPITimeoutMs(override)
+	}
+
+	switch {
+	case isTrustedLANAPIBaseURL(apiBaseURL):
+		return 30 * 60 * 1000
+	case isLoopbackAPIBaseURL(apiBaseURL):
+		return 20 * 60 * 1000
+	default:
+		return 10 * 60 * 1000
+	}
+}
+
+func resolveAPIMaxRetries(apiBaseURL string) int {
+	override := parseIntWithDefault(firstNonEmpty(os.Getenv("SPIRE2MIND_API_MAX_RETRIES")), -1)
+	if override >= 0 {
+		return normalizeAPIMaxRetries(override)
+	}
+
+	switch {
+	case isTrustedLANAPIBaseURL(apiBaseURL):
+		return 1
+	case isLoopbackAPIBaseURL(apiBaseURL):
+		return 2
+	default:
+		return 3
+	}
 }
 
 func resolveClaudeCLIPath() string {
@@ -416,9 +528,42 @@ func normalizeAPIProvider(value string) string {
 }
 
 func isTrustedLocalAPIBaseURL(value string) bool {
+	host, ip, ok := parseAPIHost(value)
+	if !ok {
+		return false
+	}
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	if ip.IsLoopback() {
+		return true
+	}
+	return isPrivateIPv4(ip)
+}
+
+func isLoopbackAPIBaseURL(value string) bool {
+	host, ip, ok := parseAPIHost(value)
+	if !ok {
+		return false
+	}
+	return strings.EqualFold(host, "localhost") || ip.IsLoopback()
+}
+
+func isTrustedLANAPIBaseURL(value string) bool {
+	host, ip, ok := parseAPIHost(value)
+	if !ok {
+		return false
+	}
+	if strings.EqualFold(host, "localhost") || ip.IsLoopback() {
+		return false
+	}
+	return isPrivateIPv4(ip)
+}
+
+func parseAPIHost(value string) (string, net.IP, bool) {
 	raw := strings.TrimSpace(value)
 	if raw == "" {
-		return false
+		return "", nil, false
 	}
 
 	if !strings.Contains(raw, "://") {
@@ -426,23 +571,24 @@ func isTrustedLocalAPIBaseURL(value string) bool {
 	}
 	parsed, err := url.Parse(raw)
 	if err != nil {
-		return false
+		return "", nil, false
 	}
 
 	host := strings.TrimSpace(parsed.Hostname())
 	if host == "" {
-		return false
-	}
-	if strings.EqualFold(host, "localhost") {
-		return true
+		return "", nil, false
 	}
 
 	ip := net.ParseIP(host)
 	if ip == nil {
-		return false
+		return host, nil, false
 	}
-	if ip.IsLoopback() {
-		return true
+	return host, ip, true
+}
+
+func isPrivateIPv4(ip net.IP) bool {
+	if ip == nil {
+		return false
 	}
 
 	if ipv4 := ip.To4(); ipv4 != nil {
@@ -456,6 +602,5 @@ func isTrustedLocalAPIBaseURL(value string) bool {
 			return true
 		}
 	}
-
 	return false
 }

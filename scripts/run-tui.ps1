@@ -1,7 +1,7 @@
 param(
     [int]$Attempts = 3,
     [int]$MaxCycles = -1,
-    [string]$Language = "en",
+    [string]$Language = "zh",
     [string]$Provider = "claude-cli",
     [string]$FastMode = "instant",
     [string]$Planner = "mcts",
@@ -34,22 +34,13 @@ function Resolve-TuiLanguage {
     )
 
     if ([string]::IsNullOrWhiteSpace($RequestedLanguage)) {
-        $requested = "en"
+        return "zh"
     }
-    else {
-        $requested = $RequestedLanguage.Trim().ToLowerInvariant()
-    }
-    $disableConsoleSafe = $env:SPIRE2MIND_TUI_DISABLE_CONSOLE_SAFE_I18N
-    $consoleSafeEnabled = -not ($disableConsoleSafe -match '^(1|true|yes|on)$')
-
-    if ($consoleSafeEnabled -and $requested -ne "en") {
-        return "en"
-    }
-
-    return $requested
+    return $RequestedLanguage.Trim().ToLowerInvariant()
 }
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot "tts-profile-utils.ps1")
 $preferredGo = Join-Path $repoRoot ".tools\go-go1.26.1 go1.25.8\go\bin\go.exe"
 $goExe = if (Test-Path $preferredGo) { $preferredGo } else { "go" }
 $bridgeUrl = if ($env:SPIRE2MIND_BRIDGE_URL) { $env:SPIRE2MIND_BRIDGE_URL.TrimEnd("/") } else { "http://127.0.0.1:8080" }
@@ -69,6 +60,7 @@ Set-ConsoleUtf8
 
 $effectiveLanguage = Resolve-TuiLanguage -RequestedLanguage $Language
 $resolvedForceModelEval = $ForceModelEval.IsPresent -or ($env:SPIRE2MIND_FORCE_MODEL_EVAL -match '^(1|true|yes|on)$')
+$resolvedTTSProfile = Resolve-TTSProfile -RepoRoot $repoRoot
 
 $env:GOCACHE = $goCache
 $env:GOMODCACHE = $goModCache
@@ -80,6 +72,9 @@ $env:SPIRE2MIND_MAX_CYCLES = [string]$MaxCycles
 $env:SPIRE2MIND_GAME_FAST_MODE = $FastMode
 $env:SPIRE2MIND_COMBAT_PLANNER = $Planner
 $env:SPIRE2MIND_FORCE_MODEL_EVAL = if ($resolvedForceModelEval) { "1" } else { "0" }
+if (-not $env:SPIRE2MIND_STREAMER_STYLE -and $resolvedTTSProfile.streamerStyle) {
+    $env:SPIRE2MIND_STREAMER_STYLE = [string]$resolvedTTSProfile.streamerStyle
+}
 
 $attemptLabel = if ($Attempts -le 0) { "continuous" } else { [string]$Attempts }
 
@@ -131,6 +126,38 @@ function Ensure-GameAndBridgeReady {
     throw "Bridge did not become ready within $TimeoutSec seconds."
 }
 
+function Start-TTSPlayerIfEnabled {
+    param(
+        [string]$RepoRoot
+    )
+
+    $enabled = $env:SPIRE2MIND_TTS_AUTO_SPEAK
+    if ($enabled -notmatch '^(1|true|yes|on)$') {
+        return
+    }
+
+    $scriptPath = Join-Path $RepoRoot "scripts\start-tts-player.ps1"
+    if (-not (Test-Path $scriptPath)) {
+        Write-Warning "TTS player launcher not found: $scriptPath"
+        return
+    }
+
+    $ttsArgs = @(
+        "-ExecutionPolicy", "Bypass",
+        "-File", $scriptPath,
+        "-ReplaceExisting"
+    )
+    if ($env:SPIRE2MIND_TTS_PROVIDER) { $ttsArgs += @("-Provider", $env:SPIRE2MIND_TTS_PROVIDER) }
+    if ($env:SPIRE2MIND_TTS_FALLBACK_PROVIDER) { $ttsArgs += @("-FallbackProvider", $env:SPIRE2MIND_TTS_FALLBACK_PROVIDER) }
+    if ($env:SPIRE2MIND_TTS_BASE_URL) { $ttsArgs += @("-BaseUrl", $env:SPIRE2MIND_TTS_BASE_URL) }
+    if ($env:SPIRE2MIND_TTS_API_KEY) { $ttsArgs += @("-ApiKey", $env:SPIRE2MIND_TTS_API_KEY) }
+    if ($env:SPIRE2MIND_TTS_MODEL) { $ttsArgs += @("-Model", $env:SPIRE2MIND_TTS_MODEL) }
+    if ($env:SPIRE2MIND_TTS_VOICE) { $ttsArgs += @("-Voice", $env:SPIRE2MIND_TTS_VOICE) }
+    if ($env:SPIRE2MIND_TTS_SPEED) { $ttsArgs += @("-Speed", $env:SPIRE2MIND_TTS_SPEED) }
+
+    & powershell.exe @ttsArgs
+}
+
 function Stop-ExistingSpire2MindTUI {
     param(
         [int]$CurrentPid
@@ -177,10 +204,6 @@ Write-Host "Repo: $repoRoot"
 Write-Host "Go: $goExe"
 Write-Host "Provider: $Provider"
 Write-Host "Language: $effectiveLanguage"
-if ($effectiveLanguage -ne $Language) {
-    Write-Host "Requested language: $Language"
-    Write-Host "Console-safe i18n: forcing English for the visible TUI"
-}
 Write-Host "Attempts: $attemptLabel"
 if ($MaxCycles -eq 0) {
     Write-Host "Max cycles: unlimited"
@@ -203,6 +226,7 @@ if ($ReplaceExisting) {
 }
 
 Ensure-GameAndBridgeReady -ExecutablePath $gameExe -Url $bridgeUrl -TimeoutSec 120
+Start-TTSPlayerIfEnabled -RepoRoot $repoRoot
 
 if ($MaxCycles -ge 0) {
     & $goExe run .\cmd\spire2mind play --attempts $Attempts --max-cycles $MaxCycles

@@ -273,6 +273,12 @@ func renderGuidebookSnapshot(snapshot *GuidebookSnapshot, language i18n.Language
 		fmt.Sprintf("- %s: `%d`", loc.Label("Recent fallback runs", "Recent fallback runs"), snapshot.RunQuality.RecentFallbackRuns),
 		fmt.Sprintf("- %s: `%d`", loc.Label("Recent provider-retry runs", "Recent provider-retry runs"), snapshot.RunQuality.RecentProviderRetryRuns),
 		fmt.Sprintf("- %s: `%d`", loc.Label("Recent tool-error runs", "Recent tool-error runs"), snapshot.RunQuality.RecentToolErrorRuns),
+		fmt.Sprintf("- %s: `%d`", loc.Label("Recent median floor", "Recent median floor"), snapshot.RunQuality.RecentMedianFloor),
+		fmt.Sprintf("- %s: `%d`", loc.Label("Recent best floor", "Recent best floor"), snapshot.RunQuality.RecentBestFloor),
+		fmt.Sprintf("- %s: `%d / %d`", loc.Label("Recent floor >= 7 runs", "Recent floor >= 7 runs"), snapshot.RunQuality.RecentFloor7PlusRuns, snapshot.RunQuality.RecentCompleteRuns),
+		fmt.Sprintf("- %s: `%d / %d`", loc.Label("Recent Act 2 entry runs", "Recent Act 2 entry runs"), snapshot.RunQuality.RecentAct2EntryRuns, snapshot.RunQuality.RecentCompleteRuns),
+		fmt.Sprintf("- %s: `%d`", loc.Label("Recent died-with-gold runs", "Recent died-with-gold runs"), snapshot.RunQuality.RecentDiedWithGoldRuns),
+		fmt.Sprintf("- %s: `%d`", loc.Label("Recent average death gold", "Recent average death gold"), snapshot.RunQuality.RecentAverageDeathGold),
 	)
 
 	lines = append(lines, "", "## "+loc.Label("Living Codex", "Living Codex"), "")
