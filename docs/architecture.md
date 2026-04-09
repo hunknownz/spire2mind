@@ -1,208 +1,126 @@
-# spire2mind 整体架构设计
+# Spire2Mind Architecture
 
-## 项目定位
+## Goal
 
-spire2mind 是一个 AI 自动玩杀戮尖塔 2 (Slay the Spire 2) 的系统。它由三层组成：C# Bridge（游戏桥接）、Go Agent（AI 编排）、bubbletea TUI（终端界面）。
+Spire2Mind runs a live Slay the Spire 2 automation stack on Windows:
 
-## 架构全景
+- a C# Bridge mod runs inside the game process
+- a Go runtime talks to the Bridge over HTTP and SSE
+- a deterministic policy and optional model-driven agent choose actions
+- a headless runner and a Bubble Tea TUI share the same control loop
 
-```
-┌─────────────────────────────────────────────────────┐
-│                  终端 TUI (bubbletea)                │
-│  游戏状态 | Agent 思考过程 | 操作日志 | Token/Cost    │
-└───────────────┬─────────────────────────────────────┘
-                │ tea.Msg 事件驱动
-                ▼
-┌─────────────────────────────────────────────────────┐
-│              Go Agent (open-agent-sdk-go)            │
-│                                                      │
-│  Harness Loop:                                       │
-│    callModel() → tool_use → RunTools() → loop        │
-│                                                      │
-│  Custom Tools:                                       │
-│    get_game_state  → ModClient.GetState()            │
-│    get_actions     → ModClient.GetActions()          │
-│    act             → ModClient.Act()                 │
-│    wait_actionable → ModClient.WaitUntilActionable() │
-│    get_game_data   → 本地 JSON 查询                   │
-└───────────────┬─────────────────────────────────────┘
-                │ HTTP JSON (localhost:8080)
-                ▼
-┌─────────────────────────────────────────────────────┐
-│              C# Bridge (游戏 Mod)                    │
-│                                                      │
-│  Server:  HttpServer + Router (5端点) + SSE          │
-│  Thread:  自定义 SynchronizationContext + Queue       │
-│  State:   StateBuilder (状态快照 + CanXxx 谓词)      │
-│  Action:  ActionExecutor (执行 + WaitFor 稳定)       │
-│  Patch:   Harmony InstantMode                        │
-└───────────────┬─────────────────────────────────────┘
-                │ 进程内直接调用
-                ▼
-┌─────────────────────────────────────────────────────┐
-│              Slay the Spire 2 (Godot 引擎)           │
-└─────────────────────────────────────────────────────┘
-```
+The system is designed so the Bridge remains the only writer to the game.
 
-## 各层职责
+Current phase status and near-term priorities are tracked in
+[current-baseline.md](/C:/Users/klerc/spire2mind/docs/current-baseline.md).
 
-### C# Bridge 层 — "手和眼"
+## Layers
 
-运行在游戏进程内部，职责是**翻译**：把游戏内部对象翻译成 JSON，把 JSON 动作翻译成游戏操作。
+### 1. Game + Bridge
 
-- 不做决策
-- 不存记忆
-- 不知道 AI 的存在
-- 尽可能薄，只做翻译
+The Bridge is a signed mod loaded by the Steam Windows build of Slay the Spire 2.
+It exposes the live game state through HTTP and executes actions on the game thread.
 
-详细设计见 [bridge-design.md](bridge-design.md)。
+Key responsibilities:
 
-### Go Agent 层 — "大脑"
+- read live game objects on the Godot main thread
+- normalize gameplay state into a stable JSON schema
+- expose available actions derived from the live UI and game state
+- execute legal actions and wait for the next stable snapshot
+- publish state changes through SSE
 
-独立进程，通过 HTTP 连接 Bridge，职责是**驱动 AI 玩游戏**。
+### 2. Go runtime
 
-- 使用 open-agent-sdk-go 的 harness 模式（LLM 驱动循环）
-- 把游戏操作封装成 Custom Tools
-- LLM 通过工具与游戏交互
-- Agent SDK 自动管理：调 LLM → 执行工具 → 喂回结果 → 循环
+The Go runtime is the harness layer.
+It never writes directly into the game process.
+It only uses Bridge tools:
 
-详细设计见 [agent-design.md](agent-design.md)。
+- `get_game_state`
+- `get_available_actions`
+- `act`
+- `wait_until_actionable`
+- `get_game_data`
 
-### bubbletea TUI — "界面"
+The runtime supports two modes:
 
-终端界面，职责是**展示**：把 Agent 的运行状态实时渲染到终端。
+- deterministic-only mode when no model configuration is present
+- model-backed mode through our maintained `github.com/hunknownz/open-agent-sdk-go`
+  - `api` for Anthropic-compatible Messages API backends
+  - `claude-cli` for a persistent local Claude Code CLI session
 
-- 基于 Elm Architecture（Init → Update → View）
-- 通过 tea.Cmd 桥接 Agent SDK 的事件流
-- 显示游戏状态、Agent 思考过程、操作日志、Token 消耗
+When the model provider repeatedly fails, the runtime degrades to deterministic mode instead of abandoning the live run immediately.
 
-## 数据流
+### 3. Strategy helpers
 
-### 正常操作流
+The harness keeps lightweight long-run state outside the model:
 
-```
-Agent SDK 调 LLM
-  → LLM 返回 tool_use: get_game_state
-  → SDK 执行 GetStateTool.Call()
-    → ModClient: GET http://localhost:8080/state
-      → Router → GameThread.InvokeAsync(StateBuilder.Build)
-        → 游戏主线程读 CombatManager / RunManager
-      ← JSON 返回
-  → ToolResult 喂回 LLM
-  → LLM 返回 tool_use: act("play_card", card_index=2)
-  → SDK 执行 ActTool.Call()
-    → ModClient: POST http://localhost:8080/action
-      → Router → GameThread.InvokeAsync(ActionExecutor.ExecuteAsync)
-        → 验证 → 执行 → WaitFor 稳定 → 构建新状态
-      ← JSON 返回
-  → ToolResult 喂回 LLM
-  → 循环继续...
-```
+- `TodoManager` for short-term objectives
+- `SkillLibrary` for screen-specific local knowledge
+- `CompactMemory` for prompt compaction and cross-attempt lessons
+- `RunStore` for transcripts, latest state, prompts, per-cycle summaries, dashboard snapshots, and attempt reflections
+- `RunStore` also mirrors structured session data into a per-run SQLite index for
+  attempts, recoveries, reflections, cycle summaries, and seen-content discoveries
 
-### SSE 事件等待流
+These helpers guide the model but do not bypass the Bridge or create a second gameplay protocol.
 
-```
-LLM 返回 tool_use: wait_until_actionable
-  → SDK 执行 WaitUntilActionableTool.Call()
-    → 第一级：GET /state → 可操作？→ 直接返回
-    → 第二级：GET /events/stream → SSE 等待匹配事件
-      ← Bridge 的 EventService 每 120ms 轮询状态变化
-      ← 检测到 player_action_window_opened → 推送事件
-    → 第三级：SSE 失败 → 每 250ms 轮询 GET /state
-  → 返回最新状态
-```
+### 4. Operator interfaces
 
-### TUI 更新流
+- `spire2mind play --headless`
+  Main unattended validation path.
+- `spire2mind play`
+  Bubble Tea UI with live status, current screen, actions, logs, and run metadata.
+- `dashboard.md`
+  A persisted mirror of the live debug view for environments where the terminal UI is not directly visible.
+- `spire2mind doctor`
+  Environment, Bridge, SSE, data, and model health checks.
 
-```
-Agent SDK eventCh ← SDKMessage
-  → bubbletea listenAgent() tea.Cmd
-    → AgentEventMsg 进入 Update()
-      → 更新 model（gameState, logs, usage）
-      → View() 重绘终端
-      → return listenAgent() 继续监听
-```
+## Runtime flow
 
-## 技术选型
+1. The game starts and loads the Bridge mod.
+2. The Bridge opens an HTTP listener on `127.0.0.1:8080` by default.
+3. The Go runtime reads `/state` and `/actions/available`.
+4. If a deterministic rule matches, it executes one action immediately.
+5. Otherwise, the model can inspect tools and choose one legal action.
+6. After every action, the runtime waits for the next actionable state by SSE first and polling second.
+7. The loop continues until the configured attempt budget is exhausted, an unrecoverable failure occurs, or a bounded safety stop triggers.
 
-| 组件 | 选择 | 理由 |
-|------|------|------|
-| 游戏 Mod | C# / .NET 9 | 游戏基于 Godot + .NET，Mod 必须是 C# |
-| Agent 框架 | open-agent-sdk-go | Go 实现的 harness 模式，自带工具执行、流式输出、成本追踪 |
-| TUI 框架 | bubbletea | Go 生态最成熟的 TUI 库，Elm Architecture |
-| LLM | Claude (默认) | 通过 Agent SDK 配置，可切换 |
-| 通信协议 | HTTP JSON + SSE | 简单可靠，请求-响应 + 事件推送 |
+## Reliability principles
 
-## 项目结构
+- Single writer: only the Bridge sends write actions into the game.
+- Main-thread safety: all game reads and writes pass through `GameThread`.
+- Stable snapshots: actions only report `completed` after the next settled state.
+- Transition suppression: map travel and other transient states do not expose ghost actions.
+- Fallbacks: polling still works when SSE is unavailable.
+- Provider resilience: repeated provider failures trigger bounded retries and a deterministic fallback path.
+- Local artifacts: every run stores a timeline, latest state, and cycle summaries under `scratch/agent-runs/`.
+- Formal run index: each run also writes `run-index.sqlite`, which is the query-friendly
+  mirror of the session event stream and world codex snapshot for later analysis,
+  guide generation, and future training pipelines.
+- Global knowledge layer: recent runs are also merged into `scratch/guidebook/guidebook.md`
+  and `scratch/guidebook/living-codex.json`, which track discovered content, merged lessons,
+  and recovery hotspots across attempts.
 
-```
-spire2mind/
-├── bridge/                     ← C# Mod
-│   ├── Spire2Mind.Bridge.csproj
-│   ├── Entry.cs
-│   ├── server/
-│   ├── game/
-│   ├── patches/
-│   └── scripts/
-├── internal/                   ← Go 私有包
-│   ├── tui/                    ← bubbletea TUI
-│   ├── game/                   ← 游戏工具 + 客户端
-│   ├── harness/                ← Harness 增强机制
-│   │   ├── compact.go          ← 三层上下文压缩 (s06)
-│   │   ├── skills.go           ← 技能按需加载 (s05)
-│   │   ├── todo.go             ← 战略规划 TodoManager (s03)
-│   │   └── subagent.go         ← 子 Agent 隔离 (s04)
-│   └── strategy/               ← 规则引擎（不需要 LLM 的决策）
-│       └── rules.go
-├── data/
-│   ├── eng/                    ← 游戏元数据 JSON
-│   └── skills/                 ← 游戏知识技能文件
-│       ├── combat-basics/SKILL.md
-│       ├── boss-strategies/SKILL.md
-│       ├── deck-archetypes/SKILL.md
-│       └── event-guide/SKILL.md
-├── cmd/
-│   └── spire2mind/
-│       └── main.go             ← Go 入口
-├── research/                   ← 调研项目引用
-├── docs/                       ← 设计文档
-├── go.mod
-└── README.md
-```
+## Current scope
 
-## Harness 工程理念
+Implemented and actively validated:
 
-参考 [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) 的 Harness 工程方法论：
+- main menu and save resume
+- character select and embark
+- map movement
+- combat
+- reward resolution
+- event resolution
+- chest resolution
+- rest site resolution
+- shop inventory, purchases, and card removal
+- selection screens
+- SSE event stream
+- deterministic headless play across multiple rooms
+- chained attempt support through game over recovery actions
 
-> Agent is the model. Not frameworks, not prompt chains.
-> Harness = Tools + Knowledge + Observation + Action Interfaces + Permissions
+Deferred:
 
-spire2mind 的 Harness 由 6 个递进机制组成：
-
-| 层级 | 机制 | 说明 |
-|------|------|------|
-| s01 | Agent Loop | open-agent-sdk-go 的 runLoop（核心循环） |
-| s02 | Tool Dispatch | 5 个 Custom Tool（游戏操作） |
-| s03 | TodoManager | 运行级战略规划 + nag 提醒 |
-| s04 | SubAgent | 复杂战斗分析的上下文隔离 |
-| s05 | Skill Loading | 游戏知识按需加载（不塞 system prompt） |
-| s06 | Context Compact | 三层上下文压缩（微压缩/自动/手动） |
-
-每个机制独立实现，独立生效，核心 Agent Loop 不变。详细设计见 [agent-design.md](agent-design.md)。
-
-## 设计原则
-
-1. **Agent is the model** — Harness 提供环境，不编码智能。模型做决策，Harness 执行
-2. **Bridge 尽可能薄** — 只做翻译，不做智能。越薄越稳定，越容易跟游戏版本同步
-3. **关注点分离** — Bridge 不知道 AI，Agent 不知道游戏内部，TUI 不知道游戏逻辑
-4. **降级容错** — SSE 不可用时降级到轮询，动作超时时返回 pending 状态
-5. **公平性** — 抽牌堆打乱，不给 AI 超出人类玩家的信息优势
-6. **上下文可持续** — 通过三层压缩保证长局（50+ 战斗）不爆 context window
-
-## 参考项目
-
-- [STS2-Agent](../research/STS2-Agent) — 主要参考，Fork 其 Mod 层
-- [STS2MCP](../research/STS2MCP) — 借鉴 Markdown 输出、InstantMode、抽牌堆打乱
-- [open-agent-sdk-go](../research/open-agent-sdk-go) — Agent 框架
-- [bubbletea](../research/bubbletea) — TUI 框架
-- [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) — Harness 工程方法论，12 课递进模式
+- multiplayer support
+- timeline features
+- customer distribution signing
+- any non-Bridge control path

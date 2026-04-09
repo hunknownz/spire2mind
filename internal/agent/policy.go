@@ -115,33 +115,21 @@ func ChooseDeterministicAction(state *game.StateSnapshot, maxAttempts int, attem
 		}
 	case "SHOP":
 		if hasAction(state, "open_shop_inventory") {
-			if shopHasAffordableOption(state.Shop) {
-				return game.ActionRequest{Action: "open_shop_inventory"}, "open merchant inventory because an affordable option exists", true
+			if shouldOpenShopInventory(state) {
+				return game.ActionRequest{Action: "open_shop_inventory"}, "open merchant inventory because a meaningful purchase is available", true
 			}
 			if hasAction(state, "proceed") {
 				return game.ActionRequest{Action: "proceed"}, "skip merchant because nothing is affordable", true
 			}
 		}
-		if hasAction(state, "remove_card_at_shop") {
-			return game.ActionRequest{Action: "remove_card_at_shop"}, "use affordable card removal", true
-		}
-		if hasAction(state, "buy_relic") {
-			if index := cheapestAffordableIndex(state.Shop, "relics"); index != nil {
-				return game.ActionRequest{Action: "buy_relic", OptionIndex: index}, "buy the cheapest affordable relic", true
-			}
-		}
-		if hasAction(state, "buy_card") {
-			if index := cheapestAffordableIndex(state.Shop, "cards"); index != nil {
-				return game.ActionRequest{Action: "buy_card", OptionIndex: index}, "buy the cheapest affordable card", true
-			}
-		}
-		if hasAction(state, "buy_potion") {
-			if index := cheapestAffordableIndex(state.Shop, "potions"); index != nil {
-				return game.ActionRequest{Action: "buy_potion", OptionIndex: index}, "buy the cheapest affordable potion", true
-			}
+		if request, reason, ok := chooseShopAction(state); ok {
+			return request, reason, true
 		}
 		if hasAction(state, "close_shop_inventory") && !shopHasAffordableOption(state.Shop) {
 			return game.ActionRequest{Action: "close_shop_inventory"}, "close merchant inventory because no purchase is affordable", true
+		}
+		if hasAction(state, "close_shop_inventory") {
+			return game.ActionRequest{Action: "close_shop_inventory"}, "close merchant inventory because no meaningful purchase remains", true
 		}
 		if hasAction(state, "proceed") {
 			return game.ActionRequest{Action: "proceed"}, "only proceed is available", true
@@ -470,6 +458,198 @@ func shopHasAffordableOption(shop map[string]any) bool {
 
 	cardRemoval := nestedMap(shop, "cardRemoval")
 	return fieldBool(cardRemoval, "enoughGold")
+}
+
+func shouldOpenShopInventory(state *game.StateSnapshot) bool {
+	if state == nil {
+		return false
+	}
+	if shouldBuyCardRemoval(state) {
+		return true
+	}
+	if _, _, ok := bestAffordableShopRelic(state); ok {
+		return true
+	}
+	if _, _, ok := bestAffordableShopCard(state); ok {
+		return true
+	}
+	if _, _, ok := bestAffordableShopPotion(state); ok {
+		return true
+	}
+	return false
+}
+
+func chooseShopAction(state *game.StateSnapshot) (game.ActionRequest, string, bool) {
+	if state == nil || !strings.EqualFold(state.Screen, "SHOP") {
+		return game.ActionRequest{}, "", false
+	}
+
+	if hasAction(state, "remove_card_at_shop") && shouldBuyCardRemoval(state) {
+		return game.ActionRequest{Action: "remove_card_at_shop"}, "use affordable card removal to improve draw quality", true
+	}
+	if hasAction(state, "buy_relic") {
+		if index, score, ok := bestAffordableShopRelic(state); ok {
+			return game.ActionRequest{Action: "buy_relic", OptionIndex: index}, fmt.Sprintf("buy the strongest affordable relic (score %.1f)", score), true
+		}
+	}
+	if hasAction(state, "buy_card") {
+		if index, score, ok := bestAffordableShopCard(state); ok {
+			return game.ActionRequest{Action: "buy_card", OptionIndex: index}, fmt.Sprintf("buy the strongest affordable card for the current run (score %.1f)", score), true
+		}
+	}
+	if hasAction(state, "buy_potion") {
+		if index, score, ok := bestAffordableShopPotion(state); ok {
+			return game.ActionRequest{Action: "buy_potion", OptionIndex: index}, fmt.Sprintf("buy the best affordable potion with excess gold (score %.1f)", score), true
+		}
+	}
+
+	return game.ActionRequest{}, "", false
+}
+
+func shouldBuyCardRemoval(state *game.StateSnapshot) bool {
+	if state == nil {
+		return false
+	}
+	cardRemoval := nestedMap(state.Shop, "cardRemoval")
+	if len(cardRemoval) == 0 || !fieldBool(cardRemoval, "available") || !fieldBool(cardRemoval, "enoughGold") {
+		return false
+	}
+
+	deckCount := fieldIntValue(state.Run, "deckCount")
+	floor := fieldIntValue(state.Run, "floor")
+	gold := fieldIntValue(state.Run, "gold")
+	if deckCount <= 0 {
+		deckCount = 99
+	}
+
+	switch {
+	case deckCount <= 16:
+		return true
+	case floor <= 12 && gold >= 120:
+		return true
+	case gold >= 160:
+		return true
+	default:
+		return false
+	}
+}
+
+func bestAffordableShopRelic(state *game.StateSnapshot) (*int, float64, bool) {
+	return bestAffordableShopOption(state, "relics", scoreShopRelicChoice, 3.0)
+}
+
+func bestAffordableShopCard(state *game.StateSnapshot) (*int, float64, bool) {
+	return bestAffordableShopOption(state, "cards", scoreShopCardChoice, 4.0)
+}
+
+func bestAffordableShopPotion(state *game.StateSnapshot) (*int, float64, bool) {
+	return bestAffordableShopOption(state, "potions", scoreShopPotionChoice, 2.0)
+}
+
+func bestAffordableShopOption(state *game.StateSnapshot, key string, scorer func(*game.StateSnapshot, map[string]any) float64, minimumScore float64) (*int, float64, bool) {
+	if state == nil {
+		return nil, 0, false
+	}
+
+	bestIndex := -1
+	bestScore := minimumScore
+	for _, option := range nestedList(state.Shop, key) {
+		if !fieldBool(option, "enoughGold") {
+			continue
+		}
+		index, ok := fieldInt(option, "index")
+		if !ok {
+			continue
+		}
+		score := scorer(state, option)
+		if score < minimumScore {
+			continue
+		}
+		if bestIndex < 0 || score > bestScore || (score == bestScore && index < bestIndex) {
+			bestIndex = index
+			bestScore = score
+		}
+	}
+	if bestIndex < 0 {
+		return nil, 0, false
+	}
+	return &bestIndex, bestScore, true
+}
+
+func scoreShopCardChoice(state *game.StateSnapshot, card map[string]any) float64 {
+	score := scoreRewardCardChoice(state, card)
+	price := fieldIntValue(card, "price")
+	score -= float64(price) / 35.0
+
+	deckCount := fieldIntValue(state.Run, "deckCount")
+	if deckCount >= 16 {
+		score -= 1.0
+	}
+	if deckCount >= 20 {
+		score -= 1.0
+	}
+
+	cardID := strings.ToUpper(strings.TrimSpace(firstNonEmpty(fieldString(card, "cardId"), fieldString(card, "id"))))
+	if containsAny(cardID, "STRIKE", "DEFEND") {
+		score -= 4.0
+	}
+
+	return score
+}
+
+func scoreShopRelicChoice(state *game.StateSnapshot, relic map[string]any) float64 {
+	score := 7.0
+	price := fieldIntValue(relic, "price")
+	gold := fieldIntValue(state.Run, "gold")
+	floor := fieldIntValue(state.Run, "floor")
+	score -= float64(price) / 55.0
+
+	if floor <= 10 {
+		score += 1.0
+	}
+	if gold-price >= 80 {
+		score += 0.8
+	}
+
+	label := strings.ToLower(strings.TrimSpace(firstNonEmpty(fieldString(relic, "name"), fieldString(relic, "relicId"), fieldString(relic, "id"))))
+	switch {
+	case strings.Contains(label, "anchor"),
+		strings.Contains(label, "lantern"),
+		strings.Contains(label, "vajra"),
+		strings.Contains(label, "bag"),
+		strings.Contains(label, "horn"),
+		strings.Contains(label, "fan"),
+		strings.Contains(label, "thread"),
+		strings.Contains(label, "wheel"):
+		score += 2.0
+	case strings.Contains(label, "potion"),
+		strings.Contains(label, "shop"),
+		strings.Contains(label, "membership"):
+		score += 0.5
+	}
+
+	return score
+}
+
+func scoreShopPotionChoice(state *game.StateSnapshot, potion map[string]any) float64 {
+	gold := fieldIntValue(state.Run, "gold")
+	if gold < 180 {
+		return -10
+	}
+
+	score := 2.5
+	price := fieldIntValue(potion, "price")
+	score -= float64(price) / 45.0
+
+	name := strings.ToLower(strings.TrimSpace(firstNonEmpty(fieldString(potion, "name"), fieldString(potion, "potionId"), fieldString(potion, "id"))))
+	switch {
+	case strings.Contains(name, "block"), strings.Contains(name, "armor"), strings.Contains(name, "regen"):
+		score += 1.0
+	case strings.Contains(name, "strength"), strings.Contains(name, "fire"), strings.Contains(name, "attack"):
+		score += 0.5
+	}
+
+	return score
 }
 
 func deterministicCombatAction(state *game.StateSnapshot, failures *actionFailureMemory) (game.ActionRequest, bool) {

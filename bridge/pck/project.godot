@@ -1,0 +1,7 @@
+; Minimal Godot project used only to pack a resource .pck for STS2 mod loading.
+
+config_version=5
+
+[application]
+config/name="Spire2Mind Bridge Pack"
+run/main_scene=""

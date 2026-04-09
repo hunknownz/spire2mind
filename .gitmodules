@@ -6,7 +6,8 @@
 	url = https://github.com/Gennadiyev/STS2MCP.git
 [submodule "research/open-agent-sdk-go"]
 	path = research/open-agent-sdk-go
-	url = https://github.com/codeany-ai/open-agent-sdk-go
+	url = git@github.com:hunknownz/open-agent-sdk-go.git
+	branch = main
 [submodule "research/bubbletea"]
 	path = research/bubbletea
 	url = https://github.com/charmbracelet/bubbletea

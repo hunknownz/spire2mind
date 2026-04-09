@@ -1,0 +1,11 @@
+{
+  "id": "Spire2Mind.Bridge",
+  "name": "Spire2Mind Bridge",
+  "author": "OpenAI Codex",
+  "description": "Read-only Bridge MVP for Spire2Mind.",
+  "version": "0.1.0-mvp",
+  "has_pck": true,
+  "has_dll": true,
+  "dependencies": [],
+  "affects_gameplay": false
+}

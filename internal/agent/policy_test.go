@@ -409,3 +409,102 @@ func TestPreferredMapNodeIndexPrefersShopWhenGoldIsIdleEarly(t *testing.T) {
 		t.Fatalf("expected early idle gold to prefer shop index 1, got %v", index)
 	}
 }
+
+func TestChooseDeterministicActionUsesShopRemovalBeforeCheapCard(t *testing.T) {
+	t.Parallel()
+
+	state := &game.StateSnapshot{
+		RunID:            "RUN-SHOP-REMOVE",
+		Screen:           "SHOP",
+		AvailableActions: []string{"remove_card_at_shop", "buy_card", "close_shop_inventory"},
+		Run: map[string]any{
+			"floor":     5,
+			"gold":      150,
+			"deckCount": 12,
+			"currentHp": 70,
+			"maxHp":     80,
+		},
+		Shop: map[string]any{
+			"cardRemoval": map[string]any{
+				"available":  true,
+				"enoughGold": true,
+				"price":      75,
+			},
+			"cards": []any{
+				map[string]any{"index": 0, "cardId": "DEFEND_IRONCLAD", "name": "Defend", "price": 45, "enoughGold": true},
+			},
+		},
+	}
+
+	request, _, ok := ChooseDeterministicAction(state, 0, 1, newActionFailureMemory())
+	if !ok {
+		t.Fatal("expected deterministic shop action")
+	}
+	if request.Action != "remove_card_at_shop" {
+		t.Fatalf("expected remove_card_at_shop, got %+v", request)
+	}
+}
+
+func TestChooseDeterministicActionPrefersStrongShopCardOverCheapestCard(t *testing.T) {
+	t.Parallel()
+
+	state := &game.StateSnapshot{
+		RunID:            "RUN-SHOP-CARD",
+		Screen:           "SHOP",
+		AvailableActions: []string{"buy_card", "close_shop_inventory"},
+		Run: map[string]any{
+			"floor":     3,
+			"gold":      120,
+			"deckCount": 11,
+			"currentHp": 74,
+			"maxHp":     80,
+		},
+		Shop: map[string]any{
+			"cards": []any{
+				map[string]any{"index": 0, "cardId": "DEFEND_IRONCLAD", "name": "Defend", "price": 45, "enoughGold": true},
+				map[string]any{"index": 1, "cardId": "SHRUG_IT_OFF", "name": "Shrug It Off", "price": 78, "enoughGold": true},
+			},
+		},
+	}
+
+	request, _, ok := ChooseDeterministicAction(state, 0, 1, newActionFailureMemory())
+	if !ok {
+		t.Fatal("expected deterministic shop action")
+	}
+	if request.Action != "buy_card" {
+		t.Fatalf("expected buy_card, got %+v", request)
+	}
+	if request.OptionIndex == nil || *request.OptionIndex != 1 {
+		t.Fatalf("expected stronger card at index 1, got %+v", request)
+	}
+}
+
+func TestChooseDeterministicActionSkipsOpeningShopWithoutMeaningfulPurchase(t *testing.T) {
+	t.Parallel()
+
+	state := &game.StateSnapshot{
+		RunID:            "RUN-SHOP-SKIP",
+		Screen:           "SHOP",
+		AvailableActions: []string{"open_shop_inventory", "proceed"},
+		Run: map[string]any{
+			"floor":     4,
+			"gold":      90,
+			"deckCount": 18,
+			"currentHp": 75,
+			"maxHp":     80,
+		},
+		Shop: map[string]any{
+			"cards": []any{
+				map[string]any{"index": 0, "cardId": "STRIKE_IRONCLAD", "name": "Strike", "price": 50, "enoughGold": true},
+			},
+		},
+	}
+
+	request, _, ok := ChooseDeterministicAction(state, 0, 1, newActionFailureMemory())
+	if !ok {
+		t.Fatal("expected deterministic shop action")
+	}
+	if request.Action != "proceed" {
+		t.Fatalf("expected proceed when no meaningful purchase exists, got %+v", request)
+	}
+}
