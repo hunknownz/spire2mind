@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-04-06T20:14:23.230627Z",
+  "document_count": 15,
+  "source_breakdown": [
+    {
+      "name": "steam",
+      "language": "en",
+      "kind": "official-news",
+      "documents": 1,
+      "notes": "Official update log surface; useful for balance changes and version drift."
+    },
+    {
+      "name": "steam",
+      "language": "en",
+      "kind": "official-store",
+      "documents": 1,
+      "notes": "Official bilingual store page; good for Chinese official wording and release positioning."
+    },
+    {
+      "name": "steam",
+      "language": "zh-Hans",
+      "kind": "official-news",
+      "documents": 1,
+      "notes": "Official update log surface; useful for balance changes and version drift."
+    },
+    {
+      "name": "steam",
+      "language": "zh-Hans",
+      "kind": "official-store",
+      "documents": 1,
+      "notes": "Official bilingual store page; good for Chinese official wording and release positioning."
+    },
+    {
+      "name": "wiki.gg",
+      "language": "en",
+      "kind": "wiki-page",
+      "documents": 11,
+      "notes": "Community wiki with stable MediaWiki API; best English structured source for STS2 and broad STS1 coverage."
+    }
+  ],
+  "findings": {
+    "public_web_match_data": "No stable public web API for full run-by-run Slay the Spire 2 match telemetry was confirmed. Public web data is strong for wiki knowledge and official patch notes, but not for authoritative live match logs.",
+    "local_match_data": [
+      "This repo's Bridge exposes live match state over GET /state and state transitions over GET /events/stream.",
+      "This repo already persists per-run artifacts under scratch/agent-runs and aggregates them into scratch/guidebook/living-codex.json and run-index.sqlite.",
+      "Game-local save/settings files are useful for environment and mod state, but match-history extraction should be treated as a separate reverse-engineering task."
+    ],
+    "best_structured_sources": [
+      "wiki.gg MediaWiki API for English STS2 and STS1 pages",
+      "Steam official store/news pages for official English and Simplified Chinese text"
+    ],
+    "chinese_source_notes": [
+      "Reliable structured Chinese STS2 community sources are much thinner than English sources.",
+      "The safest Chinese baseline today is the official Simplified Chinese Steam page and official Steam news surface, then align English wiki material into your own schema."
+    ]
+  }
+}

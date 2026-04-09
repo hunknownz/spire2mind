@@ -1,0 +1,6 @@
+bridge/bin/
+bridge/obj/
+bridge/build/
+.tools/
+spire2mind.exe
+scratch/
