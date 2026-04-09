@@ -257,6 +257,129 @@ func TestPromptAssemblyPipelineStructuredRewardUsesSurvivalGuidance(t *testing.T
 	}
 }
 
+func TestPromptAssemblyPipelineStructuredRewardAppliesPromptBudget(t *testing.T) {
+	state := &game.StateSnapshot{
+		RunID:            "RUN-BUDGET-REWARD",
+		Screen:           "REWARD",
+		AvailableActions: []string{"choose_reward_card", "skip_reward_cards"},
+		Run: map[string]any{
+			"floor":     6,
+			"currentHp": 32,
+			"maxHp":     80,
+			"gold":      190,
+		},
+		Reward: map[string]any{
+			"pendingCardChoice": true,
+			"cardOptions": []map[string]any{
+				{"index": 0, "id": "shrug", "name": "Shrug It Off", "cost": 1},
+				{"index": 1, "id": "pommel", "name": "Pommel Strike", "cost": 1},
+			},
+		},
+	}
+
+	todo := NewTodoManager()
+	todo.currentGoal = strings.Repeat("survive this act and preserve hp; ", 80)
+	todo.roomGoal = strings.Repeat("pick the strongest reward; ", 80)
+	todo.nextIntent = strings.Repeat("resolve reward cleanly; ", 80)
+
+	compact := NewCompactMemory()
+	compact.lastSummary = strings.Repeat("summary ", 300)
+	compact.recent = []string{
+		strings.Repeat("timeline-one ", 120),
+		strings.Repeat("timeline-two ", 120),
+	}
+	compact.lessons = []string{
+		strings.Repeat("spend gold earlier; ", 120),
+		strings.Repeat("avoid greedy lines at low hp; ", 120),
+	}
+
+	skills := NewSkillLibrary("C:\\Users\\klerc\\spire2mind")
+	skills.cache["deck-archetypes"] = strings.Repeat("reward skill context\n", 800)
+
+	pipeline := NewPromptAssemblyPipeline()
+	assembly := pipeline.Build(
+		PromptModeStructured,
+		state,
+		todo,
+		skills,
+		compact,
+		nil,
+		i18n.LanguageEnglish,
+	)
+
+	budget := pipeline.structuredPromptBudget(state)
+	if assembly.Telemetry.PromptSizeBytes > budget.MaxBytes {
+		t.Fatalf("expected prompt size <= %d, got %d", budget.MaxBytes, assembly.Telemetry.PromptSizeBytes)
+	}
+	if !strings.Contains(assembly.Text, "Reward guidance:") {
+		t.Fatalf("expected reward guidance to be preserved, got:\n%s", assembly.Text)
+	}
+	if !strings.Contains(assembly.Text, "Minimal state payload:") {
+		t.Fatalf("expected minimal state payload to be preserved, got:\n%s", assembly.Text)
+	}
+}
+
+func TestPromptAssemblyPipelineStructuredCombatAppliesPromptBudget(t *testing.T) {
+	state := &game.StateSnapshot{
+		RunID:            "RUN-BUDGET-COMBAT",
+		Screen:           "COMBAT",
+		AvailableActions: []string{"play_card", "end_turn"},
+		Turn:             promptAssemblyIntPtr(5),
+		Run: map[string]any{
+			"floor":     15,
+			"currentHp": 39,
+			"maxHp":     80,
+			"gold":      210,
+		},
+		Combat: map[string]any{
+			"player": map[string]any{
+				"currentHp": 39,
+				"maxHp":     80,
+				"block":     8,
+				"energy":    3,
+			},
+			"hand": []map[string]any{
+				{"index": 0, "id": "bash", "name": "Bash", "cost": 2, "playable": true, "requiresTarget": true, "validTargetIndices": []int{0}},
+				{"index": 1, "id": "shrug", "name": "Shrug It Off", "cost": 1, "playable": true, "requiresTarget": false},
+			},
+			"enemies": []map[string]any{
+				{"index": 0, "id": "cultist", "name": "Cultist", "currentHp": 42, "block": 0, "intent": "Attack", "isHittable": true},
+				{"index": 1, "id": "slaver", "name": "Red Slaver", "currentHp": 38, "block": 0, "intent": "Attack", "isHittable": true},
+			},
+		},
+	}
+
+	todo := NewTodoManager()
+	todo.currentGoal = strings.Repeat("win the fight without losing hp; ", 90)
+	todo.roomGoal = strings.Repeat("find the best legal line; ", 90)
+	todo.nextIntent = strings.Repeat("use planner output; ", 90)
+
+	skills := NewSkillLibrary("C:\\Users\\klerc\\spire2mind")
+	skills.cache["combat-basics"] = strings.Repeat("combat skill context\n", 900)
+	skills.cache["deck-archetypes"] = strings.Repeat("deck skill context\n", 900)
+
+	assembly := NewPromptAssemblyPipeline().Build(
+		PromptModeStructured,
+		state,
+		todo,
+		skills,
+		NewCompactMemory(),
+		&CombatPlan{Summary: strings.Repeat("planner summary ", 500)},
+		i18n.LanguageEnglish,
+	)
+
+	budget := NewPromptAssemblyPipeline().structuredPromptBudget(state)
+	if assembly.Telemetry.PromptSizeBytes > budget.MaxBytes {
+		t.Fatalf("expected combat prompt size <= %d, got %d", budget.MaxBytes, assembly.Telemetry.PromptSizeBytes)
+	}
+	if !strings.Contains(assembly.Text, "Combat guidance:") {
+		t.Fatalf("expected combat guidance to be preserved, got:\n%s", assembly.Text)
+	}
+	if !strings.Contains(assembly.Text, "Run objective:") {
+		t.Fatalf("expected run objective to be preserved, got:\n%s", assembly.Text)
+	}
+}
+
 func promptAssemblyIntPtr(value int) *int {
 	return &value
 }

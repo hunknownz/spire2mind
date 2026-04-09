@@ -43,6 +43,12 @@ type structuredPromptPolicy struct {
 	IncludeKnowledge     bool
 }
 
+type promptBudget struct {
+	MaxBytes      int
+	DropOrder     []string
+	TruncateOrder []string
+}
+
 func NewPromptAssemblyPipeline() *PromptAssemblyPipeline {
 	return &PromptAssemblyPipeline{}
 }
@@ -80,6 +86,7 @@ func (p *PromptAssemblyPipeline) Build(mode PromptMode, state *game.StateSnapsho
 	default:
 		p.appendCycleStateBlocks(&blocks, state, todo, skills, compact, planner, language)
 	}
+	blocks = p.applyPromptBudget(mode, state, blocks)
 
 	nonEmpty := make([]string, 0, len(blocks))
 	breakdown := make(map[string]int, len(blocks))
@@ -102,6 +109,156 @@ func (p *PromptAssemblyPipeline) Build(mode PromptMode, state *game.StateSnapsho
 			BlockBreakdown:  breakdown,
 		},
 	}
+}
+
+func (p *PromptAssemblyPipeline) applyPromptBudget(mode PromptMode, state *game.StateSnapshot, blocks []promptBlock) []promptBlock {
+	if mode != PromptModeStructured {
+		return blocks
+	}
+
+	budget := p.structuredPromptBudget(state)
+	if budget.MaxBytes <= 0 || promptBlocksSize(blocks) <= budget.MaxBytes {
+		return blocks
+	}
+
+	trimmed := append([]promptBlock(nil), blocks...)
+	for _, name := range budget.DropOrder {
+		if promptBlocksSize(trimmed) <= budget.MaxBytes {
+			break
+		}
+		trimmed = dropPromptBlock(trimmed, name)
+	}
+
+	for _, name := range budget.TruncateOrder {
+		if promptBlocksSize(trimmed) <= budget.MaxBytes {
+			break
+		}
+		trimmed = truncatePromptBlockToFit(trimmed, name, budget.MaxBytes)
+	}
+
+	return trimmed
+}
+
+func (p *PromptAssemblyPipeline) structuredPromptBudget(state *game.StateSnapshot) promptBudget {
+	switch strings.ToUpper(strings.TrimSpace(stateScreen(state))) {
+	case "COMBAT":
+		return promptBudget{
+			MaxBytes:      11000,
+			DropOrder:     []string{"entity_knowledge", "todo", "tactical_hints"},
+			TruncateOrder: []string{"planner", "screen_summary", "minimal_state"},
+		}
+	case "MAP", "EVENT", "SHOP", "REWARD", "CARD_SELECTION", "REST":
+		return promptBudget{
+			MaxBytes:      7000,
+			DropOrder:     []string{"entity_knowledge", "compact_memory", "todo"},
+			TruncateOrder: []string{"screen_summary", "minimal_state"},
+		}
+	default:
+		return promptBudget{
+			MaxBytes:      6500,
+			DropOrder:     []string{"entity_knowledge", "compact_memory", "todo"},
+			TruncateOrder: []string{"screen_summary", "minimal_state"},
+		}
+	}
+}
+
+func promptBlocksSize(blocks []promptBlock) int {
+	if len(blocks) == 0 {
+		return 0
+	}
+
+	total := 0
+	nonEmpty := 0
+	for _, block := range blocks {
+		text := strings.TrimSpace(block.Text)
+		if text == "" {
+			continue
+		}
+		if nonEmpty > 0 {
+			total += 2
+		}
+		total += len([]byte(text))
+		nonEmpty++
+	}
+	return total
+}
+
+func dropPromptBlock(blocks []promptBlock, name string) []promptBlock {
+	trimmed := make([]promptBlock, 0, len(blocks))
+	dropped := false
+	for _, block := range blocks {
+		if !dropped && block.Name == name {
+			dropped = true
+			continue
+		}
+		trimmed = append(trimmed, block)
+	}
+	return trimmed
+}
+
+func truncatePromptBlockToFit(blocks []promptBlock, name string, maxBytes int) []promptBlock {
+	index := -1
+	for i := range blocks {
+		if blocks[i].Name == name && strings.TrimSpace(blocks[i].Text) != "" {
+			index = i
+			break
+		}
+	}
+	if index < 0 {
+		return blocks
+	}
+
+	otherBytes := promptBlocksSize(blocks) - len([]byte(strings.TrimSpace(blocks[index].Text)))
+	separatorBytes := 0
+	if len(nonEmptyPromptBlocks(blocks)) > 1 {
+		separatorBytes = 2
+	}
+	available := maxBytes - otherBytes - separatorBytes
+	if available < 160 {
+		return dropPromptBlock(blocks, name)
+	}
+
+	truncated := truncateTextBytes(strings.TrimSpace(blocks[index].Text), available)
+	if truncated == "" {
+		return dropPromptBlock(blocks, name)
+	}
+
+	updated := append([]promptBlock(nil), blocks...)
+	updated[index].Text = truncated
+	return updated
+}
+
+func nonEmptyPromptBlocks(blocks []promptBlock) []promptBlock {
+	trimmed := make([]promptBlock, 0, len(blocks))
+	for _, block := range blocks {
+		if strings.TrimSpace(block.Text) != "" {
+			trimmed = append(trimmed, block)
+		}
+	}
+	return trimmed
+}
+
+func truncateTextBytes(text string, maxBytes int) string {
+	text = strings.TrimSpace(text)
+	if text == "" || maxBytes <= 0 || len([]byte(text)) <= maxBytes {
+		return text
+	}
+
+	const suffix = "\n[truncated]"
+	suffixBytes := len([]byte(suffix))
+	if maxBytes <= suffixBytes {
+		return ""
+	}
+
+	runes := []rune(text)
+	for len(runes) > 0 {
+		candidate := strings.TrimSpace(string(runes)) + suffix
+		if len([]byte(candidate)) <= maxBytes {
+			return candidate
+		}
+		runes = runes[:len(runes)-1]
+	}
+	return ""
 }
 
 func (p *PromptAssemblyPipeline) appendCycleStateBlocks(blocks *[]promptBlock, state *game.StateSnapshot, todo *TodoManager, skills *SkillLibrary, compact *CompactMemory, planner *CombatPlan, language i18n.Language) {
