@@ -10,24 +10,61 @@ func NormalizeStateSnapshot(state *StateSnapshot) *StateSnapshot {
 	state.RunID = i18n.RepairText(state.RunID)
 	state.Screen = i18n.RepairText(state.Screen)
 	state.AvailableActions = normalizeStringSlice(state.AvailableActions)
-	state.Session = normalizeMapAny(state.Session)
-	state.Run = normalizeMapAny(state.Run)
-	state.Combat = normalizeMapAny(state.Combat)
-	state.Map = normalizeMapAny(state.Map)
-	state.Selection = normalizeMapAny(state.Selection)
-	state.Reward = normalizeMapAny(state.Reward)
-	state.Event = normalizeMapAny(state.Event)
-	state.CharacterSelect = normalizeMapAny(state.CharacterSelect)
-	state.Chest = normalizeMapAny(state.Chest)
-	state.Shop = normalizeMapAny(state.Shop)
-	state.Rest = normalizeMapAny(state.Rest)
-	state.Modal = normalizeMapAny(state.Modal)
-	state.GameOver = normalizeMapAny(state.GameOver)
-	state.AgentView = normalizeMapAny(state.AgentView)
+
+	// Typed struct fields contain string values that may need i18n repair.
+	// Repair is applied to frequently-displayed names/descriptions.
+	normalizeRunState(state.Run)
+	normalizeCombatState(state.Combat)
+
+	// map[string]any fields still use generic normalization.
 	state.Multiplayer = normalizeMapAny(state.Multiplayer)
 	state.MultiplayerLobby = normalizeMapAny(state.MultiplayerLobby)
 	state.Timeline = normalizeMapAny(state.Timeline)
+
 	return state
+}
+
+func normalizeRunState(run *RunState) {
+	if run == nil {
+		return
+	}
+	run.Character = i18n.RepairText(run.Character)
+	for i := range run.Deck {
+		run.Deck[i].Name = i18n.RepairText(run.Deck[i].Name)
+	}
+	for i := range run.Relics {
+		run.Relics[i].Name = i18n.RepairText(run.Relics[i].Name)
+	}
+	for i := range run.Potions {
+		run.Potions[i].Name = i18n.RepairText(run.Potions[i].Name)
+	}
+}
+
+func normalizeCombatState(combat *CombatState) {
+	if combat == nil {
+		return
+	}
+	for i := range combat.Hand {
+		combat.Hand[i].Name = i18n.RepairText(combat.Hand[i].Name)
+	}
+	for i := range combat.Enemies {
+		combat.Enemies[i].Name = i18n.RepairText(combat.Enemies[i].Name)
+		for j := range combat.Enemies[i].Powers {
+			combat.Enemies[i].Powers[j].Name = i18n.RepairText(combat.Enemies[i].Powers[j].Name)
+		}
+	}
+	for i := range combat.Player.Powers {
+		combat.Player.Powers[i].Name = i18n.RepairText(combat.Player.Powers[i].Name)
+	}
+	for i := range combat.DrawPile {
+		combat.DrawPile[i].Name = i18n.RepairText(combat.DrawPile[i].Name)
+	}
+	for i := range combat.DiscardPile {
+		combat.DiscardPile[i].Name = i18n.RepairText(combat.DiscardPile[i].Name)
+	}
+	for i := range combat.ExhaustPile {
+		combat.ExhaustPile[i].Name = i18n.RepairText(combat.ExhaustPile[i].Name)
+	}
 }
 
 func normalizeMapAny(input map[string]any) map[string]any {

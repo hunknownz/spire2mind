@@ -351,10 +351,8 @@ func (m *Model) currentStateHeader() (string, string, string) {
 	}
 
 	headline := "-"
-	if m.state.AgentView != nil {
-		if raw, ok := m.state.AgentView["headline"].(string); ok && strings.TrimSpace(raw) != "" {
-			headline = raw
-		}
+	if m.state.AgentView != nil && strings.TrimSpace(m.state.AgentView.Headline) != "" {
+		headline = m.state.AgentView.Headline
 	}
 
 	return screen, headline, runID

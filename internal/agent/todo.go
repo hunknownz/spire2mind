@@ -294,14 +294,16 @@ func (t *TodoManager) ShouldProceedAfterResolvedCardReward(state *game.StateSnap
 	}
 
 	claimableRewards := 0
-	for _, reward := range nestedList(state.Reward, "rewards") {
-		if !fieldBool(reward, "claimable") {
-			continue
-		}
-		claimableRewards++
-		rewardType := strings.ToLower(fieldString(reward, "rewardType"))
-		if !strings.Contains(rewardType, "card") {
-			return false
+	if state.Reward != nil {
+		for _, reward := range state.Reward.Rewards {
+			if !reward.Claimable {
+				continue
+			}
+			claimableRewards++
+			rewardType := strings.ToLower(reward.RewardType)
+			if !strings.Contains(rewardType, "card") {
+				return false
+			}
 		}
 	}
 
@@ -313,7 +315,7 @@ func rewardHasPendingCardChoice(state *game.StateSnapshot) bool {
 		return false
 	}
 
-	return fieldBool(state.Reward, "pendingCardChoice") || len(nestedList(state.Reward, "cardOptions")) > 0
+	return (state.Reward != nil && state.Reward.PendingCardChoice) || (state.Reward != nil && len(state.Reward.CardOptions) > 0)
 }
 
 func hasAction(state *game.StateSnapshot, action string) bool {

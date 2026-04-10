@@ -100,16 +100,16 @@ func (t *SeenContentTracker) Observe(state *game.StateSnapshot) []SeenContentEnt
 
 	start := len(t.recent)
 
-	t.observeEntries(seenCategoryCards, nestedList(state.Combat, "hand"), ctx, "cardId", "id")
-	t.observeEntries(seenCategoryCards, nestedList(state.Reward, "cardOptions"), ctx, "cardId", "id")
-	t.observeEntries(seenCategoryCards, nestedList(state.Selection, "cards"), ctx, "cardId", "id")
-	t.observeEntries(seenCategoryCards, nestedList(state.Shop, "cards"), ctx, "cardId", "id")
+	t.observeEntries(seenCategoryCards, combatHandMaps(state), ctx, "cardId", "id")
+	t.observeEntries(seenCategoryCards, rewardCardOptionsMaps(state), ctx, "cardId", "id")
+	t.observeEntries(seenCategoryCards, selectionCardsMaps(state), ctx, "cardId", "id")
+	t.observeEntries(seenCategoryCards, shopItemsToMaps(state, "cards"), ctx, "cardId", "id")
 	t.observeDeck(state, ctx)
 
-	t.observeEntries(seenCategoryRelics, nestedList(state.Chest, "relicOptions"), ctx, "relicId", "id")
-	t.observeEntries(seenCategoryRelics, nestedList(state.Shop, "relics"), ctx, "relicId", "id")
-	t.observeEntries(seenCategoryPotions, nestedList(state.Shop, "potions"), ctx, "potionId", "id")
-	t.observeEntries(seenCategoryMonsters, nestedList(state.Combat, "enemies"), ctx, "enemyId", "id")
+	t.observeEntries(seenCategoryRelics, chestRelicsMaps(state), ctx, "relicId", "id")
+	t.observeEntries(seenCategoryRelics, shopItemsToMaps(state, "relics"), ctx, "relicId", "id")
+	t.observeEntries(seenCategoryPotions, shopItemsToMaps(state, "potions"), ctx, "potionId", "id")
+	t.observeEntries(seenCategoryMonsters, combatEnemiesMaps(state), ctx, "enemyId", "id")
 	t.observeEvent(state, ctx)
 	t.observeCharacters(state, ctx)
 
@@ -342,30 +342,29 @@ func seenContentCountsFromData(value interface{}) map[string]int {
 }
 
 func (t *SeenContentTracker) observeDeck(state *game.StateSnapshot, ctx seenContentContext) {
-	if state == nil || len(state.Run) == 0 {
+	if state == nil || state.Run == nil {
 		return
 	}
 
-	rawDeck, ok := state.Run["deck"].([]interface{})
-	if !ok {
-		return
-	}
-
-	for _, item := range rawDeck {
-		card, ok := item.(map[string]any)
-		if !ok {
-			continue
+	for _, card := range state.Run.Deck {
+		m := map[string]any{
+			"cardId": card.CardID,
+			"name":   card.Name,
 		}
-		t.observeEntry(seenCategoryCards, card, ctx, "cardId", "id")
+		t.observeEntry(seenCategoryCards, m, ctx, "cardId", "id")
 	}
 }
 
 func (t *SeenContentTracker) observeEvent(state *game.StateSnapshot, ctx seenContentContext) {
-	if state == nil || len(state.Event) == 0 {
+	if state == nil || state.Event == nil {
 		return
 	}
 
-	t.observeEntry(seenCategoryEvents, state.Event, ctx, "eventId", "id")
+	m := map[string]any{
+		"eventId": state.Event.EventID,
+		"title":   state.Event.Title,
+	}
+	t.observeEntry(seenCategoryEvents, m, ctx, "eventId", "id")
 }
 
 func (t *SeenContentTracker) observeCharacters(state *game.StateSnapshot, ctx seenContentContext) {
@@ -373,14 +372,18 @@ func (t *SeenContentTracker) observeCharacters(state *game.StateSnapshot, ctx se
 		return
 	}
 
-	for _, character := range nestedList(state.CharacterSelect, "characters") {
+	for _, character := range charSelectMaps(state) {
 		t.observeEntry(seenCategoryCharacters, character, ctx, "characterId", "id")
 	}
-	if name := strings.TrimSpace(fieldString(state.Run, "character")); name != "" {
-		t.observeNamed(seenCategoryCharacters, "", name, ctx)
+	if state.Run != nil {
+		if name := strings.TrimSpace(state.Run.Character); name != "" {
+			t.observeNamed(seenCategoryCharacters, "", name, ctx)
+		}
 	}
-	if name := strings.TrimSpace(fieldString(state.GameOver, "characterId")); name != "" {
-		t.observeNamed(seenCategoryCharacters, name, name, ctx)
+	if state.GameOver != nil {
+		if name := strings.TrimSpace(state.GameOver.CharacterID); name != "" {
+			t.observeNamed(seenCategoryCharacters, name, name, ctx)
+		}
 	}
 }
 
@@ -620,10 +623,12 @@ func seenContentFloor(state *game.StateSnapshot) *int {
 	if state == nil {
 		return nil
 	}
-	if floor, ok := fieldInt(state.Run, "floor"); ok {
+	if state.Run != nil && state.Run.Floor > 0 {
+		floor := state.Run.Floor
 		return &floor
 	}
-	if floor, ok := fieldInt(state.GameOver, "floor"); ok {
+	if state.GameOver != nil && state.GameOver.Floor > 0 {
+		floor := state.GameOver.Floor
 		return &floor
 	}
 	return nil

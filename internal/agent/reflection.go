@@ -177,7 +177,7 @@ func buildReflectionTacticalHints(state *game.StateSnapshot) []string {
 		return hints
 	}
 
-	if strings.EqualFold(state.Screen, "GAME_OVER") && len(state.Combat) > 0 {
+	if strings.EqualFold(state.Screen, "GAME_OVER") && state.Combat != nil {
 		combatState := *state
 		combatState.Screen = "COMBAT"
 		return BuildTacticalHints(&combatState)
@@ -195,7 +195,7 @@ func buildReflectionRoomDetail(state *game.StateSnapshot) []string {
 		return detail
 	}
 
-	if strings.EqualFold(state.Screen, "GAME_OVER") && len(state.Combat) > 0 {
+	if strings.EqualFold(state.Screen, "GAME_OVER") && state.Combat != nil {
 		combatState := *state
 		combatState.Screen = "COMBAT"
 		if detail := StateDetailLines(&combatState, 4); len(detail) > 0 && !(len(detail) == 1 && detail[0] == "- -") {
@@ -234,7 +234,8 @@ func buildReflectionSuccesses(state *game.StateSnapshot, reflection *AttemptRefl
 		successes = append(successes, "The final rooms showed clean automation with no stale-index thrashing")
 	}
 
-	if gold, ok := fieldInt(state.Run, "gold"); ok && gold >= 90 {
+	if state.Run != nil && state.Run.Gold >= 90 {
+		gold := state.Run.Gold
 		successes = append(successes, fmt.Sprintf("Accumulated %d gold — economy and reward progression were healthy", gold))
 	}
 
@@ -259,8 +260,14 @@ func buildReflectionRisks(state *game.StateSnapshot, reflection *AttemptReflecti
 		risks = append(risks, "Fast transitions caused friction that forced runtime recovery instead of clean flow")
 	}
 
-	currentHP, okCurrent := fieldInt(state.Run, "currentHp")
-	maxHP, okMax := fieldInt(state.Run, "maxHp")
+	currentHP, okCurrent := 0, state != nil && state.Run != nil
+	maxHP, okMax := 0, state != nil && state.Run != nil
+	if okCurrent {
+		currentHP = state.Run.CurrentHp
+	}
+	if okMax {
+		maxHP = state.Run.MaxHp
+	}
 	if okCurrent && okMax && maxHP > 0 {
 		hpPercent := currentHP * 100 / maxHP
 		switch {
@@ -271,7 +278,8 @@ func buildReflectionRisks(state *game.StateSnapshot, reflection *AttemptReflecti
 		}
 	}
 
-	if gold, ok := fieldInt(state.Run, "gold"); ok && gold >= 80 && strings.EqualFold(reflection.Outcome, "defeat") {
+	if state != nil && state.Run != nil && state.Run.Gold >= 80 && strings.EqualFold(reflection.Outcome, "defeat") {
+		gold := state.Run.Gold
 		risks = append(risks, fmt.Sprintf("Died with %d unspent gold — convert resources into survivability or power earlier", gold))
 	}
 
@@ -341,14 +349,20 @@ func buildReflectionLessonBuckets(state *game.StateSnapshot, reflection *Attempt
 		buckets.add("runtime", "Re-read the live state after fast transitions before repeating an indexed action.")
 	}
 
-	currentHP, okCurrent := fieldInt(state.Run, "currentHp")
-	maxHP, okMax := fieldInt(state.Run, "maxHp")
+	currentHP, okCurrent := 0, state != nil && state.Run != nil
+	maxHP, okMax := 0, state != nil && state.Run != nil
+	if okCurrent {
+		currentHP = state.Run.CurrentHp
+	}
+	if okMax {
+		maxHP = state.Run.MaxHp
+	}
 	if okCurrent && okMax && maxHP > 0 && currentHP*100/maxHP <= 35 {
 		buckets.add("combat_survival", "Play safer at low health: value block over damage and stop spending HP to race.")
 		buckets.add("pathing", "At low health, bias toward shorter and safer routes with rest or lower-variance rooms.")
 	}
 
-	if gold, ok := fieldInt(state.Run, "gold"); ok && gold >= 80 && strings.EqualFold(reflection.Outcome, "defeat") {
+	if state != nil && state.Run != nil && state.Run.Gold >= 80 && strings.EqualFold(reflection.Outcome, "defeat") {
 		buckets.add("shop_economy", "Convert gold earlier: prioritize card removal, strong relics, or key shop cards before gold becomes useless.")
 	}
 
@@ -391,13 +405,19 @@ func buildReflectionLessons(state *game.StateSnapshot, reflection *AttemptReflec
 		lessons = append(lessons, "Re-read the live state after fast transitions before repeating an indexed action.")
 	}
 
-	currentHP, okCurrent := fieldInt(state.Run, "currentHp")
-	maxHP, okMax := fieldInt(state.Run, "maxHp")
+	currentHP, okCurrent := 0, state != nil && state.Run != nil
+	maxHP, okMax := 0, state != nil && state.Run != nil
+	if okCurrent {
+		currentHP = state.Run.CurrentHp
+	}
+	if okMax {
+		maxHP = state.Run.MaxHp
+	}
 	if okCurrent && okMax && maxHP > 0 && currentHP*100/maxHP <= 35 {
 		lessons = append(lessons, "Play safer at low health: value block over damage, pick shorter paths, and sequence rewards defensively.")
 	}
 
-	if gold, ok := fieldInt(state.Run, "gold"); ok && gold >= 80 && strings.EqualFold(reflection.Outcome, "defeat") {
+	if state != nil && state.Run != nil && state.Run.Gold >= 80 && strings.EqualFold(reflection.Outcome, "defeat") {
 		lessons = append(lessons, "Convert gold earlier: prioritize card removal, strong relics, or key shop cards before gold becomes useless.")
 	}
 
@@ -490,7 +510,7 @@ func reflectionOutcome(state *game.StateSnapshot) string {
 		return "unknown"
 	}
 
-	if fieldBool(state.GameOver, "isVictory") {
+	if state.GameOver != nil && state.GameOver.Victory {
 		return "victory"
 	}
 	if strings.EqualFold(state.Screen, "GAME_OVER") {
@@ -505,10 +525,12 @@ func reflectionFloor(state *game.StateSnapshot) *int {
 		return nil
 	}
 
-	if floor, ok := fieldInt(state.GameOver, "floor"); ok {
+	if state.GameOver != nil && state.GameOver.Floor > 0 {
+		floor := state.GameOver.Floor
 		return &floor
 	}
-	if floor, ok := fieldInt(state.Run, "floor"); ok {
+	if state.Run != nil && state.Run.Floor > 0 {
+		floor := state.Run.Floor
 		return &floor
 	}
 
@@ -520,11 +542,11 @@ func reflectionCharacterID(state *game.StateSnapshot) string {
 		return ""
 	}
 
-	if characterID := fieldString(state.GameOver, "characterId"); characterID != "" {
-		return characterID
+	if state.GameOver != nil && state.GameOver.CharacterID != "" {
+		return state.GameOver.CharacterID
 	}
-	if characterID := fieldString(state.Run, "characterId"); characterID != "" {
-		return characterID
+	if state.Run != nil && state.Run.Character != "" {
+		return state.Run.Character
 	}
 
 	return ""
@@ -534,27 +556,14 @@ func countDeckSize(state *game.StateSnapshot) int {
 	if state == nil || state.Run == nil {
 		return 0
 	}
-	raw, ok := state.Run["deck"]
-	if !ok {
-		return 0
-	}
-	// deck can be []any (card objects or strings) or []map[string]any.
-	switch v := raw.(type) {
-	case []any:
-		return len(v)
-	case []map[string]any:
-		return len(v)
-	default:
-		return 0
-	}
+	return len(state.Run.Deck)
 }
 
 func reflectionHeadline(state *game.StateSnapshot) string {
-	if state == nil || len(state.AgentView) == 0 {
+	if state == nil || state.AgentView == nil {
 		return ""
 	}
-
-	return fieldString(state.AgentView, "headline")
+	return state.AgentView.Headline
 }
 
 func classifyReflectionFindings(reflection *AttemptReflection) ([]string, []string, []string) {

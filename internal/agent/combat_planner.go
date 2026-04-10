@@ -376,64 +376,77 @@ func NewCombatPlanner(cfg config.Config) CombatPlanner {
 }
 
 func buildCombatSnapshot(state *game.StateSnapshot, codex *SeenContentRegistry) CombatSnapshot {
-	player := asMap(state.Combat["player"])
-	snapshot := CombatSnapshot{
-		Player: CombatPlayerState{
-			CurrentHP: fieldIntValue(player, "currentHp"),
-			MaxHP:     fieldIntValue(player, "maxHp"),
-			Block:     fieldIntValue(player, "block"),
-			Energy:    fieldIntValue(player, "energy"),
-			Stars:     fieldIntValue(player, "stars"),
-		},
-		CanPlayCard: hasAction(state, "play_card"),
-		CanEndTurn:  hasAction(state, "end_turn"),
-		Floor:       fieldIntValue(state.Run, "floor"),
-		Gold:        fieldIntValue(state.Run, "gold"),
+	var snapshot CombatSnapshot
+	if state.Combat != nil {
+		p := state.Combat.Player
+		snapshot = CombatSnapshot{
+			Player: CombatPlayerState{
+				CurrentHP: p.CurrentHp,
+				MaxHP:     p.MaxHp,
+				Block:     p.Block,
+				Energy:    p.Energy,
+				Stars:     p.Stars,
+			},
+			CanPlayCard: hasAction(state, "play_card"),
+			CanEndTurn:  hasAction(state, "end_turn"),
+		}
+	}
+	if state.Run != nil {
+		snapshot.Floor = state.Run.Floor
+		snapshot.Gold = state.Run.Gold
 	}
 
-	for _, card := range nestedList(state.Combat, "hand") {
-		snapshot.Hand = append(snapshot.Hand, CombatCardState{
-			Index:          fieldIntValue(card, "index"),
-			CardID:         fallbackID(fieldString(card, "cardId"), fieldString(card, "id")),
-			Name:           fieldString(card, "name"),
-			EnergyCost:     fieldIntValue(card, "energyCost"),
-			Playable:       fieldBool(card, "playable"),
-			RequiresTarget: cardRequiresTarget(state, card),
-			ValidTargets:   append([]int(nil), fieldIntSlice(card, "validTargetIndices")...),
-		})
+	if state.Combat != nil {
+		for _, card := range state.Combat.Hand {
+			energyCost := 0
+			if card.EnergyCost != nil {
+				energyCost = *card.EnergyCost
+			}
+			snapshot.Hand = append(snapshot.Hand, CombatCardState{
+				Index:          card.Index,
+				CardID:         fallbackID(card.CardID, ""),
+				Name:           card.Name,
+				EnergyCost:     energyCost,
+				Playable:       card.Playable,
+				RequiresTarget: card.RequiresTarget,
+				ValidTargets:   append([]int(nil), card.ValidTargetIndices...),
+			})
+		}
 	}
 
-	for _, enemy := range nestedList(state.Combat, "enemies") {
-		currentHP := fieldIntValue(enemy, "currentHp")
-		label := fallbackID(fieldString(enemy, "name"), fieldString(enemy, "enemyId"))
-		entry := CombatEnemyState{
-			Index:     fieldIntValue(enemy, "index"),
-			EnemyID:   fallbackID(fieldString(enemy, "enemyId"), fieldString(enemy, "id")),
-			Name:      label,
-			CurrentHP: currentHP,
-			Block:     fieldIntValue(enemy, "block"),
-			Hittable:  fieldBool(enemy, "isHittable"),
-		}
-		for _, intent := range nestedList(enemy, "intents") {
-			intentState := CombatIntentState{
-				IntentType: fieldString(intent, "intentType"),
-				Label:      fieldString(intent, "label"),
+	if state.Combat != nil {
+		for _, enemy := range state.Combat.Enemies {
+			currentHP := enemy.CurrentHp
+			label := fallbackID(enemy.Name, enemy.EnemyID)
+			entry := CombatEnemyState{
+				Index:     enemy.Index,
+				EnemyID:   fallbackID(enemy.EnemyID, ""),
+				Name:      label,
+				CurrentHP: currentHP,
+				Block:     enemy.Block,
+				Hittable:  enemy.IsHittable,
 			}
-			if totalDamage, ok := fieldInt(intent, "totalDamage"); ok && totalDamage > 0 {
-				intentState.TotalDamage = totalDamage
-			} else if damage, ok := fieldInt(intent, "damage"); ok && damage > 0 {
-				intentState.TotalDamage = damage
+			for _, intent := range enemy.Intents {
+				intentState := CombatIntentState{
+					IntentType: intent.IntentType,
+					Label:      intent.Label,
+				}
+				if intent.TotalDamage != nil && *intent.TotalDamage > 0 {
+					intentState.TotalDamage = *intent.TotalDamage
+				} else if intent.Damage != nil && *intent.Damage > 0 {
+					intentState.TotalDamage = *intent.Damage
+				}
+				if intentState.TotalDamage > 0 {
+					snapshot.IncomingDamage += intentState.TotalDamage
+				}
+				entry.Intents = append(entry.Intents, intentState)
 			}
-			if intentState.TotalDamage > 0 {
-				snapshot.IncomingDamage += intentState.TotalDamage
+			if currentHP > 0 && (snapshot.LowestEnemyHP == 0 || currentHP < snapshot.LowestEnemyHP) {
+				snapshot.LowestEnemyHP = currentHP
+				snapshot.LowestEnemyLabel = label
 			}
-			entry.Intents = append(entry.Intents, intentState)
+			snapshot.Enemies = append(snapshot.Enemies, entry)
 		}
-		if currentHP > 0 && (snapshot.LowestEnemyHP == 0 || currentHP < snapshot.LowestEnemyHP) {
-			snapshot.LowestEnemyHP = currentHP
-			snapshot.LowestEnemyLabel = label
-		}
-		snapshot.Enemies = append(snapshot.Enemies, entry)
 	}
 
 	applyCodexPriors(&snapshot, codex)

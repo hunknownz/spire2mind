@@ -374,21 +374,23 @@ func shouldUseCombatEdgeSettle(state *StateSnapshot) bool {
 	if state == nil || !strings.EqualFold(strings.TrimSpace(state.Screen), "COMBAT") {
 		return false
 	}
-	player, _ := state.Combat["player"].(map[string]any)
-	energy, hasEnergy := nestedInt(player, "energy")
-	if hasEnergy && energy > 1 {
+	if state.Combat == nil {
 		return false
 	}
-	hand := nestedMapList(state.Combat, "hand")
+	energy := state.Combat.Player.Energy
+	if energy > 1 {
+		return false
+	}
+	hand := state.Combat.Hand
 	if len(state.AvailableActions) == 1 && strings.EqualFold(strings.TrimSpace(state.AvailableActions[0]), "end_turn") {
-		if hasEnergy && energy > 0 {
+		if energy > 0 {
 			return false
 		}
 		if len(hand) == 0 {
 			return true
 		}
 		for _, card := range hand {
-			if nestedBool(card, "playable") {
+			if card.Playable {
 				return false
 			}
 		}
@@ -399,16 +401,13 @@ func shouldUseCombatEdgeSettle(state *StateSnapshot) bool {
 		return false
 	}
 
-	if !hasEnergy {
-		energy = 0
-	}
 	if energy != 1 {
 		return false
 	}
 
 	playableCards := 0
 	for _, card := range hand {
-		if nestedBool(card, "playable") {
+		if card.Playable {
 			playableCards++
 		}
 	}
@@ -442,25 +441,33 @@ func stateFingerprint(state *StateSnapshot) string {
 
 	switch strings.TrimSpace(state.Screen) {
 	case "COMBAT":
-		payload["actionWindowOpen"] = nestedBool(state.Combat, "actionWindowOpen")
-		payload["player"] = state.Combat["player"]
-		payload["hand"] = state.Combat["hand"]
-		payload["enemies"] = state.Combat["enemies"]
+		if state.Combat != nil {
+			payload["actionWindowOpen"] = state.Combat.ActionWindowOpen
+			payload["player"] = state.Combat.Player
+			payload["hand"] = state.Combat.Hand
+			payload["enemies"] = state.Combat.Enemies
+		}
 	case "REWARD":
-		payload["phase"] = nestedString(state.Reward, "phase")
-		payload["sourceScreen"] = nestedString(state.Reward, "sourceScreen")
-		payload["sourceHint"] = nestedString(state.Reward, "sourceHint")
-		payload["pendingCardChoice"] = nestedBool(state.Reward, "pendingCardChoice")
-		payload["rewards"] = state.Reward["rewards"]
-		payload["cardOptions"] = state.Reward["cardOptions"]
+		if state.Reward != nil {
+			payload["phase"] = state.Reward.Phase
+			payload["sourceScreen"] = state.Reward.SourceScreen
+			payload["sourceHint"] = state.Reward.SourceHint
+			payload["pendingCardChoice"] = state.Reward.PendingCardChoice
+			payload["rewards"] = state.Reward.Rewards
+			payload["cardOptions"] = state.Reward.CardOptions
+		}
 	case "CARD_SELECTION":
-		payload["selectionKind"] = nestedString(state.Selection, "kind")
-		payload["selectionSourceScreen"] = nestedString(state.Selection, "sourceScreen")
-		payload["selectionSourceHint"] = nestedString(state.Selection, "sourceHint")
-		payload["selectionMode"] = nestedString(state.Selection, "mode")
-		payload["cards"] = state.Selection["cards"]
+		if state.Selection != nil {
+			payload["selectionKind"] = state.Selection.Kind
+			payload["selectionSourceScreen"] = state.Selection.SourceScreen
+			payload["selectionSourceHint"] = state.Selection.SourceHint
+			payload["selectionMode"] = state.Selection.Mode
+			payload["cards"] = state.Selection.Cards
+		}
 	case "GAME_OVER":
-		payload["stage"] = nestedString(state.GameOver, "stage")
+		if state.GameOver != nil {
+			payload["stage"] = state.GameOver.Stage
+		}
 	}
 
 	bytes, err := json.Marshal(payload)
@@ -483,13 +490,13 @@ func IsActionableState(state *StateSnapshot) bool {
 
 	switch strings.TrimSpace(state.Screen) {
 	case "COMBAT":
-		if !nestedBool(state.Combat, "actionWindowOpen") {
+		if state.Combat == nil || !state.Combat.ActionWindowOpen {
 			return false
 		}
-		if nestedBool(state.Combat, "isOverOrEnding") ||
-			nestedBool(state.Combat, "playerActionsDisabled") ||
-			nestedBool(state.Combat, "isInCardPlay") ||
-			nestedBool(state.Combat, "isInCardSelection") {
+		if state.Combat.IsOverOrEnding ||
+			state.Combat.PlayerActionsDisabled ||
+			state.Combat.IsInCardPlay ||
+			state.Combat.IsInCardSelection {
 			return false
 		}
 		if !combatHasActionableEnemies(state) {
@@ -501,20 +508,21 @@ func IsActionableState(state *StateSnapshot) bool {
 	case "CARD_SELECTION":
 		return selectionStateIsActionable(state)
 	case "GAME_OVER":
-		stage := nestedString(state.GameOver, "stage")
-		return stage == "" || !strings.EqualFold(stage, "transition")
+		if state.GameOver == nil {
+			return true
+		}
+		return state.GameOver.Stage == "" || !strings.EqualFold(state.GameOver.Stage, "transition")
 	default:
 		return true
 	}
 }
 
 func rewardStateIsActionable(state *StateSnapshot) bool {
-	if state == nil {
+	if state == nil || state.Reward == nil {
 		return false
 	}
 
-	phase := nestedString(state.Reward, "phase")
-	if strings.EqualFold(phase, "settling") {
+	if strings.EqualFold(state.Reward.Phase, "settling") {
 		return false
 	}
 
@@ -524,10 +532,10 @@ func rewardStateIsActionable(state *StateSnapshot) bool {
 	hasSkipRewardCards := hasAvailableAction(state, "skip_reward_cards")
 	hasDeckSelection := hasAvailableAction(state, "select_deck_card")
 
-	pendingCardChoice := nestedBool(state.Reward, "pendingCardChoice") || len(nestedMapList(state.Reward, "cardOptions")) > 0
+	pendingCardChoice := state.Reward.PendingCardChoice || len(state.Reward.CardOptions) > 0
 	hasClaimableRewards := false
-	for _, reward := range nestedMapList(state.Reward, "rewards") {
-		if nestedBool(reward, "claimable") {
+	for _, reward := range state.Reward.Rewards {
+		if reward.Claimable {
 			hasClaimableRewards = true
 			break
 		}
@@ -547,7 +555,7 @@ func rewardStateIsActionable(state *StateSnapshot) bool {
 		return hasClaimReward
 	}
 
-	if nestedBool(state.Reward, "canProceed") {
+	if state.Reward.CanProceed {
 		if hasClaimReward || hasChooseRewardCard || hasSkipRewardCards || hasDeckSelection {
 			return false
 		}
@@ -558,7 +566,7 @@ func rewardStateIsActionable(state *StateSnapshot) bool {
 }
 
 func selectionStateIsActionable(state *StateSnapshot) bool {
-	if state == nil {
+	if state == nil || state.Selection == nil {
 		return false
 	}
 
@@ -567,11 +575,11 @@ func selectionStateIsActionable(state *StateSnapshot) bool {
 	hasDeckSelection := hasAvailableAction(state, "select_deck_card")
 	hasConfirmSelection := hasAvailableAction(state, "confirm_selection")
 
-	selectionKind := nestedString(state.Selection, "kind")
-	requiresConfirmation := nestedBool(state.Selection, "requiresConfirmation")
-	canConfirm := nestedBool(state.Selection, "canConfirm")
-	hasSelectionCards := len(nestedMapList(state.Selection, "cards")) > 0
-	pendingRewardChoice := nestedBool(state.Reward, "pendingCardChoice") || len(nestedMapList(state.Reward, "cardOptions")) > 0
+	selectionKind := state.Selection.Kind
+	requiresConfirmation := state.Selection.RequiresConfirmation
+	canConfirm := state.Selection.CanConfirm
+	hasSelectionCards := len(state.Selection.Cards) > 0
+	pendingRewardChoice := state.Reward != nil && (state.Reward.PendingCardChoice || len(state.Reward.CardOptions) > 0)
 
 	if strings.EqualFold(selectionKind, "NSimpleCardSelectScreen") && (requiresConfirmation || canConfirm || hasConfirmSelection) {
 		return false
@@ -605,21 +613,12 @@ func selectionStateIsActionable(state *StateSnapshot) bool {
 }
 
 func combatHasActionableEnemies(state *StateSnapshot) bool {
-	if state == nil {
+	if state == nil || state.Combat == nil {
 		return false
 	}
 
-	enemies, ok := state.Combat["enemies"].([]interface{})
-	if !ok {
-		return false
-	}
-
-	for _, raw := range enemies {
-		enemy, ok := raw.(map[string]any)
-		if !ok {
-			continue
-		}
-		if nestedBool(enemy, "isHittable") {
+	for _, enemy := range state.Combat.Enemies {
+		if enemy.IsHittable {
 			return true
 		}
 	}

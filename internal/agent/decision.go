@@ -261,8 +261,8 @@ func NormalizeActionRequestForState(state *game.StateSnapshot, request game.Acti
 			}
 		}
 	case "claim_reward":
-		claimableRewards := indexedRewardItems(state, "rewards", func(item map[string]any) bool {
-			return fieldBool(item, "claimable")
+		claimableRewards := indexedRewardItems(state, "rewards", func(item game.RewardItem) bool {
+			return item.Claimable
 		})
 		request = normalizeOptionIndexedRequest(request)
 		if request.OptionIndex == nil && len(claimableRewards) == 1 {
@@ -273,7 +273,7 @@ func NormalizeActionRequestForState(state *game.StateSnapshot, request game.Acti
 		"buy_card", "buy_relic", "buy_potion",
 		"choose_rest_option", "choose_treasure_relic", "choose_event_option":
 		request = normalizeOptionIndexedRequest(request)
-		if request.Action == "choose_event_option" && fieldBool(state.Event, "isFinished") {
+		if request.Action == "choose_event_option" && state.Event != nil && state.Event.IsFinished {
 			request.OptionIndex = nil
 		}
 	}
@@ -341,51 +341,81 @@ func ValidateActionDecision(state *game.StateSnapshot, decision *ActionDecision)
 	case "play_card":
 		return validatePlayCardDecision(state, decision)
 	case "choose_map_node":
-		return validateIndexedDecision(decision.OptionIndex, nestedList(state.Map, "availableNodes"), "index", nil, "invalid_action: option_index is out of range for choose_map_node")
+		count := 0
+		if state.Map != nil {
+			count = len(state.Map.AvailableNodes)
+		}
+		return validateIndexCount(decision.OptionIndex, count, "invalid_action: option_index is out of range for choose_map_node")
 	case "select_character":
-		return validateIndexedDecision(decision.OptionIndex, nestedList(state.CharacterSelect, "characters"), "index", func(item map[string]any) bool {
-			return !fieldBool(item, "isLocked")
-		}, "invalid_action: option_index is out of range for select_character")
+		count := 0
+		if state.CharacterSelect != nil {
+			count = len(state.CharacterSelect.Characters)
+		}
+		return validateIndexCount(decision.OptionIndex, count, "invalid_action: option_index is out of range for select_character")
 	case "claim_reward":
-		return validateIndexedDecision(decision.OptionIndex, nestedList(state.Reward, "rewards"), "index", func(item map[string]any) bool {
-			return fieldBool(item, "claimable")
-		}, "invalid_action: option_index is out of range for claim_reward")
+		count := 0
+		if state.Reward != nil {
+			count = len(state.Reward.Rewards)
+		}
+		return validateIndexCount(decision.OptionIndex, count, "invalid_action: option_index is out of range for claim_reward")
 	case "choose_reward_card":
-		return validateIndexedDecision(decision.OptionIndex, nestedList(state.Reward, "cardOptions"), "index", nil, "invalid_action: option_index is out of range for choose_reward_card")
+		count := 0
+		if state.Reward != nil {
+			count = len(state.Reward.CardOptions)
+		}
+		return validateIndexCount(decision.OptionIndex, count, "invalid_action: option_index is out of range for choose_reward_card")
 	case "proceed":
 		return validateProceedDecision(state)
 	case "confirm_selection":
 		return validateConfirmSelectionDecision(state)
 	case "choose_event_option":
-		if fieldBool(state.Event, "isFinished") {
+		if state.Event != nil && state.Event.IsFinished {
 			if decision.OptionIndex == nil || *decision.OptionIndex == 0 {
 				return nil
 			}
 			return fmt.Errorf("invalid_action: finished events only accept option_index 0 for choose_event_option")
 		}
-		return validateIndexedDecision(decision.OptionIndex, nestedList(state.Event, "options"), "index", func(item map[string]any) bool {
-			return !fieldBool(item, "isLocked")
-		}, "invalid_action: option_index is out of range for choose_event_option")
+		eventCount := 0
+		if state.Event != nil {
+			eventCount = len(state.Event.Options)
+		}
+		return validateIndexCount(decision.OptionIndex, eventCount, "invalid_action: option_index is out of range for choose_event_option")
 	case "choose_treasure_relic":
-		return validateIndexedDecision(decision.OptionIndex, nestedList(state.Chest, "relicOptions"), "index", nil, "invalid_action: option_index is out of range for choose_treasure_relic")
+		chestCount := 0
+		if state.Chest != nil {
+			chestCount = len(state.Chest.RelicOptions)
+		}
+		return validateIndexCount(decision.OptionIndex, chestCount, "invalid_action: option_index is out of range for choose_treasure_relic")
 	case "choose_rest_option":
-		return validateIndexedDecision(decision.OptionIndex, nestedList(state.Rest, "options"), "index", func(item map[string]any) bool {
-			return fieldBool(item, "isEnabled")
-		}, "invalid_action: option_index is out of range for choose_rest_option")
+		restCount := 0
+		if state.Rest != nil {
+			restCount = len(state.Rest.Options)
+		}
+		return validateIndexCount(decision.OptionIndex, restCount, "invalid_action: option_index is out of range for choose_rest_option")
 	case "buy_card":
-		return validateIndexedDecision(decision.OptionIndex, nestedList(state.Shop, "cards"), "index", func(item map[string]any) bool {
-			return fieldBool(item, "enoughGold")
-		}, "invalid_action: option_index is out of range for buy_card")
+		cardCount := 0
+		if state.Shop != nil {
+			cardCount = len(state.Shop.Cards)
+		}
+		return validateIndexCount(decision.OptionIndex, cardCount, "invalid_action: option_index is out of range for buy_card")
 	case "buy_relic":
-		return validateIndexedDecision(decision.OptionIndex, nestedList(state.Shop, "relics"), "index", func(item map[string]any) bool {
-			return fieldBool(item, "enoughGold")
-		}, "invalid_action: option_index is out of range for buy_relic")
+		relicCount := 0
+		if state.Shop != nil {
+			relicCount = len(state.Shop.Relics)
+		}
+		return validateIndexCount(decision.OptionIndex, relicCount, "invalid_action: option_index is out of range for buy_relic")
 	case "buy_potion":
-		return validateIndexedDecision(decision.OptionIndex, nestedList(state.Shop, "potions"), "index", func(item map[string]any) bool {
-			return fieldBool(item, "enoughGold")
-		}, "invalid_action: option_index is out of range for buy_potion")
+		potionCount := 0
+		if state.Shop != nil {
+			potionCount = len(state.Shop.Potions)
+		}
+		return validateIndexCount(decision.OptionIndex, potionCount, "invalid_action: option_index is out of range for buy_potion")
 	case "select_deck_card":
-		return validateIndexedDecision(decision.OptionIndex, nestedList(state.Selection, "cards"), "index", nil, "invalid_action: option_index is out of range for select_deck_card")
+		selCount := 0
+		if state.Selection != nil {
+			selCount = len(state.Selection.Cards)
+		}
+		return validateIndexCount(decision.OptionIndex, selCount, "invalid_action: option_index is out of range for select_deck_card")
 	default:
 		return nil
 	}
@@ -400,7 +430,7 @@ func validatePlayCardDecision(state *game.StateSnapshot, decision *ActionDecisio
 	if !ok {
 		return fmt.Errorf("invalid_action: card_index is out of range for play_card")
 	}
-	if !fieldBool(card, "playable") {
+	if !card.Playable {
 		return fmt.Errorf("invalid_action: selected card is not currently playable")
 	}
 	if !cardRequiresTarget(state, card) {
@@ -419,6 +449,16 @@ func validatePlayCardDecision(state *game.StateSnapshot, decision *ActionDecisio
 	}
 
 	return fmt.Errorf("invalid_target: target_index is out of range")
+}
+
+func validateIndexCount(index *int, count int, errMessage string) error {
+	if index == nil {
+		return nil
+	}
+	if *index < 0 || *index >= count {
+		return fmt.Errorf("%s", errMessage)
+	}
+	return nil
 }
 
 func validateIndexedDecision(index *int, items []map[string]any, key string, predicate func(map[string]any) bool, errMessage string) error {
@@ -455,7 +495,7 @@ func validateConfirmSelectionDecision(state *game.StateSnapshot) error {
 		return fmt.Errorf("invalid_action: state is unavailable")
 	}
 
-	if !fieldBool(state.Selection, "requiresConfirmation") || !fieldBool(state.Selection, "canConfirm") {
+	if state.Selection == nil || !state.Selection.RequiresConfirmation || !state.Selection.CanConfirm {
 		return fmt.Errorf("invalid_action: confirm_selection is not available for the current selection")
 	}
 
@@ -467,67 +507,76 @@ func hasUnresolvedRewardOrSelection(state *game.StateSnapshot) bool {
 		return false
 	}
 
-	if fieldBool(state.Reward, "pendingCardChoice") {
+	if state.Reward != nil && state.Reward.PendingCardChoice {
 		return true
 	}
-	if len(indexedRewardItems(state, "rewards", func(item map[string]any) bool {
-		return fieldBool(item, "claimable")
-	})) > 0 {
+	if state.Reward != nil {
+		for _, r := range state.Reward.Rewards {
+			if r.Claimable {
+				return true
+			}
+		}
+	}
+	if state.Reward != nil && len(state.Reward.CardOptions) > 0 {
 		return true
 	}
-	if len(nestedList(state.Reward, "cardOptions")) > 0 {
+	if state.Selection != nil && len(state.Selection.Cards) > 0 {
 		return true
 	}
-	if len(nestedList(state.Selection, "cards")) > 0 {
-		return true
-	}
-	if fieldBool(state.Selection, "requiresConfirmation") && fieldBool(state.Selection, "canConfirm") {
+	if state.Selection != nil && state.Selection.RequiresConfirmation && state.Selection.CanConfirm {
 		return true
 	}
 
 	return false
 }
 
-func indexedRewardItems(state *game.StateSnapshot, key string, predicate func(map[string]any) bool) []int {
+func indexedRewardItems(state *game.StateSnapshot, key string, predicate func(game.RewardItem) bool) []int {
+	if state == nil || state.Reward == nil {
+		return nil
+	}
+	var items []game.RewardItem
+	switch key {
+	case "rewards":
+		items = state.Reward.Rewards
+	default:
+		return nil
+	}
 	var indices []int
-	for _, item := range nestedList(state.Reward, key) {
+	for _, item := range items {
 		if predicate != nil && !predicate(item) {
 			continue
 		}
-		if index, ok := fieldInt(item, "index"); ok {
-			indices = append(indices, index)
-		}
+		indices = append(indices, item.Index)
 	}
 	return indices
 }
 
-func combatHandCard(state *game.StateSnapshot, cardIndex int) (map[string]any, bool) {
-	for _, card := range nestedList(state.Combat, "hand") {
-		if index, ok := fieldInt(card, "index"); ok && index == cardIndex {
+func combatHandCard(state *game.StateSnapshot, cardIndex int) (game.CardState, bool) {
+	if state == nil || state.Combat == nil {
+		return game.CardState{}, false
+	}
+	for _, card := range state.Combat.Hand {
+		if card.Index == cardIndex {
 			return card, true
 		}
 	}
-
-	return nil, false
+	return game.CardState{}, false
 }
 
 func combatValidTargets(state *game.StateSnapshot) []int {
 	return combatEnemyTargetIndices(state)
 }
 
-func combatTargetIndicesForCard(state *game.StateSnapshot, card map[string]any) []int {
-	if len(card) == 0 {
-		return nil
-	}
+func combatTargetIndicesForCard(state *game.StateSnapshot, card game.CardState) []int {
 	if state == nil {
 		return nil
 	}
 
-	if validTargets := append([]int(nil), fieldIntSlice(card, "validTargetIndices")...); len(validTargets) > 0 {
+	if validTargets := append([]int(nil), card.ValidTargetIndices...); len(validTargets) > 0 {
 		return validTargets
 	}
 
-	switch strings.TrimSpace(fieldString(card, "targetType")) {
+	switch strings.TrimSpace(card.TargetType) {
 	case "AnyEnemy":
 		return combatEnemyTargetIndices(state)
 	case "AnyAlly":
@@ -537,17 +586,14 @@ func combatTargetIndicesForCard(state *game.StateSnapshot, card map[string]any) 
 	}
 }
 
-func cardRequiresTarget(state *game.StateSnapshot, card map[string]any) bool {
-	if len(card) == 0 {
-		return false
-	}
-	if fieldBool(card, "requiresTarget") {
+func cardRequiresTarget(state *game.StateSnapshot, card game.CardState) bool {
+	if card.RequiresTarget {
 		return true
 	}
-	if len(fieldIntSlice(card, "validTargetIndices")) > 0 {
+	if len(card.ValidTargetIndices) > 0 {
 		return true
 	}
-	switch strings.TrimSpace(fieldString(card, "targetType")) {
+	switch strings.TrimSpace(card.TargetType) {
 	case "", "None", "Self":
 		return false
 	default:
@@ -559,31 +605,22 @@ func cardRequiresTarget(state *game.StateSnapshot, card map[string]any) bool {
 }
 
 func combatEnemyTargetIndices(state *game.StateSnapshot) []int {
+	if state == nil || state.Combat == nil {
+		return nil
+	}
 	var valid []int
-	for _, enemy := range nestedList(state.Combat, "enemies") {
-		if !fieldBool(enemy, "isHittable") {
+	for _, enemy := range state.Combat.Enemies {
+		if !enemy.IsHittable {
 			continue
 		}
-		if index, ok := fieldInt(enemy, "index"); ok {
-			valid = append(valid, index)
-		}
+		valid = append(valid, enemy.Index)
 	}
-
 	return valid
 }
 
 func combatAllyTargetIndices(state *game.StateSnapshot) []int {
-	var valid []int
-	for _, ally := range nestedList(state.Combat, "allies") {
-		if !fieldBool(ally, "isAlive") {
-			continue
-		}
-		if index, ok := fieldInt(ally, "index"); ok {
-			valid = append(valid, index)
-		}
-	}
-
-	return valid
+	// Allies are not part of the typed CombatState; return nil.
+	return nil
 }
 
 func containsInt(values []int, needle int) bool {

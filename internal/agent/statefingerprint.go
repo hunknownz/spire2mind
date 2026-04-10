@@ -234,44 +234,53 @@ func buildDecisionFingerprint(state *game.StateSnapshot) decisionFingerprint {
 }
 
 func buildCombatDecisionFingerprint(state *game.StateSnapshot) *combatDecisionFingerprint {
-	player := asMap(state.Combat["player"])
+	if state == nil || state.Combat == nil {
+		return &combatDecisionFingerprint{}
+	}
+	player := state.Combat.Player
 	payload := &combatDecisionFingerprint{
 		Player: combatPlayerFingerprint{
-			Energy: fieldIntValue(player, "energy"),
-			Block:  fieldIntValue(player, "block"),
-			Stars:  fieldIntValue(player, "stars"),
+			Energy: player.Energy,
+			Block:  player.Block,
+			Stars:  player.Stars,
 		},
 	}
 
-	for _, card := range nestedList(state.Combat, "hand") {
-		cardID := fallbackID(fieldString(card, "cardId"), fieldString(card, "id"))
+	for _, card := range state.Combat.Hand {
+		cardID := fallbackID(card.CardID, "")
+		energyCost := 0
+		if card.EnergyCost != nil {
+			energyCost = *card.EnergyCost
+		}
 		payload.Hand = append(payload.Hand, combatCardFingerprint{
-			Index:          fieldIntValue(card, "index"),
+			Index:          card.Index,
 			CardID:         cardID,
-			Name:           fingerprintDisplayLabel(cardID, fieldString(card, "name")),
-			EnergyCost:     fieldIntValue(card, "energyCost"),
-			Playable:       fieldBool(card, "playable"),
+			Name:           fingerprintDisplayLabel(cardID, card.Name),
+			EnergyCost:     energyCost,
+			Playable:       card.Playable,
 			RequiresTarget: cardRequiresTarget(state, card),
-			ValidTargets:   append([]int(nil), fieldIntSlice(card, "validTargetIndices")...),
+			ValidTargets:   append([]int(nil), card.ValidTargetIndices...),
 		})
 	}
 
-	for _, enemy := range nestedList(state.Combat, "enemies") {
-		enemyID := fallbackID(fieldString(enemy, "enemyId"), fieldString(enemy, "id"))
+	for _, enemy := range state.Combat.Enemies {
+		enemyID := fallbackID(enemy.EnemyID, "")
 		fingerprint := combatEnemyFingerprint{
-			Index:     fieldIntValue(enemy, "index"),
+			Index:     enemy.Index,
 			EnemyID:   enemyID,
-			Name:      fingerprintDisplayLabel(enemyID, fieldString(enemy, "name")),
-			CurrentHP: fieldIntValue(enemy, "currentHp"),
-			Block:     fieldIntValue(enemy, "block"),
-			Hittable:  fieldBool(enemy, "isHittable"),
+			Name:      fingerprintDisplayLabel(enemyID, enemy.Name),
+			CurrentHP: enemy.CurrentHp,
+			Block:     enemy.Block,
+			Hittable:  enemy.IsHittable,
 		}
-		for _, intent := range nestedList(enemy, "intents") {
-			intentType := fieldString(intent, "intentType")
-			label := fieldString(intent, "label")
-			damage, hasDamage := fieldInt(intent, "totalDamage")
-			if !hasDamage {
-				damage, _ = fieldInt(intent, "damage")
+		for _, intent := range enemy.Intents {
+			intentType := intent.IntentType
+			label := intent.Label
+			damage := 0
+			if intent.TotalDamage != nil {
+				damage = *intent.TotalDamage
+			} else if intent.Damage != nil {
+				damage = *intent.Damage
 			}
 
 			intentLabel := strings.TrimSpace(intentType)
@@ -292,85 +301,103 @@ func buildCombatDecisionFingerprint(state *game.StateSnapshot) *combatDecisionFi
 }
 
 func buildRewardDecisionFingerprint(state *game.StateSnapshot) *rewardDecisionFingerprint {
-	payload := &rewardDecisionFingerprint{
-		Phase:             fieldString(state.Reward, "phase"),
-		SourceScreen:      fieldString(state.Reward, "sourceScreen"),
-		SourceHint:        fieldString(state.Reward, "sourceHint"),
-		PendingCardChoice: fieldBool(state.Reward, "pendingCardChoice"),
-		CanProceed:        fieldBool(state.Reward, "canProceed"),
-	}
-	for _, reward := range nestedList(state.Reward, "rewards") {
-		payload.Rewards = append(payload.Rewards, indexedFlagFingerprint{
-			Index:     fieldIntValue(reward, "index"),
-			Label:     fieldString(reward, "rewardType"),
-			Claimable: fieldBool(reward, "claimable"),
-		})
-	}
-	for _, option := range nestedList(state.Reward, "cardOptions") {
-		cardID := fallbackID(fieldString(option, "cardId"), fieldString(option, "id"))
-		payload.CardOptions = append(payload.CardOptions, indexedLabelFingerprint{
-			Index: fieldIntValue(option, "index"),
-			ID:    cardID,
-			Label: fingerprintDisplayLabel(cardID, fieldString(option, "name")),
-		})
+	payload := &rewardDecisionFingerprint{}
+	if state.Reward != nil {
+		payload.Phase = state.Reward.Phase
+		payload.SourceScreen = state.Reward.SourceScreen
+		payload.SourceHint = state.Reward.SourceHint
+		payload.PendingCardChoice = state.Reward.PendingCardChoice
+		payload.CanProceed = state.Reward.CanProceed
+		for _, reward := range state.Reward.Rewards {
+			payload.Rewards = append(payload.Rewards, indexedFlagFingerprint{
+				Index:     reward.Index,
+				Label:     reward.RewardType,
+				Claimable: reward.Claimable,
+			})
+		}
+		for _, option := range state.Reward.CardOptions {
+			cardID := fallbackID(option.CardID, "")
+			payload.CardOptions = append(payload.CardOptions, indexedLabelFingerprint{
+				Index: option.Index,
+				ID:    cardID,
+				Label: fingerprintDisplayLabel(cardID, option.Name),
+			})
+		}
 	}
 	return payload
 }
 
 func buildMapDecisionFingerprint(state *game.StateSnapshot) *mapDecisionFingerprint {
-	payload := &mapDecisionFingerprint{
-		Traveling: fieldBool(state.Map, "isTraveling"),
+	payload := &mapDecisionFingerprint{}
+	if state.Map == nil {
+		return payload
 	}
-	if currentNode := asMap(state.Map["currentNode"]); currentNode != nil {
-		payload.CurrentNode = &mapNodeFingerprint{
-			Index:    fieldIntValue(currentNode, "index"),
-			Row:      fieldIntValue(currentNode, "row"),
-			Col:      fieldIntValue(currentNode, "col"),
-			NodeType: fieldString(currentNode, "nodeType"),
+	payload.Traveling = state.Map.IsTraveling
+	if state.Map.CurrentNode != nil {
+		cn := state.Map.CurrentNode
+		fp := mapNodeFingerprint{
+			Index:    cn.Index,
+			NodeType: cn.NodeType,
 		}
+		if cn.Row != nil {
+			fp.Row = *cn.Row
+		}
+		if cn.Col != nil {
+			fp.Col = *cn.Col
+		}
+		payload.CurrentNode = &fp
 	}
-	for _, node := range nestedList(state.Map, "availableNodes") {
-		payload.AvailableNodes = append(payload.AvailableNodes, mapNodeFingerprint{
-			Index:    fieldIntValue(node, "index"),
-			Row:      fieldIntValue(node, "row"),
-			Col:      fieldIntValue(node, "col"),
-			NodeType: fieldString(node, "nodeType"),
-		})
+	for _, node := range state.Map.AvailableNodes {
+		fp := mapNodeFingerprint{
+			Index:    node.Index,
+			NodeType: node.NodeType,
+		}
+		if node.Row != nil {
+			fp.Row = *node.Row
+		}
+		if node.Col != nil {
+			fp.Col = *node.Col
+		}
+		payload.AvailableNodes = append(payload.AvailableNodes, fp)
 	}
 	return payload
 }
 
 func buildEventDecisionFingerprint(state *game.StateSnapshot) *eventDecisionFingerprint {
-	payload := &eventDecisionFingerprint{
-		IsFinished: fieldBool(state.Event, "isFinished"),
-		Title:      fieldString(state.Event, "title"),
+	payload := &eventDecisionFingerprint{}
+	if state.Event == nil {
+		return payload
 	}
-	for _, option := range nestedList(state.Event, "options") {
+	payload.IsFinished = state.Event.IsFinished
+	payload.Title = state.Event.Title
+	for _, option := range state.Event.Options {
 		payload.Options = append(payload.Options, eventOptionFingerprint{
-			Index:     fieldIntValue(option, "index"),
-			Label:     fallbackID(fieldString(option, "label"), fieldString(option, "title")),
-			IsLocked:  fieldBool(option, "isLocked"),
-			IsProceed: fieldBool(option, "isProceed"),
+			Index:     option.Index,
+			Label:     fallbackID(option.Title, ""),
+			IsLocked:  option.IsLocked,
+			IsProceed: option.IsProceed,
 		})
 	}
 	return payload
 }
 
 func buildSelectionDecisionFingerprint(state *game.StateSnapshot) *selectionDecisionFingerprint {
-	payload := &selectionDecisionFingerprint{
-		Kind:                 fieldString(state.Selection, "kind"),
-		SourceScreen:         fieldString(state.Selection, "sourceScreen"),
-		SourceHint:           fieldString(state.Selection, "sourceHint"),
-		Mode:                 fieldString(state.Selection, "mode"),
-		RequiresConfirmation: fieldBool(state.Selection, "requiresConfirmation"),
-		CanConfirm:           fieldBool(state.Selection, "canConfirm"),
+	payload := &selectionDecisionFingerprint{}
+	if state.Selection == nil {
+		return payload
 	}
-	for _, card := range nestedList(state.Selection, "cards") {
-		cardID := fallbackID(fieldString(card, "cardId"), fieldString(card, "id"))
+	payload.Kind = state.Selection.Kind
+	payload.SourceScreen = state.Selection.SourceScreen
+	payload.SourceHint = state.Selection.SourceHint
+	payload.Mode = state.Selection.Mode
+	payload.RequiresConfirmation = state.Selection.RequiresConfirmation
+	payload.CanConfirm = state.Selection.CanConfirm
+	for _, card := range state.Selection.Cards {
+		cardID := fallbackID(card.CardID, "")
 		payload.Cards = append(payload.Cards, indexedLabelFingerprint{
-			Index: fieldIntValue(card, "index"),
+			Index: card.Index,
 			ID:    cardID,
-			Label: fingerprintDisplayLabel(cardID, fieldString(card, "name")),
+			Label: fingerprintDisplayLabel(cardID, card.Name),
 		})
 	}
 	return payload
@@ -378,28 +405,44 @@ func buildSelectionDecisionFingerprint(state *game.StateSnapshot) *selectionDeci
 
 func buildShopDecisionFingerprint(state *game.StateSnapshot) *shopDecisionFingerprint {
 	payload := &shopDecisionFingerprint{}
-	appendOptions := func(source []map[string]any) []pricedOptionFingerprint {
-		options := make([]pricedOptionFingerprint, 0, len(source))
-		for _, item := range source {
-			optionID := firstNonEmpty(fieldString(item, "cardId"), fieldString(item, "relicId"), fieldString(item, "potionId"), fieldString(item, "id"))
-			options = append(options, pricedOptionFingerprint{
-				Index:      fieldIntValue(item, "index"),
-				ID:         optionID,
-				Label:      fingerprintDisplayLabel(optionID, fieldString(item, "name")),
-				Price:      fieldIntValue(item, "price"),
-				EnoughGold: fieldBool(item, "enoughGold"),
-			})
-		}
-		return options
+	if state.Shop == nil {
+		return payload
 	}
-	payload.Cards = appendOptions(nestedList(state.Shop, "cards"))
-	payload.Relics = appendOptions(nestedList(state.Shop, "relics"))
-	payload.Potions = appendOptions(nestedList(state.Shop, "potions"))
-	if removal := asMap(state.Shop["cardRemoval"]); removal != nil {
+	for _, card := range state.Shop.Cards {
+		optionID := fallbackID(card.CardID, "")
+		payload.Cards = append(payload.Cards, pricedOptionFingerprint{
+			Index:      card.Index,
+			ID:         optionID,
+			Label:      fingerprintDisplayLabel(optionID, card.Name),
+			Price:      card.Price,
+			EnoughGold: card.EnoughGold,
+		})
+	}
+	for _, relic := range state.Shop.Relics {
+		optionID := fallbackID(relic.RelicID, "")
+		payload.Relics = append(payload.Relics, pricedOptionFingerprint{
+			Index:      relic.Index,
+			ID:         optionID,
+			Label:      fingerprintDisplayLabel(optionID, relic.Name),
+			Price:      relic.Price,
+			EnoughGold: relic.EnoughGold,
+		})
+	}
+	for _, potion := range state.Shop.Potions {
+		optionID := fallbackID(potion.PotionID, "")
+		payload.Potions = append(payload.Potions, pricedOptionFingerprint{
+			Index:      potion.Index,
+			ID:         optionID,
+			Label:      fingerprintDisplayLabel(optionID, potion.Name),
+			Price:      potion.Price,
+			EnoughGold: potion.EnoughGold,
+		})
+	}
+	if state.Shop.CardRemoval != nil {
 		payload.CardRemoval = &pricedFlagFingerprint{
-			Price:      fieldIntValue(removal, "price"),
-			Available:  fieldBool(removal, "available"),
-			EnoughGold: fieldBool(removal, "enoughGold"),
+			Price:      state.Shop.CardRemoval.Price,
+			Available:  state.Shop.CardRemoval.IsStocked,
+			EnoughGold: state.Shop.CardRemoval.EnoughGold,
 		}
 	}
 	return payload
@@ -407,53 +450,63 @@ func buildShopDecisionFingerprint(state *game.StateSnapshot) *shopDecisionFinger
 
 func buildRestDecisionFingerprint(state *game.StateSnapshot) *restDecisionFingerprint {
 	payload := &restDecisionFingerprint{}
-	for _, option := range nestedList(state.Rest, "options") {
+	if state.Rest == nil {
+		return payload
+	}
+	for _, option := range state.Rest.Options {
 		payload.Options = append(payload.Options, restOptionFingerprint{
-			Index:      fieldIntValue(option, "index"),
-			OptionType: fieldString(option, "optionType"),
-			Title:      fieldString(option, "title"),
-			IsEnabled:  fieldBool(option, "isEnabled"),
+			Index:      option.Index,
+			OptionType: option.OptionID,
+			Title:      option.Title,
+			IsEnabled:  option.IsEnabled,
 		})
 	}
 	return payload
 }
 
 func buildChestDecisionFingerprint(state *game.StateSnapshot) *chestDecisionFingerprint {
-	payload := &chestDecisionFingerprint{
-		IsOpened: fieldBool(state.Chest, "isOpened"),
+	payload := &chestDecisionFingerprint{}
+	if state.Chest == nil {
+		return payload
 	}
-	for _, option := range nestedList(state.Chest, "relicOptions") {
-		relicID := fallbackID(fieldString(option, "relicId"), fieldString(option, "id"))
+	payload.IsOpened = state.Chest.IsOpened
+	for _, option := range state.Chest.RelicOptions {
+		relicID := fallbackID(option.RelicID, "")
 		payload.RelicOptions = append(payload.RelicOptions, indexedLabelFingerprint{
-			Index: fieldIntValue(option, "index"),
+			Index: option.Index,
 			ID:    relicID,
-			Label: fingerprintDisplayLabel(relicID, fieldString(option, "name")),
+			Label: fingerprintDisplayLabel(relicID, option.Name),
 		})
 	}
 	return payload
 }
 
 func buildCharacterDecisionFingerprint(state *game.StateSnapshot) *characterDecisionFingerprint {
-	payload := &characterDecisionFingerprint{
-		SelectedCharacterID: fieldString(state.CharacterSelect, "selectedCharacterId"),
+	payload := &characterDecisionFingerprint{}
+	if state.CharacterSelect == nil {
+		return payload
 	}
-	for _, character := range nestedList(state.CharacterSelect, "characters") {
+	payload.SelectedCharacterID = state.CharacterSelect.SelectedCharacter
+	for _, character := range state.CharacterSelect.Characters {
 		payload.Characters = append(payload.Characters, characterOptionFingerprint{
-			Index:       fieldIntValue(character, "index"),
-			CharacterID: fieldString(character, "characterId"),
-			IsLocked:    fieldBool(character, "isLocked"),
-			IsSelected:  fieldBool(character, "isSelected"),
-			IsRandom:    fieldBool(character, "isRandom"),
+			Index:       character.Index,
+			CharacterID: character.CharID,
+			IsLocked:    character.IsLocked,
+			IsSelected:  character.IsSelected,
+			IsRandom:    character.IsRandom,
 		})
 	}
 	return payload
 }
 
 func buildGameOverDecisionFingerprint(state *game.StateSnapshot) *gameOverDecisionFingerprint {
+	if state.GameOver == nil {
+		return &gameOverDecisionFingerprint{}
+	}
 	return &gameOverDecisionFingerprint{
-		IsVictory: fieldBool(state.GameOver, "isVictory"),
-		Floor:     fieldIntValue(state.GameOver, "floor"),
-		KilledBy:  fieldString(state.GameOver, "killedBy"),
+		IsVictory: state.GameOver.Victory,
+		Floor:     state.GameOver.Floor,
+		KilledBy:  "", // GameOverState doesn't have KilledBy
 	}
 }
 

@@ -530,7 +530,7 @@ func (i *runIndex) upsertAttemptState(attempt int, state *game.StateSnapshot, re
 		return nil
 	}
 
-	headline := fieldString(state.AgentView, "headline")
+	headline := agentViewHeadline(state)
 	characterID := reflectionCharacterID(state)
 	outcome := reflectionOutcome(state)
 	floor := reflectionFloor(state)
@@ -677,7 +677,7 @@ func stateRunID(state *game.StateSnapshot) string {
 
 func eventHeadline(event SessionEvent) string {
 	if event.State != nil {
-		if headline := strings.TrimSpace(fieldString(event.State.AgentView, "headline")); headline != "" {
+		if headline := strings.TrimSpace(agentViewHeadline(event.State)); headline != "" {
 			return headline
 		}
 	}

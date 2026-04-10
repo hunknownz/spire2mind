@@ -36,28 +36,33 @@ func BuildTacticalHintsForLanguage(state *game.StateSnapshot, language i18n.Lang
 }
 
 func buildCombatHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
-	currentHP, ok := fieldInt(state.Run, "currentHp")
-	if !ok || currentHP <= 0 {
+	if state == nil || state.Run == nil || state.Combat == nil {
+		return nil
+	}
+	currentHP := state.Run.CurrentHp
+	if currentHP <= 0 {
 		return nil
 	}
 
-	playerBlock, _ := fieldInt(asMap(state.Combat["player"]), "block")
+	playerBlock := state.Combat.Player.Block
 	totalIncoming := 0
 	attackingEnemies := 0
 	liveEnemies := 0
 	lowestEnemyHP := -1
-	for _, enemy := range nestedList(state.Combat, "enemies") {
-		if !fieldBool(enemy, "isAlive") {
+	for _, enemy := range state.Combat.Enemies {
+		if !enemy.IsAlive {
 			continue
 		}
 		liveEnemies++
-		if hp, ok := fieldInt(enemy, "currentHp"); ok && (lowestEnemyHP < 0 || hp < lowestEnemyHP) {
-			lowestEnemyHP = hp
+		if lowestEnemyHP < 0 || enemy.CurrentHp < lowestEnemyHP {
+			lowestEnemyHP = enemy.CurrentHp
 		}
-		for _, intent := range nestedList(enemy, "intents") {
-			damage, ok := fieldInt(intent, "totalDamage")
-			if !ok {
-				damage, _ = fieldInt(intent, "damage")
+		for _, intent := range enemy.Intents {
+			damage := 0
+			if intent.TotalDamage != nil {
+				damage = *intent.TotalDamage
+			} else if intent.Damage != nil {
+				damage = *intent.Damage
 			}
 			if damage > 0 {
 				totalIncoming += damage
@@ -104,13 +109,11 @@ func buildCombatHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
 		))
 	}
 
-	if player := asMap(state.Combat["player"]); player != nil {
-		if energy, ok := fieldInt(player, "energy"); ok && energy >= 3 {
-			hints = append(hints, loc.Paragraph(
-				fmt.Sprintf("High energy available (%d). Spend it all before ending turn; wasted energy is wasted tempo.", energy),
-				fmt.Sprintf("当前能量较高（%d）。结束回合前尽量把能量花完，浪费能量就是浪费节奏。", energy),
-			))
-		}
+	if energy := state.Combat.Player.Energy; energy >= 3 {
+		hints = append(hints, loc.Paragraph(
+			fmt.Sprintf("High energy available (%d). Spend it all before ending turn; wasted energy is wasted tempo.", energy),
+			fmt.Sprintf("当前能量较高（%d）。结束回合前尽量把能量花完，浪费能量就是浪费节奏。", energy),
+		))
 	}
 
 	if liveEnemies >= 3 {
@@ -126,15 +129,15 @@ func buildCombatHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
 	}
 
 	enemyBuffing := false
-	for _, enemy := range nestedList(state.Combat, "enemies") {
+	for _, enemy := range state.Combat.Enemies {
 		if enemyBuffing {
 			break
 		}
-		if !fieldBool(enemy, "isAlive") {
+		if !enemy.IsAlive {
 			continue
 		}
-		for _, intent := range nestedList(enemy, "intents") {
-			intentType := strings.ToLower(fieldString(intent, "type"))
+		for _, intent := range enemy.Intents {
+			intentType := strings.ToLower(intent.IntentType)
 			if strings.Contains(intentType, "buff") || strings.Contains(intentType, "strategic") {
 				hints = append(hints, loc.Paragraph(
 					"An enemy is buffing; use this breathing room to deal damage or set up, not panic-block.",
@@ -150,11 +153,11 @@ func buildCombatHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
 }
 
 func buildMapHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
-	currentHP, okCurrent := fieldInt(state.Run, "currentHp")
-	maxHP, okMax := fieldInt(state.Run, "maxHp")
-	if !okCurrent || !okMax || maxHP <= 0 {
+	if state == nil || state.Run == nil || state.Run.MaxHp <= 0 {
 		return nil
 	}
+	currentHP := state.Run.CurrentHp
+	maxHP := state.Run.MaxHp
 
 	var hints []string
 	if currentHP*3 <= maxHP {
@@ -168,7 +171,7 @@ func buildMapHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
 		))
 	}
 
-	if gold, ok := fieldInt(state.Run, "gold"); ok && gold >= 120 {
+	if gold := state.Run.Gold; gold >= 120 {
 		hints = append(hints, loc.Paragraph(
 			fmt.Sprintf("Economy note: %d gold is enough to justify converting resources soon at a shop or removal opportunity.", gold),
 			fmt.Sprintf("经济提示：你现在有 %d 金币，已经值得尽快找商店或移除机会把资源换成强度。", gold),
@@ -188,8 +191,8 @@ func buildMapHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
 
 func buildShopHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
 	var hints []string
-	if cardRemoval := asMap(state.Shop["cardRemoval"]); len(cardRemoval) > 0 && fieldBool(cardRemoval, "available") && fieldBool(cardRemoval, "enoughGold") {
-		if price, ok := fieldInt(cardRemoval, "price"); ok {
+	if state != nil && state.Shop != nil && state.Shop.CardRemoval != nil && state.Shop.CardRemoval.IsStocked && state.Shop.CardRemoval.EnoughGold {
+		if price := state.Shop.CardRemoval.Price; price > 0 {
 			hints = append(hints, loc.Paragraph(
 				fmt.Sprintf("Shop priority: card removal is available and affordable at %d gold. Compare other purchases against the value of deck thinning.", price),
 				fmt.Sprintf("商店优先级：移除卡牌当前可买，价格是 %d 金币。先拿它和其他购买做比较，别低估精简牌组的价值。", price),
@@ -201,7 +204,7 @@ func buildShopHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
 			))
 		}
 	}
-	if gold, ok := fieldInt(state.Run, "gold"); ok && gold >= 140 {
+	if state != nil && state.Run != nil && state.Run.Gold >= 140 {
 		hints = append(hints, loc.Paragraph(
 			"Do not leave this shop carrying a large pile of gold unless every affordable option is low impact.",
 			"除非所有买得起的东西都很低价值，否则不要带着大把金币离开这个商店。",
@@ -213,15 +216,18 @@ func buildShopHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
 func buildRewardHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
 	var hints []string
 
-	currentHP, okCurrent := fieldInt(state.Run, "currentHp")
-	maxHP, okMax := fieldInt(state.Run, "maxHp")
-	if okCurrent && okMax && maxHP > 0 && currentHP*3 <= maxHP {
+	currentHP, maxHP := 0, 0
+	if state != nil && state.Run != nil {
+		currentHP = state.Run.CurrentHp
+		maxHP = state.Run.MaxHp
+	}
+	if maxHP > 0 && currentHP*3 <= maxHP {
 		hints = append(hints, loc.Paragraph(
 			fmt.Sprintf("Reward bias: HP is low at %d/%d. Prefer cards and choices that stabilize survival, consistency, or immediate tempo over speculative greed.", currentHP, maxHP),
 			fmt.Sprintf("奖励偏置：当前血量只有 %d/%d。优先能稳住生存、提高稳定性或立刻带来节奏的选择，不要贪远期。", currentHP, maxHP),
 		))
 	}
-	if floor := fieldIntValue(state.Run, "floor"); floor > 0 && floor <= 12 {
+	if floor := runFloor(state); floor > 0 && floor <= 12 {
 		hints = append(hints, loc.Paragraph(
 			"Early-floor reward rule: prioritize immediate combat strength and reliable block before niche scaling.",
 			"前中期奖励规则：先拿立刻能提升战斗力和稳定格挡的东西，再考虑偏门成长。",
@@ -233,19 +239,11 @@ func buildRewardHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
 }
 
 func buildDeckQualityHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
-	if state == nil || state.Run == nil {
-		return nil
-	}
-	raw, ok := state.Run["deck"]
-	if !ok {
-		return nil
-	}
-	items, ok := raw.([]interface{})
-	if !ok || len(items) == 0 {
+	if state == nil || state.Run == nil || len(state.Run.Deck) == 0 {
 		return nil
 	}
 
-	deckSize := len(items)
+	deckSize := len(state.Run.Deck)
 	var hints []string
 
 	switch {
@@ -262,16 +260,13 @@ func buildDeckQualityHints(state *game.StateSnapshot, loc i18n.Localizer) []stri
 	}
 
 	attacks, defenses := 0, 0
-	for _, item := range items {
-		card, ok := item.(map[string]any)
-		if !ok {
-			continue
-		}
-		cardType := strings.ToLower(fieldString(card, "type"))
+	for _, card := range state.Run.Deck {
+		// RunCard only has CardID and Name; infer type from name heuristically
+		name := strings.ToLower(card.Name)
 		switch {
-		case strings.Contains(cardType, "attack"):
+		case strings.Contains(name, "strike") || strings.Contains(name, "attack"):
 			attacks++
-		case strings.Contains(cardType, "skill"), strings.Contains(cardType, "defense"):
+		case strings.Contains(name, "defend") || strings.Contains(name, "block") || strings.Contains(name, "skill"):
 			defenses++
 		}
 	}
@@ -293,11 +288,11 @@ func buildDeckQualityHints(state *game.StateSnapshot, loc i18n.Localizer) []stri
 }
 
 func buildRestHints(state *game.StateSnapshot, loc i18n.Localizer) []string {
-	currentHP, okCurrent := fieldInt(state.Run, "currentHp")
-	maxHP, okMax := fieldInt(state.Run, "maxHp")
-	if !okCurrent || !okMax || maxHP <= 0 {
+	if state == nil || state.Run == nil || state.Run.MaxHp <= 0 {
 		return nil
 	}
+	currentHP := state.Run.CurrentHp
+	maxHP := state.Run.MaxHp
 
 	var hints []string
 	hpPercent := currentHP * 100 / maxHP

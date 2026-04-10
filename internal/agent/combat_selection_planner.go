@@ -21,7 +21,7 @@ func isCombatSelectionState(state *game.StateSnapshot) bool {
 	if state == nil || !strings.EqualFold(state.Screen, "CARD_SELECTION") {
 		return false
 	}
-	if !strings.EqualFold(fieldString(state.Selection, "sourceScreen"), "COMBAT") {
+	if !strings.EqualFold(state.Selection.SourceScreen, "COMBAT") {
 		return false
 	}
 	return hasAction(state, "select_deck_card")
@@ -53,8 +53,8 @@ func analyzeCombatSelection(state *game.StateSnapshot, language i18n.Language, m
 
 	reasons := []string{
 		loc.Label(
-			fmt.Sprintf("Selection source hint: %s.", valueOrDash(fieldString(state.Selection, "sourceHint"))),
-			fmt.Sprintf("当前选牌来源提示：%s。", valueOrDash(fieldString(state.Selection, "sourceHint"))),
+			fmt.Sprintf("Selection source hint: %s.", valueOrDash(state.Selection.SourceHint)),
+			fmt.Sprintf("当前选牌来源提示：%s。", valueOrDash(state.Selection.SourceHint)),
 		),
 	}
 	if incoming := buildCombatSnapshot(state, nil).IncomingDamage; incoming > 0 {
@@ -88,7 +88,7 @@ func analyzeCombatSelection(state *game.StateSnapshot, language i18n.Language, m
 }
 
 func inferCombatSelectionPurpose(state *game.StateSnapshot) combatSelectionPurpose {
-	text := strings.ToLower(strings.TrimSpace(fieldString(state.Selection, "prompt") + " " + fieldString(state.Selection, "sourceHint")))
+	text := strings.ToLower(strings.TrimSpace(state.Selection.Prompt + " " + state.Selection.SourceHint))
 	switch {
 	case strings.Contains(text, "消耗"), strings.Contains(text, "exhaust"), strings.Contains(text, "burningpact"), strings.Contains(text, "true_grit"):
 		return combatSelectionPurposeExhaust
@@ -100,13 +100,16 @@ func inferCombatSelectionPurpose(state *game.StateSnapshot) combatSelectionPurpo
 }
 
 func rankCombatSelectionCandidates(state *game.StateSnapshot, purpose combatSelectionPurpose) []CombatPlanCandidate {
-	cards := nestedList(state.Selection, "cards")
+	if state.Selection == nil {
+		return nil
+	}
+	cards := state.Selection.Cards
 	snapshot := buildCombatSnapshot(state, nil)
 	candidates := make([]CombatPlanCandidate, 0, len(cards))
 	for _, card := range cards {
-		index := fieldIntValue(card, "index")
-		label := fmt.Sprintf("select [%d] %s", index, fallbackID(fieldString(card, "name"), fieldString(card, "cardId")))
-		score := scoreCombatSelectionCard(card, snapshot, purpose)
+		index := card.Index
+		label := fmt.Sprintf("select [%d] %s", index, fallbackID(card.Name, card.CardID))
+		score := scoreCombatSelectionCardTyped(card, snapshot, purpose)
 		candidates = append(candidates, CombatPlanCandidate{
 			Action: "select_deck_card",
 			Label:  label,
@@ -122,10 +125,24 @@ func rankCombatSelectionCandidates(state *game.StateSnapshot, purpose combatSele
 	return candidates
 }
 
+func scoreCombatSelectionCardTyped(card game.CardState, snapshot CombatSnapshot, purpose combatSelectionPurpose) float64 {
+	cardID := strings.ToUpper(strings.TrimSpace(card.CardID))
+	name := strings.ToLower(strings.TrimSpace(card.Name))
+	cost := 0
+	if card.EnergyCost != nil {
+		cost = *card.EnergyCost
+	}
+	return scoreCombatSelectionCardInner(cardID, name, cost, snapshot, purpose)
+}
+
 func scoreCombatSelectionCard(card map[string]any, snapshot CombatSnapshot, purpose combatSelectionPurpose) float64 {
 	cardID := strings.ToUpper(strings.TrimSpace(firstNonEmpty(fieldString(card, "cardId"), fieldString(card, "id"))))
 	name := strings.ToLower(strings.TrimSpace(fieldString(card, "name")))
 	cost := fieldIntValue(card, "energyCost")
+	return scoreCombatSelectionCardInner(cardID, name, cost, snapshot, purpose)
+}
+
+func scoreCombatSelectionCardInner(cardID, name string, cost int, snapshot CombatSnapshot, purpose combatSelectionPurpose) float64 {
 
 	isStatusLike := containsAny(cardID, "SLIMED", "WOUND", "DAZED", "BURN", "VOID") ||
 		containsAny(strings.ToUpper(name), "SLIMED", "WOUND", "DAZED", "BURN", "VOID")

@@ -56,8 +56,8 @@ func localizedRiskBand(loc i18n.Localizer, riskBand string) string {
 
 func estimateMapNodeDepth(state *game.StateSnapshot, node map[string]any) DepthEstimate {
 	hp := hpRatio(state)
-	gold := fieldIntValue(state.Run, "gold")
-	floor := fieldIntValue(state.Run, "floor")
+	gold := runGold(state)
+	floor := runFloor(state)
 	nodeType := normalizeMapNodeType(fieldString(node, "nodeType"))
 
 	survival := 0.60
@@ -163,7 +163,7 @@ func estimateMapNodeDepth(state *game.StateSnapshot, node map[string]any) DepthE
 func estimateRewardCardDepth(state *game.StateSnapshot, card map[string]any) DepthEstimate {
 	cardID := strings.ToUpper(strings.TrimSpace(firstNonEmpty(fieldString(card, "cardId"), fieldString(card, "id"))))
 	name := strings.ToLower(strings.TrimSpace(fieldString(card, "name")))
-	floor := fieldIntValue(state.Run, "floor")
+	floor := runFloor(state)
 	hp := hpRatio(state)
 
 	survival := 0.48
@@ -233,7 +233,7 @@ func estimateRewardCardDepth(state *game.StateSnapshot, card map[string]any) Dep
 func estimateShopCardDepth(state *game.StateSnapshot, card map[string]any) DepthEstimate {
 	estimate := estimateRewardCardDepth(state, card)
 	price := fieldIntValue(card, "price")
-	gold := fieldIntValue(state.Run, "gold")
+	gold := runGold(state)
 
 	estimate.ResourceConversionOdds = clampProbability(estimate.ResourceConversionOdds + 0.34 - float64(price)/220.0)
 	estimate.DepthAdvanceOdds = clampProbability(estimate.DepthAdvanceOdds - float64(price)/360.0)
@@ -246,8 +246,8 @@ func estimateShopCardDepth(state *game.StateSnapshot, card map[string]any) Depth
 
 func estimateShopRelicDepth(state *game.StateSnapshot, relic map[string]any) DepthEstimate {
 	price := fieldIntValue(relic, "price")
-	gold := fieldIntValue(state.Run, "gold")
-	floor := fieldIntValue(state.Run, "floor")
+	gold := runGold(state)
+	floor := runFloor(state)
 	name := strings.ToLower(strings.TrimSpace(firstNonEmpty(fieldString(relic, "name"), fieldString(relic, "relicId"), fieldString(relic, "id"))))
 
 	survival := 0.56
@@ -296,7 +296,7 @@ func estimateShopRelicDepth(state *game.StateSnapshot, relic map[string]any) Dep
 
 func estimateShopPotionDepth(state *game.StateSnapshot, potion map[string]any) DepthEstimate {
 	price := fieldIntValue(potion, "price")
-	gold := fieldIntValue(state.Run, "gold")
+	gold := runGold(state)
 	name := strings.ToLower(strings.TrimSpace(firstNonEmpty(fieldString(potion, "name"), fieldString(potion, "potionId"), fieldString(potion, "id"))))
 
 	survival := 0.48
@@ -326,9 +326,9 @@ func estimateShopPotionDepth(state *game.StateSnapshot, potion map[string]any) D
 }
 
 func estimateCardRemovalDepth(state *game.StateSnapshot) DepthEstimate {
-	deckCount := fieldIntValue(state.Run, "deckCount")
-	floor := fieldIntValue(state.Run, "floor")
-	gold := fieldIntValue(state.Run, "gold")
+	deckCount := runDeckCount(state)
+	floor := runFloor(state)
+	gold := runGold(state)
 	hp := hpRatio(state)
 
 	survival := 0.58
@@ -374,14 +374,12 @@ func highLeverageProbabilityLines(state *game.StateSnapshot, language i18n.Langu
 			estimate DepthEstimate
 		}
 		var options []option
-		for _, node := range nestedList(state.Map, "availableNodes") {
-			index, ok := fieldInt(node, "index")
-			if !ok {
-				continue
+		if state.Map != nil {
+			for _, node := range state.Map.AvailableNodes {
+				nodeMap := mapNodeToMap(node)
+				label := fmt.Sprintf("%s %d (%s)", loc.Label("Node", "节点"), node.Index, node.NodeType)
+				options = append(options, option{label: label, estimate: estimateMapNodeDepth(state, nodeMap)})
 			}
-			nodeType := fieldString(node, "nodeType")
-			label := fmt.Sprintf("%s %d (%s)", loc.Label("Node", "节点"), index, nodeType)
-			options = append(options, option{label: label, estimate: estimateMapNodeDepth(state, node)})
 		}
 		if len(options) == 0 {
 			return nil
@@ -400,7 +398,7 @@ func highLeverageProbabilityLines(state *game.StateSnapshot, language i18n.Langu
 	case "REWARD", "CARD_SELECTION":
 		cards := rewardCardOptions(state)
 		if len(cards) == 0 && strings.EqualFold(state.Screen, "CARD_SELECTION") {
-			cards = nestedList(state.Selection, "cards")
+			cards = selectionCardsMaps(state)
 		}
 		if len(cards) == 0 {
 			return nil
@@ -510,9 +508,8 @@ func clampProbability(value float64) float64 {
 }
 
 func hasAffordableCardRemoval(state *game.StateSnapshot) bool {
-	if state == nil {
+	if state == nil || state.Shop == nil || state.Shop.CardRemoval == nil {
 		return false
 	}
-	cardRemoval := nestedMap(state.Shop, "cardRemoval")
-	return len(cardRemoval) > 0 && fieldBool(cardRemoval, "available") && fieldBool(cardRemoval, "enoughGold")
+	return state.Shop.CardRemoval.IsStocked && state.Shop.CardRemoval.EnoughGold
 }

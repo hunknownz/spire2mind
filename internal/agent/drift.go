@@ -70,10 +70,14 @@ func rewardTransitionWithinScreen(expected *game.StateSnapshot, live *game.State
 		return false
 	}
 
-	return !strings.EqualFold(fieldString(expected.Reward, "phase"), fieldString(live.Reward, "phase")) ||
-		!strings.EqualFold(fieldString(expected.Reward, "sourceScreen"), fieldString(live.Reward, "sourceScreen")) ||
-		!strings.EqualFold(fieldString(expected.Reward, "sourceHint"), fieldString(live.Reward, "sourceHint")) ||
-		fieldBool(expected.Reward, "pendingCardChoice") != fieldBool(live.Reward, "pendingCardChoice")
+	ep, lp := expected.Reward, live.Reward
+	if ep == nil || lp == nil {
+		return ep != lp
+	}
+	return !strings.EqualFold(ep.Phase, lp.Phase) ||
+		!strings.EqualFold(ep.SourceScreen, lp.SourceScreen) ||
+		!strings.EqualFold(ep.SourceHint, lp.SourceHint) ||
+		ep.PendingCardChoice != lp.PendingCardChoice
 }
 
 func selectionSeamWithinScreen(expected *game.StateSnapshot, live *game.StateSnapshot) bool {
@@ -84,11 +88,15 @@ func selectionSeamWithinScreen(expected *game.StateSnapshot, live *game.StateSna
 		return false
 	}
 
-	return !strings.EqualFold(fieldString(expected.Selection, "kind"), fieldString(live.Selection, "kind")) ||
-		!strings.EqualFold(fieldString(expected.Selection, "sourceScreen"), fieldString(live.Selection, "sourceScreen")) ||
-		!strings.EqualFold(fieldString(expected.Selection, "sourceHint"), fieldString(live.Selection, "sourceHint")) ||
-		!strings.EqualFold(fieldString(expected.Selection, "mode"), fieldString(live.Selection, "mode")) ||
-		fieldBool(expected.Selection, "requiresConfirmation") != fieldBool(live.Selection, "requiresConfirmation")
+	es, ls := expected.Selection, live.Selection
+	if es == nil || ls == nil {
+		return es != ls
+	}
+	return !strings.EqualFold(es.Kind, ls.Kind) ||
+		!strings.EqualFold(es.SourceScreen, ls.SourceScreen) ||
+		!strings.EqualFold(es.SourceHint, ls.SourceHint) ||
+		!strings.EqualFold(es.Mode, ls.Mode) ||
+		es.RequiresConfirmation != ls.RequiresConfirmation
 }
 
 func stateUnavailableError(expected *game.StateSnapshot, live *game.StateSnapshot) error {

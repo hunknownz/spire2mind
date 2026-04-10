@@ -90,11 +90,10 @@ func canNormalizeActionRequest(expectedState *game.StateSnapshot, liveState *gam
 		if !ok {
 			return false
 		}
-		if matchCardOption(expectedCard, liveCard) {
+		if expectedCard.CardID == liveCard.CardID && expectedCard.CardID != "" {
 			return true
 		}
-		return stableIdentity(expectedCard, "cardId", "id") == "" &&
-			stableIdentity(liveCard, "cardId", "id") == "" &&
+		return expectedCard.CardID == "" && liveCard.CardID == "" &&
 			*original.CardIndex == *normalized.CardIndex
 	default:
 		return true

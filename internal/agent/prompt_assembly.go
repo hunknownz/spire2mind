@@ -522,9 +522,12 @@ func (p *PromptAssemblyPipeline) structuredScreenGuidance(state *game.StateSnaps
 }
 
 func (p *PromptAssemblyPipeline) runObjectiveBlock(state *game.StateSnapshot, loc i18n.Localizer) string {
-	floor, _ := fieldInt(state.Run, "floor")
-	currentHP, _ := fieldInt(state.Run, "currentHp")
-	maxHP, _ := fieldInt(state.Run, "maxHp")
+	floor, currentHP, maxHP := 0, 0, 0
+	if state != nil && state.Run != nil {
+		floor = state.Run.Floor
+		currentHP = state.Run.CurrentHp
+		maxHP = state.Run.MaxHp
+	}
 	lowHP := maxHP > 0 && currentHP*100 <= maxHP*45
 
 	stageObjectiveEN := "Build a run that can keep climbing: take stable lines, convert resources into immediate power, and avoid unnecessary HP loss."
@@ -637,54 +640,63 @@ func minimalRunPayload(state *game.StateSnapshot) map[string]any {
 	if state == nil || state.Run == nil {
 		return nil
 	}
-	run := map[string]any{}
-	copyMapKey(run, "floor", state.Run, "floor")
-	copyMapKey(run, "current_hp", state.Run, "currentHp")
-	copyMapKey(run, "max_hp", state.Run, "maxHp")
-	copyMapKey(run, "gold", state.Run, "gold")
-	copyMapKey(run, "character_id", state.Run, "characterId")
+	run := map[string]any{
+		"floor":        state.Run.Floor,
+		"current_hp":   state.Run.CurrentHp,
+		"max_hp":       state.Run.MaxHp,
+		"gold":         state.Run.Gold,
+		"character_id": state.Run.Character,
+	}
 	return run
 }
 
 func minimalCombatPayload(state *game.StateSnapshot) map[string]any {
-	payload := map[string]any{}
-	player := nestedMap(state.Combat, "player")
-	if len(player) > 0 {
-		snapshot := map[string]any{}
-		copyMapKey(snapshot, "current_hp", player, "currentHp")
-		copyMapKey(snapshot, "max_hp", player, "maxHp")
-		copyMapKey(snapshot, "block", player, "block")
-		copyMapKey(snapshot, "energy", player, "energy")
-		payload["player"] = snapshot
+	if state == nil || state.Combat == nil {
+		return map[string]any{}
 	}
-	if hand := nestedList(state.Combat, "hand"); len(hand) > 0 {
+	payload := map[string]any{}
+	player := state.Combat.Player
+	payload["player"] = map[string]any{
+		"current_hp": player.CurrentHp,
+		"max_hp":     player.MaxHp,
+		"block":      player.Block,
+		"energy":     player.Energy,
+	}
+	if hand := state.Combat.Hand; len(hand) > 0 {
 		cards := make([]map[string]any, 0, minInt(len(hand), 8))
 		for _, card := range hand {
-			entry := map[string]any{}
-			copyMapKey(entry, "index", card, "index")
-			copyMapKey(entry, "id", card, "id")
-			copyMapKey(entry, "name", card, "name")
-			copyMapKey(entry, "cost", card, "cost")
-			copyMapKey(entry, "playable", card, "playable")
-			copyMapKey(entry, "requires_target", card, "requiresTarget")
-			if validTargets := fieldIntSlice(card, "validTargetIndices"); len(validTargets) > 0 {
-				entry["valid_target_indices"] = validTargets
+			entry := map[string]any{
+				"index":           card.Index,
+				"name":            card.Name,
+				"playable":        card.Playable,
+				"requires_target": card.RequiresTarget,
+			}
+			if card.CardID != "" {
+				entry["id"] = card.CardID
+			}
+			if card.EnergyCost != nil {
+				entry["cost"] = *card.EnergyCost
+			}
+			if len(card.ValidTargetIndices) > 0 {
+				entry["valid_target_indices"] = card.ValidTargetIndices
 			}
 			cards = append(cards, entry)
 		}
 		payload["hand"] = cards
 	}
-	if enemies := nestedList(state.Combat, "enemies"); len(enemies) > 0 {
+	if enemies := state.Combat.Enemies; len(enemies) > 0 {
 		items := make([]map[string]any, 0, minInt(len(enemies), 6))
 		for _, enemy := range enemies {
-			entry := map[string]any{}
-			copyMapKey(entry, "index", enemy, "index")
-			copyMapKey(entry, "id", enemy, "id")
-			copyMapKey(entry, "name", enemy, "name")
-			copyMapKey(entry, "current_hp", enemy, "currentHp")
-			copyMapKey(entry, "block", enemy, "block")
-			copyMapKey(entry, "intent", enemy, "intent")
-			copyMapKey(entry, "is_hittable", enemy, "isHittable")
+			entry := map[string]any{
+				"index":      enemy.Index,
+				"name":       enemy.Name,
+				"current_hp": enemy.CurrentHp,
+				"block":      enemy.Block,
+				"is_hittable": enemy.IsHittable,
+			}
+			if enemy.EnemyID != "" {
+				entry["id"] = enemy.EnemyID
+			}
 			items = append(items, entry)
 		}
 		payload["enemies"] = items
@@ -693,74 +705,108 @@ func minimalCombatPayload(state *game.StateSnapshot) map[string]any {
 }
 
 func minimalRewardPayload(state *game.StateSnapshot) map[string]any {
+	pendingCardChoice := false
+	canProceed := false
+	if state != nil && state.Reward != nil {
+		pendingCardChoice = state.Reward.PendingCardChoice
+		canProceed = state.Reward.CanProceed
+	}
 	payload := map[string]any{
-		"pending_card_choice": fieldBool(state.Reward, "pendingCardChoice"),
-		"can_proceed":         fieldBool(state.Reward, "canProceed"),
+		"pending_card_choice": pendingCardChoice,
+		"can_proceed":         canProceed,
 	}
-	if rewards := nestedList(state.Reward, "rewards"); len(rewards) > 0 {
-		items := make([]map[string]any, 0, minInt(len(rewards), 6))
-		for _, reward := range rewards {
-			entry := map[string]any{}
-			copyMapKey(entry, "index", reward, "index")
-			copyMapKey(entry, "reward_type", reward, "rewardType")
-			copyMapKey(entry, "name", reward, "name")
-			copyMapKey(entry, "claimable", reward, "claimable")
-			items = append(items, entry)
+	if state != nil && state.Reward != nil {
+		if rewards := state.Reward.Rewards; len(rewards) > 0 {
+			items := make([]map[string]any, 0, minInt(len(rewards), 6))
+			for _, reward := range rewards {
+				items = append(items, map[string]any{
+					"index":       reward.Index,
+					"reward_type": reward.RewardType,
+					"claimable":   reward.Claimable,
+				})
+			}
+			payload["rewards"] = items
 		}
-		payload["rewards"] = items
-	}
-	if cards := nestedList(state.Reward, "cardOptions"); len(cards) > 0 {
-		items := make([]map[string]any, 0, minInt(len(cards), 5))
-		for _, card := range cards {
-			entry := map[string]any{}
-			copyMapKey(entry, "index", card, "index")
-			copyMapKey(entry, "id", card, "id")
-			copyMapKey(entry, "name", card, "name")
-			copyMapKey(entry, "cost", card, "cost")
-			items = append(items, entry)
+		if cards := state.Reward.CardOptions; len(cards) > 0 {
+			items := make([]map[string]any, 0, minInt(len(cards), 5))
+			for _, card := range cards {
+				entry := map[string]any{
+					"index": card.Index,
+					"name":  card.Name,
+				}
+				if card.CardID != "" {
+					entry["id"] = card.CardID
+				}
+				if card.EnergyCost != nil {
+					entry["cost"] = *card.EnergyCost
+				}
+				items = append(items, entry)
+			}
+			payload["card_options"] = items
 		}
-		payload["card_options"] = items
 	}
 	return payload
 }
 
 func minimalSelectionPayload(state *game.StateSnapshot) map[string]any {
-	payload := map[string]any{
-		"kind":                  fieldString(state.Selection, "kind"),
-		"source_screen":         fieldString(state.Selection, "sourceScreen"),
-		"requires_confirmation": fieldBool(state.Selection, "requiresConfirmation"),
-		"can_confirm":           fieldBool(state.Selection, "canConfirm"),
+	kind, sourceScreen := "", ""
+	requiresConfirmation, canConfirm := false, false
+	if state != nil && state.Selection != nil {
+		kind = state.Selection.Kind
+		sourceScreen = state.Selection.SourceScreen
+		requiresConfirmation = state.Selection.RequiresConfirmation
+		canConfirm = state.Selection.CanConfirm
 	}
-	if cards := nestedList(state.Selection, "cards"); len(cards) > 0 {
-		items := make([]map[string]any, 0, minInt(len(cards), 8))
-		for _, card := range cards {
-			entry := map[string]any{}
-			copyMapKey(entry, "index", card, "index")
-			copyMapKey(entry, "id", card, "id")
-			copyMapKey(entry, "name", card, "name")
-			items = append(items, entry)
+	payload := map[string]any{
+		"kind":                  kind,
+		"source_screen":         sourceScreen,
+		"requires_confirmation": requiresConfirmation,
+		"can_confirm":           canConfirm,
+	}
+	if state != nil && state.Selection != nil {
+		if cards := state.Selection.Cards; len(cards) > 0 {
+			items := make([]map[string]any, 0, minInt(len(cards), 8))
+			for _, card := range cards {
+				entry := map[string]any{
+					"index": card.Index,
+					"name":  card.Name,
+				}
+				if card.CardID != "" {
+					entry["id"] = card.CardID
+				}
+				items = append(items, entry)
+			}
+			payload["cards"] = items
 		}
-		payload["cards"] = items
 	}
 	return payload
 }
 
 func minimalEventPayload(state *game.StateSnapshot) map[string]any {
-	payload := map[string]any{
-		"id":          fieldString(state.Event, "id"),
-		"name":        firstNonEmpty(fieldString(state.Event, "name"), fieldString(state.Event, "title")),
-		"is_finished": fieldBool(state.Event, "isFinished"),
+	id, name := "", ""
+	isFinished := false
+	if state != nil && state.Event != nil {
+		id = state.Event.EventID
+		name = firstNonEmpty(state.Event.Title, state.Event.EventID)
+		isFinished = state.Event.IsFinished
 	}
-	if options := nestedList(state.Event, "options"); len(options) > 0 {
-		items := make([]map[string]any, 0, minInt(len(options), 6))
-		for _, option := range options {
-			entry := map[string]any{}
-			copyMapKey(entry, "index", option, "index")
-			copyMapKey(entry, "label", option, "label")
-			copyMapKey(entry, "is_locked", option, "isLocked")
-			items = append(items, entry)
+	payload := map[string]any{
+		"id":          id,
+		"name":        name,
+		"is_finished": isFinished,
+	}
+	if state != nil && state.Event != nil {
+		if options := state.Event.Options; len(options) > 0 {
+			items := make([]map[string]any, 0, minInt(len(options), 6))
+			for _, option := range options {
+				items = append(items, map[string]any{
+					"index":     option.Index,
+					"label":     option.Title,
+					"is_locked": option.IsLocked,
+				})
+			}
+			payload["options"] = items
 		}
-		payload["options"] = items
 	}
 	return payload
 }
@@ -779,7 +825,7 @@ func minimalShopPayload(state *game.StateSnapshot) map[string]any {
 		source string
 		target string
 	}{{"cards", "cards"}, {"relics", "relics"}, {"potions", "potions"}} {
-		items := nestedList(state.Shop, section.source)
+		items := shopItemsToMaps(state, section.source)
 		if len(items) == 0 {
 			continue
 		}
@@ -799,14 +845,14 @@ func minimalShopPayload(state *game.StateSnapshot) map[string]any {
 
 func minimalRestPayload(state *game.StateSnapshot) map[string]any {
 	payload := map[string]any{}
-	if options := nestedList(state.Rest, "options"); len(options) > 0 {
-		items := make([]map[string]any, 0, minInt(len(options), 6))
-		for _, option := range options {
-			entry := map[string]any{}
-			copyMapKey(entry, "index", option, "index")
-			copyMapKey(entry, "label", option, "label")
-			copyMapKey(entry, "is_enabled", option, "isEnabled")
-			items = append(items, entry)
+	if state != nil && state.Rest != nil && len(state.Rest.Options) > 0 {
+		items := make([]map[string]any, 0, minInt(len(state.Rest.Options), 6))
+		for _, option := range state.Rest.Options {
+			items = append(items, map[string]any{
+				"index":      option.Index,
+				"label":      option.Title,
+				"is_enabled": option.IsEnabled,
+			})
 		}
 		payload["options"] = items
 	}
@@ -815,14 +861,13 @@ func minimalRestPayload(state *game.StateSnapshot) map[string]any {
 
 func minimalMapPayload(state *game.StateSnapshot) map[string]any {
 	payload := map[string]any{}
-	if nodes := nestedList(state.Map, "availableNodes"); len(nodes) > 0 {
-		items := make([]map[string]any, 0, minInt(len(nodes), 8))
-		for _, node := range nodes {
-			entry := map[string]any{}
-			copyMapKey(entry, "index", node, "index")
-			copyMapKey(entry, "symbol", node, "symbol")
-			copyMapKey(entry, "node_type", node, "nodeType")
-			items = append(items, entry)
+	if state != nil && state.Map != nil && len(state.Map.AvailableNodes) > 0 {
+		items := make([]map[string]any, 0, minInt(len(state.Map.AvailableNodes), 8))
+		for _, node := range state.Map.AvailableNodes {
+			items = append(items, map[string]any{
+				"index":     node.Index,
+				"node_type": node.NodeType,
+			})
 		}
 		payload["available_nodes"] = items
 	}
@@ -831,9 +876,10 @@ func minimalMapPayload(state *game.StateSnapshot) map[string]any {
 
 func minimalGameOverPayload(state *game.StateSnapshot) map[string]any {
 	payload := map[string]any{}
-	copyMapKey(payload, "can_continue", state.GameOver, "canContinue")
-	copyMapKey(payload, "can_return_to_main_menu", state.GameOver, "canReturnToMainMenu")
-	copyMapKey(payload, "summary_complete", state.GameOver, "summaryComplete")
+	if state != nil && state.GameOver != nil {
+		payload["can_continue"] = state.GameOver.CanContinue
+		payload["can_return_to_main_menu"] = state.GameOver.CanReturn
+	}
 	return payload
 }
 

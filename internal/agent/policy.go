@@ -148,7 +148,7 @@ func ChooseDeterministicAction(state *game.StateSnapshot, maxAttempts int, attem
 			return game.ActionRequest{Action: "open_chest"}, "open the treasure chest", true
 		}
 		if hasAction(state, "choose_treasure_relic") {
-			if index := firstIndexedOption(state.Chest, "relicOptions"); index != nil {
+			if index := firstIndexedOptionTyped(state, "Chest", "relicOptions"); index != nil {
 				return game.ActionRequest{Action: "choose_treasure_relic", OptionIndex: index}, "take the first available relic", true
 			}
 		}
@@ -157,7 +157,7 @@ func ChooseDeterministicAction(state *game.StateSnapshot, maxAttempts int, attem
 		}
 	case "EVENT":
 		if hasAction(state, "choose_event_option") {
-			if fieldBool(state.Event, "isFinished") {
+			if state.Event != nil && state.Event.IsFinished {
 				optionIndex := 0
 				return game.ActionRequest{Action: "choose_event_option", OptionIndex: &optionIndex}, "advance past the finished event", true
 			}
@@ -235,7 +235,7 @@ func chooseSingleActionShortcut(state *game.StateSnapshot) (game.ActionRequest, 
 	action := state.AvailableActions[0]
 	if action == "choose_event_option" {
 		optionIndex := 0
-		if fieldBool(state.Event, "isFinished") {
+		if state.Event != nil && state.Event.IsFinished {
 			return game.ActionRequest{Action: action, OptionIndex: &optionIndex}, "single legal finished-event action", true
 		}
 		return game.ActionRequest{Action: action, OptionIndex: &optionIndex}, "single legal event action", true
@@ -254,67 +254,64 @@ func chooseSingleActionShortcut(state *game.StateSnapshot) (game.ActionRequest, 
 }
 
 func firstUnlockedCharacterIndex(state *game.StateSnapshot) *int {
-	for _, option := range nestedList(state.CharacterSelect, "characters") {
-		if fieldBool(option, "isLocked") {
-			continue
-		}
-		if fieldBool(option, "isRandom") {
-			continue
-		}
-
-		if index, ok := fieldInt(option, "index"); ok {
-			return &index
-		}
+	if state == nil || state.CharacterSelect == nil {
+		return nil
 	}
-
+	for _, option := range state.CharacterSelect.Characters {
+		if option.IsLocked {
+			continue
+		}
+		if option.IsRandom {
+			continue
+		}
+		index := option.Index
+		return &index
+	}
 	return nil
 }
 
 func characterAlreadySelected(state *game.StateSnapshot) bool {
-	if state == nil {
+	if state == nil || state.CharacterSelect == nil {
 		return false
 	}
 
-	selectedID := fieldString(state.CharacterSelect, "selectedCharacterId")
+	selectedID := state.CharacterSelect.SelectedCharacter
 	if selectedID == "" {
 		return false
 	}
 
-	for _, option := range nestedList(state.CharacterSelect, "characters") {
-		if fieldString(option, "characterId") != selectedID {
+	for _, option := range state.CharacterSelect.Characters {
+		if option.CharID != selectedID {
 			continue
 		}
-
-		return fieldBool(option, "isSelected") || !fieldBool(option, "isLocked")
+		return option.IsSelected || !option.IsLocked
 	}
 
 	return false
 }
 
 func preferredRestOption(state *game.StateSnapshot) *int {
-	rest := state.Rest
-	if len(rest) == 0 {
+	if state == nil || state.Rest == nil || len(state.Rest.Options) == 0 {
 		return nil
 	}
+	rest := state.Rest
 
 	if hpRatio(state) < 0.55 {
-		if index := firstMatchingRestOption(rest, "heal", "rest", "recover"); index != nil {
+		if index := firstMatchingRestOptionTyped(rest, "heal", "rest", "recover"); index != nil {
 			return index
 		}
 	}
 
-	if index := firstMatchingRestOption(rest, "smith", "upgrade", "enhance", "enchant"); index != nil {
+	if index := firstMatchingRestOptionTyped(rest, "smith", "upgrade", "enhance", "enchant"); index != nil {
 		return index
 	}
 
 	var enabled []int
-	for _, option := range nestedList(rest, "options") {
-		if !fieldBool(option, "isEnabled") {
+	for _, option := range rest.Options {
+		if !option.IsEnabled {
 			continue
 		}
-		if index, ok := fieldInt(option, "index"); ok {
-			enabled = append(enabled, index)
-		}
+		enabled = append(enabled, option.Index)
 	}
 
 	if len(enabled) == 1 {
@@ -324,18 +321,19 @@ func preferredRestOption(state *game.StateSnapshot) *int {
 	return nil
 }
 
-func firstEnabledEventOption(event map[string]any) *int {
+func firstEnabledEventOption(event *game.EventState) *int {
+	if event == nil {
+		return nil
+	}
 	var enabled []int
-	for _, option := range nestedList(event, "options") {
-		if fieldBool(option, "isLocked") {
+	for _, option := range event.Options {
+		if option.IsLocked {
 			continue
 		}
-		if fieldBool(option, "isProceed") && len(enabled) > 0 {
+		if option.IsProceed && len(enabled) > 0 {
 			continue
 		}
-		if index, ok := fieldInt(option, "index"); ok {
-			enabled = append(enabled, index)
-		}
+		enabled = append(enabled, option.Index)
 	}
 
 	if len(enabled) > 0 {
@@ -345,15 +343,16 @@ func firstEnabledEventOption(event map[string]any) *int {
 	return nil
 }
 
-func firstClaimableReward(reward map[string]any) *int {
+func firstClaimableReward(reward *game.RewardState) *int {
+	if reward == nil {
+		return nil
+	}
 	var claimable []int
-	for _, option := range nestedList(reward, "rewards") {
-		if !fieldBool(option, "claimable") {
+	for _, option := range reward.Rewards {
+		if !option.Claimable {
 			continue
 		}
-		if index, ok := fieldInt(option, "index"); ok {
-			claimable = append(claimable, index)
-		}
+		claimable = append(claimable, option.Index)
 	}
 
 	if len(claimable) > 0 {
@@ -364,18 +363,15 @@ func firstClaimableReward(reward map[string]any) *int {
 }
 
 func selectionCanConfirmNow(state *game.StateSnapshot) bool {
-	if state == nil {
+	if state == nil || state.Selection == nil {
 		return false
 	}
-	if !fieldBool(state.Selection, "requiresConfirmation") || !fieldBool(state.Selection, "canConfirm") {
+	if !state.Selection.RequiresConfirmation || !state.Selection.CanConfirm {
 		return false
 	}
-	selectedCount, ok := fieldInt(state.Selection, "selectedCount")
-	if !ok {
-		return false
-	}
-	minSelect, ok := fieldInt(state.Selection, "minSelect")
-	if !ok || minSelect <= 0 {
+	selectedCount := state.Selection.CurrentSelection
+	minSelect := state.Selection.MinSelection
+	if minSelect <= 0 {
 		minSelect = 1
 	}
 	return selectedCount >= minSelect
@@ -387,10 +383,14 @@ func chooseDeckSelectionAction(state *game.StateSnapshot) (game.ActionRequest, s
 	}
 
 	if hasAction(state, "confirm_selection") && selectionCanConfirmNow(state) {
-		selectedCount, _ := fieldInt(state.Selection, "selectedCount")
-		minSelect, _ := fieldInt(state.Selection, "minSelect")
-		if minSelect <= 0 {
-			minSelect = 1
+		selectedCount := 0
+		minSelect := 1
+		if state.Selection != nil {
+			selectedCount = state.Selection.CurrentSelection
+			minSelect = state.Selection.MinSelection
+			if minSelect <= 0 {
+				minSelect = 1
+			}
 		}
 		return game.ActionRequest{Action: "confirm_selection"}, fmt.Sprintf("confirm the current selection after choosing %d/%d cards", selectedCount, minSelect), true
 	}
@@ -419,45 +419,51 @@ func chooseDeckSelectionAction(state *game.StateSnapshot) (game.ActionRequest, s
 		return game.ActionRequest{Action: "select_deck_card", OptionIndex: index}, "select the next unselected deck card", true
 	}
 
-	if index := firstIndexedOption(state.Selection, "cards"); index != nil {
+	if index := firstIndexedOptionTyped(state, "Selection", "cards"); index != nil {
 		return game.ActionRequest{Action: "select_deck_card", OptionIndex: index}, "select the first available deck card", true
 	}
 
 	return game.ActionRequest{}, "", false
 }
 
-func firstUnselectedDeckSelectionOption(selection map[string]any) *int {
-	for _, option := range nestedList(selection, "cards") {
-		if fieldBool(option, "isSelected") {
+func firstUnselectedDeckSelectionOption(selection *game.SelectionState) *int {
+	if selection == nil {
+		return nil
+	}
+	for _, option := range selection.Cards {
+		if option.IsSelected != nil && *option.IsSelected {
 			continue
 		}
-		if index, ok := fieldInt(option, "index"); ok {
-			return &index
-		}
+		index := option.Index
+		return &index
 	}
 
 	return nil
 }
 
-func shopHasAffordableOption(shop map[string]any) bool {
-	for _, card := range nestedList(shop, "cards") {
-		if fieldBool(card, "enoughGold") {
+func shopHasAffordableOption(shop *game.ShopState) bool {
+	if shop == nil {
+		return false
+	}
+	for _, card := range shop.Cards {
+		if card.EnoughGold {
 			return true
 		}
 	}
-	for _, relic := range nestedList(shop, "relics") {
-		if fieldBool(relic, "enoughGold") {
+	for _, relic := range shop.Relics {
+		if relic.EnoughGold {
 			return true
 		}
 	}
-	for _, potion := range nestedList(shop, "potions") {
-		if fieldBool(potion, "enoughGold") {
+	for _, potion := range shop.Potions {
+		if potion.EnoughGold {
 			return true
 		}
 	}
-
-	cardRemoval := nestedMap(shop, "cardRemoval")
-	return fieldBool(cardRemoval, "enoughGold")
+	if shop.CardRemoval != nil {
+		return shop.CardRemoval.EnoughGold
+	}
+	return false
 }
 
 func shouldOpenShopInventory(state *game.StateSnapshot) bool {
@@ -507,17 +513,22 @@ func chooseShopAction(state *game.StateSnapshot) (game.ActionRequest, string, bo
 }
 
 func shouldBuyCardRemoval(state *game.StateSnapshot) bool {
-	if state == nil {
+	if state == nil || state.Shop == nil || state.Shop.CardRemoval == nil {
 		return false
 	}
-	cardRemoval := nestedMap(state.Shop, "cardRemoval")
-	if len(cardRemoval) == 0 || !fieldBool(cardRemoval, "available") || !fieldBool(cardRemoval, "enoughGold") {
+	cardRemoval := state.Shop.CardRemoval
+	if !cardRemoval.IsStocked || !cardRemoval.EnoughGold {
 		return false
 	}
 
-	deckCount := fieldIntValue(state.Run, "deckCount")
-	floor := fieldIntValue(state.Run, "floor")
-	gold := fieldIntValue(state.Run, "gold")
+	deckCount := 99
+	floor := 0
+	gold := 0
+	if state.Run != nil {
+		deckCount = state.Run.DeckCount
+		floor = state.Run.Floor
+		gold = state.Run.Gold
+	}
 	if deckCount <= 0 {
 		deckCount = 99
 	}
@@ -567,7 +578,7 @@ func bestAffordableShopOption(state *game.StateSnapshot, key string, scorer func
 
 	bestIndex := -1
 	bestScore := minimumScore
-	for _, option := range nestedList(state.Shop, key) {
+	for _, option := range shopItemsToMaps(state, key) {
 		if !fieldBool(option, "enoughGold") {
 			continue
 		}
@@ -598,7 +609,7 @@ func bestAffordableShopOptionEstimate(state *game.StateSnapshot, key string, est
 	bestIndex := -1
 	bestScore := minimumScore
 	bestEstimate := DepthEstimate{}
-	for _, option := range nestedList(state.Shop, key) {
+	for _, option := range shopItemsToMaps(state, key) {
 		if !fieldBool(option, "enoughGold") {
 			continue
 		}
@@ -626,10 +637,10 @@ func scoreShopCardChoice(state *game.StateSnapshot, card map[string]any) float64
 	score := scoreRewardCardChoice(state, card)
 	price := fieldIntValue(card, "price")
 	score -= float64(price) / 35.0
-	floor := fieldIntValue(state.Run, "floor")
+	floor := runFloor(state)
 	hp := hpRatio(state)
 
-	deckCount := fieldIntValue(state.Run, "deckCount")
+	deckCount := runDeckCount(state)
 	if deckCount >= 16 {
 		score -= 1.0
 	}
@@ -652,8 +663,8 @@ func scoreShopCardChoice(state *game.StateSnapshot, card map[string]any) float64
 func scoreShopRelicChoice(state *game.StateSnapshot, relic map[string]any) float64 {
 	score := 7.0 + estimateShopRelicDepth(state, relic).Score
 	price := fieldIntValue(relic, "price")
-	gold := fieldIntValue(state.Run, "gold")
-	floor := fieldIntValue(state.Run, "floor")
+	gold := runGold(state)
+	floor := runFloor(state)
 	score -= float64(price) / 55.0
 
 	if floor <= 10 {
@@ -687,7 +698,7 @@ func scoreShopRelicChoice(state *game.StateSnapshot, relic map[string]any) float
 }
 
 func scoreShopPotionChoice(state *game.StateSnapshot, potion map[string]any) float64 {
-	gold := fieldIntValue(state.Run, "gold")
+	gold := runGold(state)
 	if gold < 180 {
 		return -10
 	}
@@ -708,10 +719,12 @@ func scoreShopPotionChoice(state *game.StateSnapshot, potion map[string]any) flo
 }
 
 func deterministicCombatAction(state *game.StateSnapshot, failures *actionFailureMemory) (game.ActionRequest, bool) {
-	hand := nestedList(state.Combat, "hand")
-	playable := []map[string]any{}
-	for _, card := range hand {
-		if fieldBool(card, "playable") {
+	if state == nil || state.Combat == nil {
+		return game.ActionRequest{}, false
+	}
+	var playable []game.CardState
+	for _, card := range state.Combat.Hand {
+		if card.Playable {
 			playable = append(playable, card)
 		}
 	}
@@ -721,11 +734,8 @@ func deterministicCombatAction(state *game.StateSnapshot, failures *actionFailur
 	}
 
 	stateDigest := digestState(state)
-	for _, card := range choosePlayableCards(playable) {
-		cardIndex, ok := fieldInt(card, "index")
-		if !ok {
-			continue
-		}
+	for _, card := range choosePlayableCardsTyped(playable) {
+		cardIndex := card.Index
 
 		request := game.ActionRequest{Action: "play_card", CardIndex: &cardIndex}
 		if cardRequiresTarget(state, card) {
@@ -746,7 +756,10 @@ func deterministicCombatAction(state *game.StateSnapshot, failures *actionFailur
 }
 
 func preferredMapNodeIndex(state *game.StateSnapshot) *int {
-	nodes := nestedList(state.Map, "availableNodes")
+	if state == nil || state.Map == nil {
+		return nil
+	}
+	nodes := state.Map.AvailableNodes
 	if len(nodes) == 0 {
 		return nil
 	}
@@ -758,13 +771,10 @@ func preferredMapNodeIndex(state *game.StateSnapshot) *int {
 
 	ranked := make([]rankedNode, 0, len(nodes))
 	for _, node := range nodes {
-		index, ok := fieldInt(node, "index")
-		if !ok {
-			continue
-		}
-		estimate := estimateMapNodeDepth(state, node)
+		nodeMap := mapNodeToMap(node)
+		estimate := estimateMapNodeDepth(state, nodeMap)
 		ranked = append(ranked, rankedNode{
-			index: index,
+			index: node.Index,
 			score: estimate.Score,
 		})
 	}
@@ -896,16 +906,16 @@ func preferredSelectionCardIndex(state *game.StateSnapshot) *int {
 		return nil
 	}
 
+	if state.Selection == nil {
+		return nil
+	}
 	bestIndex := -1
 	bestScore := -1e9
-	for _, card := range nestedList(state.Selection, "cards") {
-		index, ok := fieldInt(card, "index")
-		if !ok {
-			continue
-		}
-		score := scoreRewardCardChoice(state, card)
-		if bestIndex < 0 || score > bestScore || (score == bestScore && index < bestIndex) {
-			bestIndex = index
+	for _, card := range state.Selection.Cards {
+		cardMap := cardStateToMap(card)
+		score := scoreRewardCardChoice(state, cardMap)
+		if bestIndex < 0 || score > bestScore || (score == bestScore && card.Index < bestIndex) {
+			bestIndex = card.Index
 			bestScore = score
 		}
 	}
@@ -916,25 +926,25 @@ func preferredSelectionCardIndex(state *game.StateSnapshot) *int {
 }
 
 func isRewardCardSelection(state *game.StateSnapshot) bool {
-	if state == nil {
+	if state == nil || state.Selection == nil {
 		return false
 	}
-	sourceHint := strings.ToLower(strings.TrimSpace(fieldString(state.Selection, "sourceHint")))
-	kind := strings.ToLower(strings.TrimSpace(fieldString(state.Selection, "kind")))
+	sourceHint := strings.ToLower(strings.TrimSpace(state.Selection.SourceHint))
+	kind := strings.ToLower(strings.TrimSpace(state.Selection.Kind))
 	return strings.Contains(sourceHint, "reward") ||
 		strings.Contains(kind, "reward") ||
-		(hasAction(state, "choose_reward_card") && len(nestedList(state.Selection, "cards")) > 0)
+		(hasAction(state, "choose_reward_card") && len(state.Selection.Cards) > 0)
 }
 
 func rewardCardOptions(state *game.StateSnapshot) []map[string]any {
 	if state == nil {
 		return nil
 	}
-	if cards := nestedList(state.Reward, "cardOptions"); len(cards) > 0 {
-		return cards
+	if state.Reward != nil && len(state.Reward.CardOptions) > 0 {
+		return cardStatesToMaps(state.Reward.CardOptions)
 	}
 	if isRewardCardSelection(state) {
-		return nestedList(state.Selection, "cards")
+		return selectionCardsMaps(state)
 	}
 	return nil
 }
@@ -944,7 +954,7 @@ func scoreRewardCardChoice(state *game.StateSnapshot, card map[string]any) float
 	name := strings.ToLower(strings.TrimSpace(fieldString(card, "name")))
 	score := estimateRewardCardDepth(state, card).Score
 
-	floor := fieldIntValue(state.Run, "floor")
+	floor := runFloor(state)
 	hp := hpRatio(state)
 
 	if floor <= 6 {
@@ -1111,7 +1121,7 @@ func choosePlayableCards(playable []map[string]any) []map[string]any {
 
 func combatCardScore(card map[string]any) int {
 	score := 0
-	if cardRequiresTarget(nil, card) {
+	if fieldBool(card, "requiresTarget") {
 		score += 3
 	}
 
@@ -1137,13 +1147,10 @@ func combatCardScore(card map[string]any) int {
 }
 
 func hpRatio(state *game.StateSnapshot) float64 {
-	current, okCurrent := fieldInt(state.Run, "currentHp")
-	maximum, okMaximum := fieldInt(state.Run, "maxHp")
-	if !okCurrent || !okMaximum || maximum <= 0 {
+	if state == nil || state.Run == nil || state.Run.MaxHp <= 0 {
 		return 1
 	}
-
-	return float64(current) / float64(maximum)
+	return float64(state.Run.CurrentHp) / float64(state.Run.MaxHp)
 }
 
 func nestedList(root map[string]any, key string) []map[string]any {
@@ -1272,4 +1279,122 @@ func formatActionDebug(request game.ActionRequest) string {
 		parts = append(parts, fmt.Sprintf("target=%d", *request.TargetIndex))
 	}
 	return strings.Join(parts, " ")
+}
+
+// ── Typed run-state accessors ────────────────────────────────────
+
+func runFloor(state *game.StateSnapshot) int {
+	if state == nil || state.Run == nil {
+		return 0
+	}
+	return state.Run.Floor
+}
+
+func runGold(state *game.StateSnapshot) int {
+	if state == nil || state.Run == nil {
+		return 0
+	}
+	return state.Run.Gold
+}
+
+func runDeckCount(state *game.StateSnapshot) int {
+	if state == nil || state.Run == nil {
+		return 0
+	}
+	return state.Run.DeckCount
+}
+
+func agentViewHeadline(state *game.StateSnapshot) string {
+	if state == nil || state.AgentView == nil {
+		return ""
+	}
+	return state.AgentView.Headline
+}
+
+func firstMatchingRestOptionTyped(rest *game.RestState, keywords ...string) *int {
+	if rest == nil {
+		return nil
+	}
+	for _, option := range rest.Options {
+		if !option.IsEnabled {
+			continue
+		}
+		label := strings.ToLower(strings.TrimSpace(option.OptionID + " " + option.Title + " " + option.Description))
+		for _, keyword := range keywords {
+			if strings.Contains(label, keyword) {
+				index := option.Index
+				return &index
+			}
+		}
+	}
+	return nil
+}
+
+func firstIndexedOptionTyped(state *game.StateSnapshot, section string, key string) *int {
+	switch section + "." + key {
+	case "Chest.relicOptions":
+		if state == nil || state.Chest == nil {
+			return nil
+		}
+		for _, r := range state.Chest.RelicOptions {
+			index := r.Index
+			return &index
+		}
+	case "Selection.cards":
+		if state == nil || state.Selection == nil {
+			return nil
+		}
+		for _, c := range state.Selection.Cards {
+			index := c.Index
+			return &index
+		}
+	}
+	return nil
+}
+
+func choosePlayableCardsTyped(playable []game.CardState) []game.CardState {
+	if len(playable) == 0 {
+		return nil
+	}
+	ordered := append([]game.CardState(nil), playable...)
+	for i := 0; i < len(ordered)-1; i++ {
+		best := i
+		bestScore := combatCardScoreTyped(ordered[i])
+		bestIndex := ordered[i].Index
+		for j := i + 1; j < len(ordered); j++ {
+			score := combatCardScoreTyped(ordered[j])
+			index := ordered[j].Index
+			if score < bestScore || (score == bestScore && index < bestIndex) {
+				best = j
+				bestScore = score
+				bestIndex = index
+			}
+		}
+		ordered[i], ordered[best] = ordered[best], ordered[i]
+	}
+	return ordered
+}
+
+func combatCardScoreTyped(card game.CardState) int {
+	score := 0
+	if cardRequiresTarget(nil, card) {
+		score += 3
+	}
+	if card.EnergyCost != nil {
+		score += *card.EnergyCost
+	}
+	if card.CostsX {
+		score += 4
+	}
+	if card.StarCostsX {
+		score += 4
+	}
+	name := strings.ToLower(card.Name)
+	if strings.Contains(name, "strike") || strings.Contains(name, "打击") {
+		score -= 2
+	}
+	if strings.Contains(name, "defend") || strings.Contains(name, "防御") {
+		score -= 1
+	}
+	return score
 }

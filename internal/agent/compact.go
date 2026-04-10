@@ -196,23 +196,14 @@ func buildStateSummaryForLanguage(state *game.StateSnapshot, language i18n.Langu
 	}
 
 	if state.Run != nil {
-		if floor, ok := state.Run["floor"]; ok {
-			lines = append(lines, fmt.Sprintf("%s: %v", loc.Label("Floor", "层数"), floor))
-		}
-		if currentHP, ok := state.Run["currentHp"]; ok {
-			maxHP := state.Run["maxHp"]
-			lines = append(lines, fmt.Sprintf("%s: %v/%v", loc.Label("HP", "生命"), currentHP, maxHP))
-		}
-		if gold, ok := state.Run["gold"]; ok {
-			lines = append(lines, fmt.Sprintf("%s: %v", loc.Label("Gold", "金币"), gold))
-		}
+		lines = append(lines, fmt.Sprintf("%s: %v", loc.Label("Floor", "层数"), state.Run.Floor))
+		lines = append(lines, fmt.Sprintf("%s: %v/%v", loc.Label("HP", "生命"), state.Run.CurrentHp, state.Run.MaxHp))
+		lines = append(lines, fmt.Sprintf("%s: %v", loc.Label("Gold", "金币"), state.Run.Gold))
 	}
 
 	if state.Combat != nil {
-		if player, ok := state.Combat["player"].(map[string]interface{}); ok {
-			lines = append(lines, fmt.Sprintf("%s: %v", loc.Label("Combat energy", "战斗能量"), player["energy"]))
-			lines = append(lines, fmt.Sprintf("%s: %v", loc.Label("Combat block", "战斗格挡"), player["block"]))
-		}
+		lines = append(lines, fmt.Sprintf("%s: %v", loc.Label("Combat energy", "战斗能量"), state.Combat.Player.Energy))
+		lines = append(lines, fmt.Sprintf("%s: %v", loc.Label("Combat block", "战斗格挡"), state.Combat.Player.Block))
 	}
 
 	return strings.Join(lines, "\n")

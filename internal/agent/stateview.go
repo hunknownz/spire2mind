@@ -28,19 +28,15 @@ func StateSummaryLinesFor(state *game.StateSnapshot, language i18n.Language) []s
 		fmt.Sprintf("- %s: `%s`", loc.Label("Actions", "动作"), valueOrDash(strings.Join(state.AvailableActions, ", "))),
 	}
 
-	if headline := fieldString(state.AgentView, "headline"); headline != "" {
-		lines = append(lines, fmt.Sprintf("- %s: %s", loc.Label("Headline", "摘要"), headline))
+	if state.AgentView != nil && state.AgentView.Headline != "" {
+		lines = append(lines, fmt.Sprintf("- %s: %s", loc.Label("Headline", "摘要"), state.AgentView.Headline))
 	}
-	if floor, ok := fieldInt(state.Run, "floor"); ok {
-		lines = append(lines, fmt.Sprintf("- %s: `%d`", loc.Label("Floor", "层数"), floor))
-	}
-	if currentHP, okCurrent := fieldInt(state.Run, "currentHp"); okCurrent {
-		if maxHP, okMax := fieldInt(state.Run, "maxHp"); okMax {
-			lines = append(lines, fmt.Sprintf("- %s: `%d/%d`", loc.Label("HP", "生命"), currentHP, maxHP))
+	if state.Run != nil {
+		lines = append(lines, fmt.Sprintf("- %s: `%d`", loc.Label("Floor", "层数"), state.Run.Floor))
+		if state.Run.MaxHp > 0 {
+			lines = append(lines, fmt.Sprintf("- %s: `%d/%d`", loc.Label("HP", "生命"), state.Run.CurrentHp, state.Run.MaxHp))
 		}
-	}
-	if gold, ok := fieldInt(state.Run, "gold"); ok {
-		lines = append(lines, fmt.Sprintf("- %s: `%d`", loc.Label("Gold", "金币"), gold))
+		lines = append(lines, fmt.Sprintf("- %s: `%d`", loc.Label("Gold", "金币"), state.Run.Gold))
 	}
 	if state.Turn != nil {
 		lines = append(lines, fmt.Sprintf("- %s: `%d`", loc.Label("Turn", "回合"), *state.Turn))
@@ -92,67 +88,59 @@ func StateDetailLinesFor(state *game.StateSnapshot, maxItems int, language i18n.
 }
 
 func combatDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localizer) []string {
-	lines := []string{}
-	if player := state.Combat["player"]; player != nil {
-		playerMap, _ := player.(map[string]any)
-		if playerMap != nil {
-			energy, _ := fieldInt(playerMap, "energy")
-			block, _ := fieldInt(playerMap, "block")
-			stars, _ := fieldInt(playerMap, "stars")
-			lines = append(lines, fmt.Sprintf(
-				"- %s: %s `%d`, %s `%d`, %s `%d`",
-				loc.Label("Player", "玩家"),
-				loc.Label("energy", "能量"), energy,
-				loc.Label("block", "格挡"), block,
-				loc.Label("stars", "星能"), stars,
-			))
-		}
+	if state == nil || state.Combat == nil {
+		return nil
 	}
+	lines := []string{}
+	player := state.Combat.Player
+	lines = append(lines, fmt.Sprintf(
+		"- %s: %s `%d`, %s `%d`, %s `%d`",
+		loc.Label("Player", "玩家"),
+		loc.Label("energy", "能量"), player.Energy,
+		loc.Label("block", "格挡"), player.Block,
+		loc.Label("stars", "星能"), player.Stars,
+	))
 
-	enemies := nestedList(state.Combat, "enemies")
+	enemies := state.Combat.Enemies
 	for i, enemy := range enemies {
 		if i >= maxItems {
 			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Enemies", "敌人"), len(enemies)-maxItems, loc.Label("more", "更多")))
 			break
 		}
-		name := fieldString(enemy, "name")
-		currentHP, _ := fieldInt(enemy, "currentHp")
-		maxHP, _ := fieldInt(enemy, "maxHp")
-		block, _ := fieldInt(enemy, "block")
 		intent := "-"
-		if intents := nestedList(enemy, "intents"); len(intents) > 0 {
-			intent = fieldString(intents[0], "intentType")
-			if label := fieldString(intents[0], "label"); label != "" && label != intent {
+		if len(enemy.Intents) > 0 {
+			intent = enemy.Intents[0].IntentType
+			if label := enemy.Intents[0].Label; label != "" && label != intent {
 				intent = intent + " / " + label
 			}
 		}
 		lines = append(lines, fmt.Sprintf(
 			"- %s %d: %s `%d/%d` %s, `%d` %s, %s `%s`",
 			loc.Label("Enemy", "敌人"), i,
-			fallbackID(name, fieldString(enemy, "enemyId")),
-			currentHP, maxHP, loc.Label("HP", "生命"),
-			block, loc.Label("block", "格挡"),
+			fallbackID(enemy.Name, enemy.EnemyID),
+			enemy.CurrentHp, enemy.MaxHp, loc.Label("HP", "生命"),
+			enemy.Block, loc.Label("block", "格挡"),
 			loc.Label("intent", "意图"), valueOrDash(intent),
 		))
 	}
 
-	hand := nestedList(state.Combat, "hand")
+	hand := state.Combat.Hand
 	for i, card := range hand {
 		if i >= maxItems {
 			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Hand", "手牌"), len(hand)-maxItems, loc.Label("more cards", "更多牌")))
 			break
 		}
-		index, _ := fieldInt(card, "index")
-		cost, _ := fieldInt(card, "energyCost")
-		playable := fieldBool(card, "playable")
-		requiresTarget := cardRequiresTarget(state, card)
+		cost := 0
+		if card.EnergyCost != nil {
+			cost = *card.EnergyCost
+		}
 		lines = append(lines, fmt.Sprintf(
 			"- %s %d: [%d] %s %s `%d` %s `%t` %s `%t`",
-			loc.Label("Hand", "手牌"), i, index,
-			fallbackID(fieldString(card, "name"), fieldString(card, "cardId")),
+			loc.Label("Hand", "手牌"), i, card.Index,
+			fallbackID(card.Name, card.CardID),
 			loc.Label("cost", "费用"), cost,
-			loc.Label("playable", "可打出"), playable,
-			loc.Label("target", "需目标"), requiresTarget,
+			loc.Label("playable", "可打出"), card.Playable,
+			loc.Label("target", "需目标"), cardRequiresTarget(state, card),
 		))
 	}
 
@@ -160,80 +148,87 @@ func combatDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localiz
 }
 
 func rewardDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localizer) []string {
+	if state == nil || state.Reward == nil {
+		return nil
+	}
 	lines := []string{}
-	if phase := fieldString(state.Reward, "phase"); phase != "" {
-		source := fieldString(state.Reward, "sourceScreen")
+	if phase := state.Reward.Phase; phase != "" {
+		source := state.Reward.SourceScreen
 		if source != "" {
 			lines = append(lines, fmt.Sprintf("- %s: `%s` (%s `%s`)", loc.Label("Reward phase", "奖励阶段"), phase, loc.Label("source", "来源"), source))
 		} else {
 			lines = append(lines, fmt.Sprintf("- %s: `%s`", loc.Label("Reward phase", "奖励阶段"), phase))
 		}
 	}
-	rewards := nestedList(state.Reward, "rewards")
-	for i, reward := range rewards {
+	for i, reward := range state.Reward.Rewards {
 		if i >= maxItems {
-			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Rewards", "奖励"), len(rewards)-maxItems, loc.Label("more", "更多")))
+			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Rewards", "奖励"), len(state.Reward.Rewards)-maxItems, loc.Label("more", "更多")))
 			break
 		}
-		index, _ := fieldInt(reward, "index")
-		lines = append(lines, fmt.Sprintf("- %s %d: [%d] `%s` %s `%t`", loc.Label("Reward", "奖励"), i, index, valueOrDash(fieldString(reward, "rewardType")), loc.Label("claimable", "可领取"), fieldBool(reward, "claimable")))
+		lines = append(lines, fmt.Sprintf("- %s %d: [%d] `%s` %s `%t`", loc.Label("Reward", "奖励"), i, reward.Index, valueOrDash(reward.RewardType), loc.Label("claimable", "可领取"), reward.Claimable))
 	}
 
-	cardOptions := nestedList(state.Reward, "cardOptions")
-	for i, card := range cardOptions {
+	for i, card := range state.Reward.CardOptions {
 		if i >= maxItems {
-			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Card options", "卡牌选项"), len(cardOptions)-maxItems, loc.Label("more", "更多")))
+			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Card options", "卡牌选项"), len(state.Reward.CardOptions)-maxItems, loc.Label("more", "更多")))
 			break
 		}
-		index, _ := fieldInt(card, "index")
-		lines = append(lines, fmt.Sprintf("- %s %d: [%d] %s", loc.Label("Card option", "卡牌选项"), i, index, fallbackID(fieldString(card, "name"), fieldString(card, "cardId"))))
+		lines = append(lines, fmt.Sprintf("- %s %d: [%d] %s", loc.Label("Card option", "卡牌选项"), i, card.Index, fallbackID(card.Name, card.CardID)))
 	}
 
 	return lines
 }
 
 func mapDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localizer) []string {
+	if state == nil || state.Map == nil {
+		return nil
+	}
 	lines := []string{}
-	if currentNode := state.Map["currentNode"]; currentNode != nil {
-		current, _ := currentNode.(map[string]any)
-		if current != nil {
-			row, _ := fieldInt(current, "row")
-			col, _ := fieldInt(current, "col")
-			nodeType := fieldString(current, "nodeType")
-			lines = append(lines, fmt.Sprintf("- %s: %s `%d`, %s `%d`, %s `%s`", loc.Label("Current node", "当前节点"), loc.Label("row", "行"), row, loc.Label("col", "列"), col, loc.Label("type", "类型"), valueOrDash(nodeType)))
+	if cn := state.Map.CurrentNode; cn != nil {
+		row, col := 0, 0
+		if cn.Row != nil {
+			row = *cn.Row
 		}
+		if cn.Col != nil {
+			col = *cn.Col
+		}
+		lines = append(lines, fmt.Sprintf("- %s: %s `%d`, %s `%d`, %s `%s`", loc.Label("Current node", "当前节点"), loc.Label("row", "行"), row, loc.Label("col", "列"), col, loc.Label("type", "类型"), valueOrDash(cn.NodeType)))
 	}
 
-	nodes := nestedList(state.Map, "availableNodes")
+	nodes := state.Map.AvailableNodes
 	for i, node := range nodes {
 		if i >= maxItems {
 			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Nodes", "节点"), len(nodes)-maxItems, loc.Label("more", "更多")))
 			break
 		}
-		index, _ := fieldInt(node, "index")
-		row, _ := fieldInt(node, "row")
-		col, _ := fieldInt(node, "col")
-		nodeType := fieldString(node, "nodeType")
-		lines = append(lines, fmt.Sprintf("- %s %d: [%d] %s `%d`, %s `%d`, %s `%s`", loc.Label("Node", "节点"), i, index, loc.Label("row", "行"), row, loc.Label("col", "列"), col, loc.Label("type", "类型"), valueOrDash(nodeType)))
+		row, col := 0, 0
+		if node.Row != nil {
+			row = *node.Row
+		}
+		if node.Col != nil {
+			col = *node.Col
+		}
+		lines = append(lines, fmt.Sprintf("- %s %d: [%d] %s `%d`, %s `%d`, %s `%s`", loc.Label("Node", "节点"), i, node.Index, loc.Label("row", "行"), row, loc.Label("col", "列"), col, loc.Label("type", "类型"), valueOrDash(node.NodeType)))
 	}
 
 	return lines
 }
 
 func eventDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localizer) []string {
+	if state == nil || state.Event == nil {
+		return nil
+	}
 	lines := []string{}
-	if title := fieldString(state.Event, "title"); title != "" {
+	if title := state.Event.Title; title != "" {
 		lines = append(lines, fmt.Sprintf("- %s: %s", loc.Label("Title", "标题"), title))
 	}
-	options := nestedList(state.Event, "options")
-	for i, option := range options {
+	for i, option := range state.Event.Options {
 		if i >= maxItems {
-			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Options", "选项"), len(options)-maxItems, loc.Label("more", "更多")))
+			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Options", "选项"), len(state.Event.Options)-maxItems, loc.Label("more", "更多")))
 			break
 		}
-		index, _ := fieldInt(option, "index")
-		label := fallbackID(fieldString(option, "label"), fieldString(option, "title"))
-		lines = append(lines, fmt.Sprintf("- %s %d: [%d] %s %s `%t`", loc.Label("Option", "选项"), i, index, valueOrDash(label), loc.Label("locked", "锁定"), fieldBool(option, "isLocked")))
+		label := fallbackID(option.Title, "")
+		lines = append(lines, fmt.Sprintf("- %s %d: [%d] %s %s `%t`", loc.Label("Option", "选项"), i, option.Index, valueOrDash(label), loc.Label("locked", "锁定"), option.IsLocked))
 	}
 	return lines
 }
@@ -264,77 +259,80 @@ func shopDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localizer
 			lines = append(lines, fmt.Sprintf("- %s %d: [%d] %s %s `%d` %s `%t`", label, i, index, valueOrDash(name), loc.Label("price", "价格"), price, loc.Label("affordable", "买得起"), fieldBool(item, "enoughGold")))
 		}
 	}
-	addItems(loc.Label("Card", "卡牌"), nestedList(state.Shop, "cards"))
-	addItems(loc.Label("Relic", "遗物"), nestedList(state.Shop, "relics"))
-	addItems(loc.Label("Potion", "药水"), nestedList(state.Shop, "potions"))
+	addItems(loc.Label("Card", "卡牌"), shopItemsToMaps(state, "cards"))
+	addItems(loc.Label("Relic", "遗物"), shopItemsToMaps(state, "relics"))
+	addItems(loc.Label("Potion", "药水"), shopItemsToMaps(state, "potions"))
 	return lines
 }
 
 func restDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localizer) []string {
-	options := nestedList(state.Rest, "options")
+	if state == nil || state.Rest == nil {
+		return nil
+	}
 	lines := []string{}
-	for i, option := range options {
+	for i, option := range state.Rest.Options {
 		if i >= maxItems {
-			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Rest options", "营火选项"), len(options)-maxItems, loc.Label("more", "更多")))
+			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Rest options", "营火选项"), len(state.Rest.Options)-maxItems, loc.Label("more", "更多")))
 			break
 		}
-		index, _ := fieldInt(option, "index")
-		lines = append(lines, fmt.Sprintf("- %s %d: [%d] `%s` %s `%t`", loc.Label("Rest option", "营火选项"), i, index, valueOrDash(fieldString(option, "optionType")), loc.Label("enabled", "可用"), fieldBool(option, "isEnabled")))
+		lines = append(lines, fmt.Sprintf("- %s %d: [%d] `%s` %s `%t`", loc.Label("Rest option", "营火选项"), i, option.Index, valueOrDash(option.OptionID), loc.Label("enabled", "可用"), option.IsEnabled))
 	}
 	return lines
 }
 
 func chestDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localizer) []string {
+	if state == nil || state.Chest == nil {
+		return nil
+	}
 	lines := []string{}
-	if fieldBool(state.Chest, "isOpened") {
+	if state.Chest.IsOpened {
 		lines = append(lines, "- "+loc.Label("Chest: already opened", "宝箱：已打开"))
 	}
-	relics := nestedList(state.Chest, "relicOptions")
-	for i, relic := range relics {
+	for i, relic := range state.Chest.RelicOptions {
 		if i >= maxItems {
-			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Relics", "遗物"), len(relics)-maxItems, loc.Label("more", "更多")))
+			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Relics", "遗物"), len(state.Chest.RelicOptions)-maxItems, loc.Label("more", "更多")))
 			break
 		}
-		index, _ := fieldInt(relic, "index")
-		lines = append(lines, fmt.Sprintf("- %s %d: [%d] `%s`", loc.Label("Relic", "遗物"), i, index, valueOrDash(fallbackID(fieldString(relic, "name"), fieldString(relic, "relicId")))))
+		lines = append(lines, fmt.Sprintf("- %s %d: [%d] `%s`", loc.Label("Relic", "遗物"), i, relic.Index, valueOrDash(fallbackID(relic.Name, relic.RelicID))))
 	}
 	return lines
 }
 
 func selectionDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localizer) []string {
+	if state == nil || state.Selection == nil {
+		return nil
+	}
 	lines := []string{}
-	if kind := fieldString(state.Selection, "kind"); kind != "" {
-		source := fieldString(state.Selection, "sourceScreen")
+	if kind := state.Selection.Kind; kind != "" {
+		source := state.Selection.SourceScreen
 		if source != "" {
 			lines = append(lines, fmt.Sprintf("- %s: `%s` (%s `%s`)", loc.Label("Selection context", "选择上下文"), kind, loc.Label("source", "来源"), source))
 		} else {
 			lines = append(lines, fmt.Sprintf("- %s: `%s`", loc.Label("Selection context", "选择上下文"), kind))
 		}
 	}
-	cards := nestedList(state.Selection, "cards")
-	for i, card := range cards {
+	for i, card := range state.Selection.Cards {
 		if i >= maxItems {
-			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Selection cards", "选牌"), len(cards)-maxItems, loc.Label("more", "更多")))
+			lines = append(lines, fmt.Sprintf("- %s: ... %d %s", loc.Label("Selection cards", "选牌"), len(state.Selection.Cards)-maxItems, loc.Label("more", "更多")))
 			break
 		}
-		index, _ := fieldInt(card, "index")
-		lines = append(lines, fmt.Sprintf("- %s %d: [%d] %s", loc.Label("Selection", "选择"), i, index, valueOrDash(fallbackID(fieldString(card, "name"), fieldString(card, "cardId")))))
+		lines = append(lines, fmt.Sprintf("- %s %d: [%d] %s", loc.Label("Selection", "选择"), i, card.Index, valueOrDash(fallbackID(card.Name, card.CardID))))
 	}
 	return lines
 }
 
 func gameOverDetailLines(state *game.StateSnapshot, loc i18n.Localizer) []string {
+	if state == nil || state.GameOver == nil {
+		return nil
+	}
 	lines := []string{}
-	if fieldBool(state.GameOver, "isVictory") {
+	if state.GameOver.Victory {
 		lines = append(lines, "- "+loc.Label("Outcome: victory", "结果：胜利"))
 	} else {
 		lines = append(lines, "- "+loc.Label("Outcome: defeat", "结果：失败"))
 	}
-	if floor, ok := fieldInt(state.GameOver, "floor"); ok {
-		lines = append(lines, fmt.Sprintf("- %s: `%d`", loc.Label("Final floor", "最终层数"), floor))
-	}
-	if enemy := fieldString(state.GameOver, "killedBy"); enemy != "" {
-		lines = append(lines, fmt.Sprintf("- %s: %s", loc.Label("Killed by", "击败者"), enemy))
+	if state.GameOver.Floor > 0 {
+		lines = append(lines, fmt.Sprintf("- %s: `%d`", loc.Label("Final floor", "最终层数"), state.GameOver.Floor))
 	}
 	return lines
 }

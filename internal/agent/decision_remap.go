@@ -76,7 +76,7 @@ func decisionMatchesExpectedSemantics(expectedState *game.StateSnapshot, liveSta
 			return false
 		}
 		liveCard, ok := combatHandCard(liveState, *decision.CardIndex)
-		if !ok || !matchCardOption(expectedCard, liveCard) {
+		if !ok || !matchCardOption(cardStateToMap(expectedCard), cardStateToMap(liveCard)) {
 			return false
 		}
 
@@ -100,29 +100,29 @@ func decisionMatchesExpectedSemantics(expectedState *game.StateSnapshot, liveSta
 		if !ok {
 			return false
 		}
-		return matchEnemyOption(expectedTarget, liveTarget)
+		return matchEnemyOption(enemyStateToMap(expectedTarget), enemyStateToMap(liveTarget))
 	case "choose_reward_card":
-		return indexedChoiceMatchesExpected(decision.OptionIndex, nestedList(expectedState.Reward, "cardOptions"), nestedList(liveState.Reward, "cardOptions"), matchCardOption)
+		return indexedChoiceMatchesExpected(decision.OptionIndex, rewardCardOptionsMaps(expectedState), rewardCardOptionsMaps(liveState), matchCardOption)
 	case "select_deck_card":
-		return indexedChoiceMatchesExpected(decision.OptionIndex, nestedList(expectedState.Selection, "cards"), nestedList(liveState.Selection, "cards"), matchCardOption)
+		return indexedChoiceMatchesExpected(decision.OptionIndex, selectionCardsMaps(expectedState), selectionCardsMaps(liveState), matchCardOption)
 	case "claim_reward":
-		return indexedChoiceMatchesExpected(decision.OptionIndex, nestedList(expectedState.Reward, "rewards"), nestedList(liveState.Reward, "rewards"), matchRewardItem)
+		return indexedChoiceMatchesExpected(decision.OptionIndex, rewardRewardsMaps(expectedState), rewardRewardsMaps(liveState), matchRewardItem)
 	case "choose_map_node":
-		return indexedChoiceMatchesExpected(decision.OptionIndex, nestedList(expectedState.Map, "availableNodes"), nestedList(liveState.Map, "availableNodes"), matchMapNode)
+		return indexedChoiceMatchesExpected(decision.OptionIndex, mapAvailableNodesMaps(expectedState), mapAvailableNodesMaps(liveState), matchMapNode)
 	case "choose_event_option":
-		return indexedChoiceMatchesExpected(decision.OptionIndex, nestedList(expectedState.Event, "options"), nestedList(liveState.Event, "options"), matchEventOption)
+		return indexedChoiceMatchesExpected(decision.OptionIndex, eventOptionsMaps(expectedState), eventOptionsMaps(liveState), matchEventOption)
 	case "choose_rest_option":
-		return indexedChoiceMatchesExpected(decision.OptionIndex, nestedList(expectedState.Rest, "options"), nestedList(liveState.Rest, "options"), matchRestOption)
+		return indexedChoiceMatchesExpected(decision.OptionIndex, restOptionsMaps(expectedState), restOptionsMaps(liveState), matchRestOption)
 	case "buy_card":
-		return indexedChoiceMatchesExpected(decision.OptionIndex, nestedList(expectedState.Shop, "cards"), nestedList(liveState.Shop, "cards"), matchShopOption)
+		return indexedChoiceMatchesExpected(decision.OptionIndex, shopItemsToMaps(expectedState, "cards"), shopItemsToMaps(liveState, "cards"), matchShopOption)
 	case "buy_relic":
-		return indexedChoiceMatchesExpected(decision.OptionIndex, nestedList(expectedState.Shop, "relics"), nestedList(liveState.Shop, "relics"), matchShopOption)
+		return indexedChoiceMatchesExpected(decision.OptionIndex, shopItemsToMaps(expectedState, "relics"), shopItemsToMaps(liveState, "relics"), matchShopOption)
 	case "buy_potion":
-		return indexedChoiceMatchesExpected(decision.OptionIndex, nestedList(expectedState.Shop, "potions"), nestedList(liveState.Shop, "potions"), matchShopOption)
+		return indexedChoiceMatchesExpected(decision.OptionIndex, shopItemsToMaps(expectedState, "potions"), shopItemsToMaps(liveState, "potions"), matchShopOption)
 	case "choose_treasure_relic":
-		return indexedChoiceMatchesExpected(decision.OptionIndex, nestedList(expectedState.Chest, "relicOptions"), nestedList(liveState.Chest, "relicOptions"), matchLabeledOption)
+		return indexedChoiceMatchesExpected(decision.OptionIndex, chestRelicsMaps(expectedState), chestRelicsMaps(liveState), matchLabeledOption)
 	case "select_character":
-		return indexedChoiceMatchesExpected(decision.OptionIndex, nestedList(expectedState.CharacterSelect, "characters"), nestedList(liveState.CharacterSelect, "characters"), matchCharacterOption)
+		return indexedChoiceMatchesExpected(decision.OptionIndex, charSelectMaps(expectedState), charSelectMaps(liveState), matchCharacterOption)
 	default:
 		return true
 	}
@@ -177,12 +177,13 @@ func remapPlayCardDecision(expectedState *game.StateSnapshot, liveState *game.St
 		return false
 	}
 
+	expectedCardMap := cardStateToMap(expectedCard)
 	liveIndex, ok := findMatchingIndexedItemWithExpectedOrder(
-		nestedList(expectedState.Combat, "hand"),
-		nestedList(liveState.Combat, "hand"),
+		combatHandMaps(expectedState),
+		combatHandMaps(liveState),
 		"index",
 		*decision.CardIndex,
-		expectedCard,
+		expectedCardMap,
 		matchCardOption,
 	)
 	if !ok {
@@ -218,12 +219,13 @@ func remapPlayCardDecision(expectedState *game.StateSnapshot, liveState *game.St
 		return changed
 	}
 
+	expectedTargetMap := enemyStateToMap(expectedTarget)
 	liveTargetIndex, ok := findMatchingIndexedItemWithExpectedOrder(
-		nestedList(expectedState.Combat, "enemies"),
-		nestedList(liveState.Combat, "enemies"),
+		combatEnemiesMaps(expectedState),
+		combatEnemiesMaps(liveState),
 		"index",
 		*decision.TargetIndex,
-		expectedTarget,
+		expectedTargetMap,
 		matchEnemyOption,
 	)
 	if !ok {
@@ -242,8 +244,8 @@ func remapPlayCardDecision(expectedState *game.StateSnapshot, liveState *game.St
 func remapRewardCardDecision(expectedState *game.StateSnapshot, liveState *game.StateSnapshot, decision *ActionDecision) bool {
 	return remapIndexedChoiceBySection(
 		&decision.OptionIndex,
-		nestedList(expectedState.Reward, "cardOptions"),
-		nestedList(liveState.Reward, "cardOptions"),
+		rewardCardOptionsMaps(expectedState),
+		rewardCardOptionsMaps(liveState),
 		matchCardOption,
 	)
 }
@@ -251,8 +253,8 @@ func remapRewardCardDecision(expectedState *game.StateSnapshot, liveState *game.
 func remapSelectionCardDecision(expectedState *game.StateSnapshot, liveState *game.StateSnapshot, decision *ActionDecision) bool {
 	return remapIndexedChoiceBySection(
 		&decision.OptionIndex,
-		nestedList(expectedState.Selection, "cards"),
-		nestedList(liveState.Selection, "cards"),
+		selectionCardsMaps(expectedState),
+		selectionCardsMaps(liveState),
 		matchCardOption,
 	)
 }
@@ -260,8 +262,8 @@ func remapSelectionCardDecision(expectedState *game.StateSnapshot, liveState *ga
 func remapRewardClaimDecision(expectedState *game.StateSnapshot, liveState *game.StateSnapshot, decision *ActionDecision) bool {
 	return remapIndexedChoiceBySection(
 		&decision.OptionIndex,
-		nestedList(expectedState.Reward, "rewards"),
-		nestedList(liveState.Reward, "rewards"),
+		rewardRewardsMaps(expectedState),
+		rewardRewardsMaps(liveState),
 		matchRewardItem,
 	)
 }
@@ -269,8 +271,8 @@ func remapRewardClaimDecision(expectedState *game.StateSnapshot, liveState *game
 func remapMapNodeDecision(expectedState *game.StateSnapshot, liveState *game.StateSnapshot, decision *ActionDecision) bool {
 	return remapIndexedChoiceBySection(
 		&decision.OptionIndex,
-		nestedList(expectedState.Map, "availableNodes"),
-		nestedList(liveState.Map, "availableNodes"),
+		mapAvailableNodesMaps(expectedState),
+		mapAvailableNodesMaps(liveState),
 		matchMapNode,
 	)
 }
@@ -278,8 +280,8 @@ func remapMapNodeDecision(expectedState *game.StateSnapshot, liveState *game.Sta
 func remapEventOptionDecision(expectedState *game.StateSnapshot, liveState *game.StateSnapshot, decision *ActionDecision) bool {
 	return remapIndexedChoiceBySection(
 		&decision.OptionIndex,
-		nestedList(expectedState.Event, "options"),
-		nestedList(liveState.Event, "options"),
+		eventOptionsMaps(expectedState),
+		eventOptionsMaps(liveState),
 		matchEventOption,
 	)
 }
@@ -287,8 +289,8 @@ func remapEventOptionDecision(expectedState *game.StateSnapshot, liveState *game
 func remapRestOptionDecision(expectedState *game.StateSnapshot, liveState *game.StateSnapshot, decision *ActionDecision) bool {
 	return remapIndexedChoiceBySection(
 		&decision.OptionIndex,
-		nestedList(expectedState.Rest, "options"),
-		nestedList(liveState.Rest, "options"),
+		restOptionsMaps(expectedState),
+		restOptionsMaps(liveState),
 		matchRestOption,
 	)
 }
@@ -296,8 +298,8 @@ func remapRestOptionDecision(expectedState *game.StateSnapshot, liveState *game.
 func remapShopOptionDecision(expectedState *game.StateSnapshot, liveState *game.StateSnapshot, decision *ActionDecision, key string) bool {
 	return remapIndexedChoiceBySection(
 		&decision.OptionIndex,
-		nestedList(expectedState.Shop, key),
-		nestedList(liveState.Shop, key),
+		shopItemsToMaps(expectedState, key),
+		shopItemsToMaps(liveState, key),
 		matchShopOption,
 	)
 }
@@ -305,8 +307,8 @@ func remapShopOptionDecision(expectedState *game.StateSnapshot, liveState *game.
 func remapChestRelicDecision(expectedState *game.StateSnapshot, liveState *game.StateSnapshot, decision *ActionDecision) bool {
 	return remapIndexedChoiceBySection(
 		&decision.OptionIndex,
-		nestedList(expectedState.Chest, "relicOptions"),
-		nestedList(liveState.Chest, "relicOptions"),
+		chestRelicsMaps(expectedState),
+		chestRelicsMaps(liveState),
 		matchLabeledOption,
 	)
 }
@@ -314,8 +316,8 @@ func remapChestRelicDecision(expectedState *game.StateSnapshot, liveState *game.
 func remapCharacterDecision(expectedState *game.StateSnapshot, liveState *game.StateSnapshot, decision *ActionDecision) bool {
 	return remapIndexedChoiceBySection(
 		&decision.OptionIndex,
-		nestedList(expectedState.CharacterSelect, "characters"),
-		nestedList(liveState.CharacterSelect, "characters"),
+		charSelectMaps(expectedState),
+		charSelectMaps(liveState),
 		matchCharacterOption,
 	)
 }
@@ -448,14 +450,358 @@ func replaceIntPointer(pointer **int, value int) bool {
 	return true
 }
 
-func combatEnemyByIndex(state *game.StateSnapshot, targetIndex int) (map[string]any, bool) {
-	for _, enemy := range nestedList(state.Combat, "enemies") {
-		if index, ok := fieldInt(enemy, "index"); ok && index == targetIndex {
+func combatEnemyByIndex(state *game.StateSnapshot, targetIndex int) (game.EnemyState, bool) {
+	if state == nil || state.Combat == nil {
+		return game.EnemyState{}, false
+	}
+	for _, enemy := range state.Combat.Enemies {
+		if enemy.Index == targetIndex {
 			return enemy, true
 		}
 	}
+	return game.EnemyState{}, false
+}
 
-	return nil, false
+// ── Typed-to-map converters for the generic remap/match infrastructure ──
+
+func cardStatesToMaps(cards []game.CardState) []map[string]any {
+	if len(cards) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(cards))
+	for _, c := range cards {
+		m := map[string]any{
+			"index":       c.Index,
+			"cardId":      c.CardID,
+			"name":        c.Name,
+			"targetType":  c.TargetType,
+			"playable":    c.Playable,
+		}
+		if c.EnergyCost != nil {
+			m["energyCost"] = *c.EnergyCost
+		}
+		if c.ValidTargetIndices != nil {
+			m["validTargetIndices"] = c.ValidTargetIndices
+		}
+		if c.IsSelected != nil {
+			m["isSelected"] = *c.IsSelected
+		}
+		result = append(result, m)
+	}
+	return result
+}
+
+func enemyStatesToMaps(enemies []game.EnemyState) []map[string]any {
+	if len(enemies) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(enemies))
+	for _, e := range enemies {
+		m := map[string]any{
+			"index":     e.Index,
+			"enemyId":   e.EnemyID,
+			"name":      e.Name,
+			"currentHp": e.CurrentHp,
+			"maxHp":     e.MaxHp,
+			"block":     e.Block,
+			"isAlive":   e.IsAlive,
+			"isHittable": e.IsHittable,
+			"moveId":    e.MoveID,
+		}
+		result = append(result, m)
+	}
+	return result
+}
+
+func rewardItemsToMaps(items []game.RewardItem) []map[string]any {
+	if len(items) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(items))
+	for _, r := range items {
+		result = append(result, map[string]any{
+			"index":       r.Index,
+			"rewardType":  r.RewardType,
+			"description": r.Description,
+			"claimable":   r.Claimable,
+		})
+	}
+	return result
+}
+
+func mapNodesToMaps(nodes []game.MapNode) []map[string]any {
+	if len(nodes) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(nodes))
+	for _, n := range nodes {
+		m := map[string]any{
+			"index":    n.Index,
+			"nodeType": n.NodeType,
+		}
+		if n.Row != nil {
+			m["row"] = *n.Row
+		}
+		if n.Col != nil {
+			m["col"] = *n.Col
+		}
+		result = append(result, m)
+	}
+	return result
+}
+
+func eventOptionsToMaps(options []game.EventOption) []map[string]any {
+	if len(options) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(options))
+	for _, o := range options {
+		result = append(result, map[string]any{
+			"index":     o.Index,
+			"title":     o.Title,
+			"label":     o.Title,
+			"isLocked":  o.IsLocked,
+			"isProceed": o.IsProceed,
+		})
+	}
+	return result
+}
+
+func restOptionsToMaps(options []game.RestOption) []map[string]any {
+	if len(options) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(options))
+	for _, o := range options {
+		result = append(result, map[string]any{
+			"index":       o.Index,
+			"optionId":    o.OptionID,
+			"optionType":  o.OptionID,
+			"title":       o.Title,
+			"description": o.Description,
+			"isEnabled":   o.IsEnabled,
+		})
+	}
+	return result
+}
+
+func shopCardsToMaps(cards []game.ShopCard) []map[string]any {
+	if len(cards) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(cards))
+	for _, c := range cards {
+		result = append(result, map[string]any{
+			"index":      c.Index,
+			"cardId":     c.CardID,
+			"name":       c.Name,
+			"price":      c.Price,
+			"isStocked":  c.IsStocked,
+			"enoughGold": c.EnoughGold,
+		})
+	}
+	return result
+}
+
+func shopRelicsToMaps(relics []game.ShopRelic) []map[string]any {
+	if len(relics) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(relics))
+	for _, r := range relics {
+		result = append(result, map[string]any{
+			"index":      r.Index,
+			"relicId":    r.RelicID,
+			"name":       r.Name,
+			"price":      r.Price,
+			"enoughGold": r.EnoughGold,
+		})
+	}
+	return result
+}
+
+func shopPotionsToMaps(potions []game.ShopPotion) []map[string]any {
+	if len(potions) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(potions))
+	for _, p := range potions {
+		result = append(result, map[string]any{
+			"index":      p.Index,
+			"potionId":   p.PotionID,
+			"name":       p.Name,
+			"price":      p.Price,
+			"enoughGold": p.EnoughGold,
+		})
+	}
+	return result
+}
+
+func chestRelicsToMaps(relics []game.ChestRelic) []map[string]any {
+	if len(relics) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(relics))
+	for _, r := range relics {
+		result = append(result, map[string]any{
+			"index":   r.Index,
+			"relicId": r.RelicID,
+			"name":    r.Name,
+		})
+	}
+	return result
+}
+
+func charSelectToMaps(chars []game.CharSelectOption) []map[string]any {
+	if len(chars) == 0 {
+		return nil
+	}
+	result := make([]map[string]any, 0, len(chars))
+	for _, c := range chars {
+		result = append(result, map[string]any{
+			"index":       c.Index,
+			"characterId": c.CharID,
+			"name":        c.Name,
+			"isLocked":    c.IsLocked,
+			"isSelected":  c.IsSelected,
+			"isRandom":    c.IsRandom,
+		})
+	}
+	return result
+}
+
+func shopItemsToMaps(state *game.StateSnapshot, key string) []map[string]any {
+	if state == nil || state.Shop == nil {
+		return nil
+	}
+	switch key {
+	case "cards":
+		return shopCardsToMaps(state.Shop.Cards)
+	case "relics":
+		return shopRelicsToMaps(state.Shop.Relics)
+	case "potions":
+		return shopPotionsToMaps(state.Shop.Potions)
+	default:
+		return nil
+	}
+}
+
+func enemyStateToMap(e game.EnemyState) map[string]any {
+	return map[string]any{
+		"index":      e.Index,
+		"enemyId":    e.EnemyID,
+		"name":       e.Name,
+		"currentHp":  e.CurrentHp,
+		"maxHp":      e.MaxHp,
+		"block":      e.Block,
+		"isAlive":    e.IsAlive,
+		"isHittable": e.IsHittable,
+		"moveId":     e.MoveID,
+	}
+}
+
+// ── Section-level extraction + conversion helpers ──
+
+func rewardCardOptionsMaps(state *game.StateSnapshot) []map[string]any {
+	if state == nil || state.Reward == nil {
+		return nil
+	}
+	return cardStatesToMaps(state.Reward.CardOptions)
+}
+
+func selectionCardsMaps(state *game.StateSnapshot) []map[string]any {
+	if state == nil || state.Selection == nil {
+		return nil
+	}
+	return cardStatesToMaps(state.Selection.Cards)
+}
+
+func rewardRewardsMaps(state *game.StateSnapshot) []map[string]any {
+	if state == nil || state.Reward == nil {
+		return nil
+	}
+	return rewardItemsToMaps(state.Reward.Rewards)
+}
+
+func mapAvailableNodesMaps(state *game.StateSnapshot) []map[string]any {
+	if state == nil || state.Map == nil {
+		return nil
+	}
+	return mapNodesToMaps(state.Map.AvailableNodes)
+}
+
+func eventOptionsMaps(state *game.StateSnapshot) []map[string]any {
+	if state == nil || state.Event == nil {
+		return nil
+	}
+	return eventOptionsToMaps(state.Event.Options)
+}
+
+func restOptionsMaps(state *game.StateSnapshot) []map[string]any {
+	if state == nil || state.Rest == nil {
+		return nil
+	}
+	return restOptionsToMaps(state.Rest.Options)
+}
+
+func chestRelicsMaps(state *game.StateSnapshot) []map[string]any {
+	if state == nil || state.Chest == nil {
+		return nil
+	}
+	return chestRelicsToMaps(state.Chest.RelicOptions)
+}
+
+func charSelectMaps(state *game.StateSnapshot) []map[string]any {
+	if state == nil || state.CharacterSelect == nil {
+		return nil
+	}
+	return charSelectToMaps(state.CharacterSelect.Characters)
+}
+
+func combatHandMaps(state *game.StateSnapshot) []map[string]any {
+	if state == nil || state.Combat == nil {
+		return nil
+	}
+	return cardStatesToMaps(state.Combat.Hand)
+}
+
+func combatEnemiesMaps(state *game.StateSnapshot) []map[string]any {
+	if state == nil || state.Combat == nil {
+		return nil
+	}
+	return enemyStatesToMaps(state.Combat.Enemies)
+}
+
+func mapNodeToMap(n game.MapNode) map[string]any {
+	m := map[string]any{
+		"index":    n.Index,
+		"nodeType": n.NodeType,
+	}
+	if n.Row != nil {
+		m["row"] = *n.Row
+	}
+	if n.Col != nil {
+		m["col"] = *n.Col
+	}
+	return m
+}
+
+func cardStateToMap(c game.CardState) map[string]any {
+	m := map[string]any{
+		"index":      c.Index,
+		"cardId":     c.CardID,
+		"name":       c.Name,
+		"targetType": c.TargetType,
+		"playable":   c.Playable,
+		"requiresTarget": c.RequiresTarget,
+	}
+	if c.EnergyCost != nil {
+		m["energyCost"] = *c.EnergyCost
+	}
+	if c.ValidTargetIndices != nil {
+		m["validTargetIndices"] = c.ValidTargetIndices
+	}
+	return m
 }
 
 func matchCardOption(expected map[string]any, live map[string]any) bool {

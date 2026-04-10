@@ -96,7 +96,7 @@ func (s *SkillLibrary) relevantSkills(state *game.StateSnapshot) []string {
 func (s *SkillLibrary) relevantSkillsForPrompt(state *game.StateSnapshot) []string {
 	switch stateScreen(state) {
 	case "COMBAT":
-		if len(nestedList(state.Combat, "enemies")) > 1 {
+		if state.Combat != nil && len(state.Combat.Enemies) > 1 {
 			return []string{"combat-basics"}
 		}
 		return []string{"combat-basics", "deck-archetypes"}

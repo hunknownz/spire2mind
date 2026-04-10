@@ -82,7 +82,7 @@ func (d *StreamerDirector) ShouldCommentate(moment StreamerMoment, previousSigna
 
 	screen := strings.ToUpper(strings.TrimSpace(state.Screen))
 	runID := strings.TrimSpace(state.RunID)
-	floor, _ := fieldInt(state.Run, "floor")
+	floor := runFloor(state)
 	turn := 0
 	if state.Turn != nil {
 		turn = *state.Turn
@@ -96,7 +96,7 @@ func (d *StreamerDirector) ShouldCommentate(moment StreamerMoment, previousSigna
 		trigger,
 		strings.TrimSpace(moment.Action),
 		compactStreamerSignatureText(moment.Outcome, 96),
-		fieldString(state.AgentView, "headline"),
+		agentViewHeadline(state),
 	}, "|")
 	if signature == previousSignature {
 		return "", "", false
