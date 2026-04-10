@@ -391,7 +391,8 @@ internal sealed class EventService : IDisposable
         bool InCombat,
         int? Turn,
         IReadOnlyList<string> AvailableActions,
-        string ActionSignature)
+        string ActionSignature,
+        string CombatSignature)
     {
         public bool HasActions => AvailableActions.Count > 0;
 
@@ -401,18 +402,39 @@ internal sealed class EventService : IDisposable
                    string.Equals(Screen, other.Screen, StringComparison.Ordinal) &&
                    InCombat == other.InCombat &&
                    Turn == other.Turn &&
-                   string.Equals(ActionSignature, other.ActionSignature, StringComparison.Ordinal);
+                   string.Equals(ActionSignature, other.ActionSignature, StringComparison.Ordinal) &&
+                   string.Equals(CombatSignature, other.CombatSignature, StringComparison.Ordinal);
         }
 
         public static StateDigest FromSnapshot(BridgeStateSnapshot snapshot)
         {
+            // Sort actions for order-independent comparison
+            var sortedActions = snapshot.AvailableActions.OrderBy(a => a, StringComparer.Ordinal).ToArray();
+
             return new StateDigest(
                 snapshot.RunId,
                 snapshot.Screen,
                 snapshot.InCombat,
                 snapshot.Turn,
-                snapshot.AvailableActions.ToArray(),
-                string.Join("|", snapshot.AvailableActions));
+                sortedActions,
+                string.Join("|", sortedActions),
+                BuildCombatSignature(snapshot));
+        }
+
+        private static string BuildCombatSignature(BridgeStateSnapshot snapshot)
+        {
+            var combat = snapshot.Combat;
+            if (combat == null)
+            {
+                return "";
+            }
+
+            var player = combat.Player;
+            var playerSig = $"p:{player?.CurrentHp}/{player?.MaxHp}/{player?.Block}/{player?.Energy}";
+            var enemySig = string.Join(",", combat.Enemies.Select(e => $"{e.Index}:{e.CurrentHp}/{e.Block}/{e.IsAlive}"));
+            var handSig = $"h:{combat.Hand.Count}";
+
+            return $"{playerSig}|{enemySig}|{handSig}";
         }
     }
 }
