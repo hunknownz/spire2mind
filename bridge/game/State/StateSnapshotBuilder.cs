@@ -134,14 +134,15 @@ internal static class StateSnapshotBuilder
                ?? "run_unknown";
     }
 
-    private static T? TryBuild<T>(Func<T?> builder) where T : class
+    private static T? TryBuild<T>(Func<T?> builder, [System.Runtime.CompilerServices.CallerArgumentExpression(nameof(builder))] string? builderExpr = null) where T : class
     {
         try
         {
             return builder();
         }
-        catch
+        catch (Exception ex)
         {
+            MegaCrit.Sts2.Core.Logging.Log.Warn($"[{Entry.ModId}] Section builder failed ({builderExpr}): {ex.GetType().Name}: {ex.Message}");
             return null;
         }
     }

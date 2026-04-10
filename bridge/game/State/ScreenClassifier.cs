@@ -6,6 +6,25 @@ namespace Spire2Mind.Bridge.Game.State;
 
 internal static class ScreenClassifier
 {
+    // Game node type names mapped to screen IDs.
+    // These are class names from the game assembly; if the game renames them,
+    // update here (compile will still succeed, but screens will classify as Unknown).
+    private static readonly Dictionary<string, string> TypeNameToScreenId = new(StringComparer.Ordinal)
+    {
+        ["NRewardsScreen"] = ScreenIds.Reward,
+        ["NCardRewardSelectionScreen"] = ScreenIds.Reward,
+        ["NMapScreen"] = ScreenIds.Map,
+        ["NMapRoom"] = ScreenIds.Map,
+        ["NCombatRoom"] = ScreenIds.Combat,
+        ["NEventRoom"] = ScreenIds.Event,
+        ["NMerchantRoom"] = ScreenIds.Shop,
+        ["NMerchantInventory"] = ScreenIds.Shop,
+        ["NRestSiteRoom"] = ScreenIds.Rest,
+        ["NTreasureRoom"] = ScreenIds.Chest,
+        ["NTreasureRoomRelicCollection"] = ScreenIds.Chest,
+        ["NGameOverScreen"] = ScreenIds.GameOver,
+    };
+
     public static string Classify(object? currentScreen)
     {
         if (NModalContainer.Instance?.OpenModal != null)
@@ -15,12 +34,9 @@ internal static class ScreenClassifier
 
         if (currentScreen == null)
         {
-            if (GameUiAccess.ResolveSelectionContext(null) != null)
-            {
-                return ScreenIds.CardSelection;
-            }
-
-            return ScreenIds.Unknown;
+            return GameUiAccess.ResolveSelectionContext(null) != null
+                ? ScreenIds.CardSelection
+                : ScreenIds.Unknown;
         }
 
         if (GameUiAccess.ResolveSelectionContext(currentScreen) != null)
@@ -29,25 +45,22 @@ internal static class ScreenClassifier
         }
 
         var typeName = currentScreen.GetType().Name;
-        return typeName switch
+
+        if (TypeNameToScreenId.TryGetValue(typeName, out var screenId))
         {
-            "NRewardsScreen" => ScreenIds.Reward,
-            "NCardRewardSelectionScreen" => ScreenIds.Reward,
-            "NMapScreen" => ScreenIds.Map,
-            "NMapRoom" => ScreenIds.Map,
-            "NCombatRoom" => ScreenIds.Combat,
-            "NEventRoom" => ScreenIds.Event,
-            "NMerchantRoom" => ScreenIds.Shop,
-            "NMerchantInventory" => ScreenIds.Shop,
-            "NRestSiteRoom" => ScreenIds.Rest,
-            "NTreasureRoom" => ScreenIds.Chest,
-            "NTreasureRoomRelicCollection" => ScreenIds.Chest,
-            "NGameOverScreen" => ScreenIds.GameOver,
-            "NMainMenu" => RunManager.Instance.DebugOnlyGetState() == null && HasVisibleCharacterSelect()
+            return screenId;
+        }
+
+        if (typeName == "NMainMenu")
+        {
+            return RunManager.Instance.DebugOnlyGetState() == null && HasVisibleCharacterSelect()
                 ? ScreenIds.CharacterSelect
-                : ScreenIds.MainMenu,
-            _ => typeName.Contains("CharacterSelect", StringComparison.Ordinal) ? ScreenIds.CharacterSelect : ScreenIds.Unknown
-        };
+                : ScreenIds.MainMenu;
+        }
+
+        return typeName.Contains("CharacterSelect", StringComparison.Ordinal)
+            ? ScreenIds.CharacterSelect
+            : ScreenIds.Unknown;
     }
 
     private static bool HasVisibleCharacterSelect()

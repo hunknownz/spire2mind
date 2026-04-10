@@ -168,8 +168,9 @@ internal sealed class EventService : IDisposable
             {
                 snapshot = await GameThread.InvokeAsync(StateSnapshotBuilder.Build).ConfigureAwait(false);
             }
-            catch
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
+                MegaCrit.Sts2.Core.Logging.Log.Warn($"[{Entry.ModId}] Event poll state build failed: {ex.GetType().Name}: {ex.Message}");
                 continue;
             }
 
