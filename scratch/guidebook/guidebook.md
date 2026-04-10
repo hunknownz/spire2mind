@@ -4,8 +4,8 @@ This guidebook aggregates recent autonomous runs into a living codex, a recovery
 
 ## Overview
 
-- Updated: `2026-04-09T12:37:04.7327354Z`
-- Runs scanned: `11`
+- Updated: `2026-04-10T04:35:09.5138894Z`
+- Runs scanned: `19`
 - Reflections scanned: `2`
 
 ## RL Readiness
@@ -36,24 +36,24 @@ This guidebook aggregates recent autonomous runs into a living codex, a recovery
 
 ## Living Codex
 
-- 已见卡牌: `26`
-- 已见遗物: `0`
-- 已见药水: `0`
-- 已见怪物: `12`
+- 已见卡牌: `34`
+- 已见遗物: `3`
+- 已见药水: `3`
+- 已见怪物: `15`
 - 已见事件: `2`
 - 已见角色: `7`
 
 - Recent discoveries:
-  - 卡牌: Ashen Strike (层数 `1`)
-  - 怪物: Flyconid (层数 `7`)
-  - 怪物: Snapping Jaxfruit (层数 `7`)
-  - 事件: Wellspring (层数 `5`)
-  - 卡牌: Whirlwind (层数 `4`)
-  - 卡牌: Fight Me! (层数 `3`)
-  - 卡牌: Uppercut (层数 `3`)
-  - 怪物: Twig Slime (M) (层数 `3`)
-  - 卡牌: Anger (层数 `2`)
-  - 卡牌: Perfected Strike (层数 `2`)
+  - 卡牌: Forgotten Ritual (层数 `7`)
+  - 卡牌: Stone Armor (层数 `7`)
+  - 药水: Colorless Potion (层数 `5`)
+  - 卡牌: Fasten (层数 `5`)
+  - 卡牌: Flame Barrier (层数 `5`)
+  - 药水: Flex Potion (层数 `5`)
+  - 卡牌: Hand of Greed (层数 `5`)
+  - 遗物: Lantern (层数 `5`)
+  - 药水: Skill Potion (层数 `5`)
+  - 遗物: Stone Calendar (层数 `5`)
 
 ## Stable Heuristics
 
@@ -68,7 +68,23 @@ This guidebook aggregates recent autonomous runs into a living codex, a recovery
 ## Recovery Hotspots
 
 - Recent window: `6`
-- No recovery hotspots recorded yet.
+
+### Recent Recovery Hotspots
+
+- hard_replan / same_screen_state_drift: `1`
+- invalid_action: `1`
+
+### Recency-Weighted Recovery Trends
+
+- hard_replan / same_screen_state_drift: `0.50`
+- invalid_action: `0.50`
+
+### Historical Recovery Hotspots
+
+- hard_replan / same_screen_state_drift: `1`
+- invalid_action: `1`
+
+Recent hotspots show what the latest runs are still tripping over; weighted trends keep historical context without letting old bugs dominate the signal.
 
 ## Failure Patterns
 

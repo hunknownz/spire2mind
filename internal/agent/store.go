@@ -94,6 +94,7 @@ func (s *RunStore) WriteLatestState(state *game.StateSnapshot) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
+	state = game.NormalizeStateSnapshot(state)
 	bytes, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
 		return err
@@ -139,7 +140,7 @@ func (s *RunStore) RecordPrompt(cycle int, prompt string) error {
 	defer s.mutex.Unlock()
 
 	path := filepath.Join(s.root, fmt.Sprintf("cycle-%04d-prompt.txt", cycle))
-	return writeUTF8TextFile(path, prompt)
+	return writeUTF8TextFile(path, i18n.RepairText(prompt))
 }
 
 func (s *RunStore) RecordCycleSummary(cycle int, summary *CycleSummary) error {
@@ -204,21 +205,21 @@ func (s *RunStore) WriteDashboard(markdown string) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	return writeUTF8TextFile(s.dashboardPath, markdown)
+	return writeUTF8TextFile(s.dashboardPath, i18n.RepairText(markdown))
 }
 
 func (s *RunStore) WriteRunStory(markdown string) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	return writeUTF8TextFile(s.storyPath, markdown)
+	return writeUTF8TextFile(s.storyPath, i18n.RepairText(markdown))
 }
 
 func (s *RunStore) WriteRunGuide(markdown string) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	return writeUTF8TextFile(s.guidePath, markdown)
+	return writeUTF8TextFile(s.guidePath, i18n.RepairText(markdown))
 }
 
 func (s *RunStore) Root() string {

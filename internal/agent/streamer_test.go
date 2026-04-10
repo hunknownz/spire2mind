@@ -71,14 +71,14 @@ func TestStreamerBuildPromptEmphasizesResultInsteadOfProcedure(t *testing.T) {
 		},
 	}
 
-	prompt := director.buildPrompt(moment, []string{"[动作] play_card - 打出痛击"}, NewTodoManager(), NewCompactMemory(), i18n.LanguageChinese)
-	if !strings.Contains(prompt, "已经落地的动作") {
+	prompt := director.buildPromptV2(moment, []string{"[动作] play_card - 打出痛击"}, NewTodoManager(), NewCompactMemory(), i18n.LanguageChinese)
+	if !strings.Contains(prompt, "刚刚落地的动作") {
 		t.Fatalf("expected prompt to mention landed action, got: %s", prompt)
 	}
-	if !strings.Contains(prompt, "不要播报菜单") {
+	if !strings.Contains(prompt, "不要像系统提示一样念步骤") {
 		t.Fatalf("expected prompt to discourage procedural narration, got: %s", prompt)
 	}
-	if !strings.Contains(prompt, "bright-cute") && !strings.Contains(prompt, "元气") {
+	if !strings.Contains(prompt, "主播风格") {
 		t.Fatalf("expected prompt to include streamer style guidance, got: %s", prompt)
 	}
 }
@@ -100,7 +100,7 @@ func TestParseSpeechSegmentsParsesFencedJSON(t *testing.T) {
 }
 
 func TestFallbackTTSSegmentsSplitsNaturalSentenceBoundaries(t *testing.T) {
-	segments := fallbackTTSSegments("先别慌。这一拍最重要的是保血！打完再想后面的事。")
+	segments := fallbackTTSSegmentsV2("先别慌。这一拍最重要的是保血！打完再想后面的事。")
 	if len(segments) != 3 {
 		t.Fatalf("expected 3 segments, got %d (%v)", len(segments), segments)
 	}
@@ -111,7 +111,7 @@ func TestFallbackTTSSegmentsSplitsNaturalSentenceBoundaries(t *testing.T) {
 
 func TestFallbackStreamerBeatRejectsDecisionJSON(t *testing.T) {
 	raw := `{"action":"play_card","card_index":0,"reason":"先出牌"}`
-	beat := fallbackStreamerBeat(StreamerMoment{
+	beat := fallbackStreamerBeatV2(StreamerMoment{
 		Action: "play_card",
 		AfterState: &game.StateSnapshot{
 			Screen: "COMBAT",

@@ -193,9 +193,16 @@ func TestPromptAssemblyPipelineStructuredMapUsesOptionIndexGuidance(t *testing.T
 		RunID:            "RUN-MAP",
 		Screen:           "MAP",
 		AvailableActions: []string{"choose_map_node"},
+		Run: map[string]any{
+			"floor":     5,
+			"gold":      150,
+			"currentHp": 64,
+			"maxHp":     80,
+		},
 		Map: map[string]any{
-			"availableNodes": []map[string]any{
-				{"index": 0, "symbol": "M", "nodeType": "monster"},
+			"availableNodes": []any{
+				map[string]any{"index": 0, "symbol": "M", "nodeType": "monster"},
+				map[string]any{"index": 1, "symbol": "$", "nodeType": "shop"},
 			},
 		},
 	}
@@ -215,6 +222,15 @@ func TestPromptAssemblyPipelineStructuredMapUsesOptionIndexGuidance(t *testing.T
 	}
 	if !strings.Contains(assembly.Text, "improve expected floor depth") {
 		t.Fatalf("expected map depth guidance, got:\n%s", assembly.Text)
+	}
+	if !strings.Contains(assembly.Text, "Depth odds:") {
+		t.Fatalf("expected depth odds block, got:\n%s", assembly.Text)
+	}
+	if !strings.Contains(assembly.Text, "Node 1 (shop)") {
+		t.Fatalf("expected map option analysis in depth odds block, got:\n%s", assembly.Text)
+	}
+	if _, ok := assembly.Telemetry.BlockBreakdown["depth_odds"]; !ok {
+		t.Fatalf("expected depth_odds block breakdown, got %+v", assembly.Telemetry.BlockBreakdown)
 	}
 	if _, ok := assembly.Telemetry.BlockBreakdown["entity_knowledge"]; !ok {
 		t.Fatalf("expected map structured prompt to include entity knowledge, got %+v", assembly.Telemetry.BlockBreakdown)
@@ -254,6 +270,52 @@ func TestPromptAssemblyPipelineStructuredRewardUsesSurvivalGuidance(t *testing.T
 	}
 	if !strings.Contains(assembly.Text, "Current risk posture: fragile") {
 		t.Fatalf("expected fragile risk posture in run objective, got:\n%s", assembly.Text)
+	}
+}
+
+func TestPromptAssemblyPipelineStructuredClosedShopHidesInventoryDetails(t *testing.T) {
+	state := &game.StateSnapshot{
+		RunID:            "RUN-SHOP-CLOSED",
+		Screen:           "SHOP",
+		AvailableActions: []string{"open_shop_inventory", "proceed"},
+		Run: map[string]any{
+			"floor":     5,
+			"currentHp": 49,
+			"maxHp":     80,
+			"gold":      80,
+		},
+		Shop: map[string]any{
+			"cards": []map[string]any{
+				{"index": 0, "name": "彼岸咆哮", "price": 75, "enoughGold": true},
+				{"index": 2, "name": "火焰屏障", "price": 72, "enoughGold": true},
+			},
+			"potions": []map[string]any{
+				{"index": 0, "name": "无色药水", "price": 52, "enoughGold": true},
+			},
+		},
+	}
+
+	assembly := NewPromptAssemblyPipeline().Build(
+		PromptModeStructured,
+		state,
+		NewTodoManager(),
+		NewSkillLibrary("C:\\Users\\klerc\\spire2mind"),
+		NewCompactMemory(),
+		nil,
+		i18n.LanguageChinese,
+	)
+
+	if strings.Contains(assembly.Text, "彼岸咆哮") || strings.Contains(assembly.Text, "火焰屏障") {
+		t.Fatalf("did not expect closed shop prompt to expose inventory items, got:\n%s", assembly.Text)
+	}
+	if strings.Contains(assembly.Text, "最佳卡牌") || strings.Contains(assembly.Text, "深层概率:") {
+		t.Fatalf("did not expect closed shop prompt to expose shop purchase odds, got:\n%s", assembly.Text)
+	}
+	if !strings.Contains(assembly.Text, "\"inventory_open\": false") {
+		t.Fatalf("expected closed shop minimal payload to mark inventory_open=false, got:\n%s", assembly.Text)
+	}
+	if !strings.Contains(assembly.Text, "商店背包当前关闭") {
+		t.Fatalf("expected closed shop room detail guidance, got:\n%s", assembly.Text)
 	}
 }
 

@@ -534,6 +534,30 @@ func TestPreferredMapNodeIndexAvoidsEliteWhenLowHP(t *testing.T) {
 	}
 }
 
+func TestEstimateMapNodeDepthPrefersRestOverEliteWhenFragile(t *testing.T) {
+	t.Parallel()
+
+	state := &game.StateSnapshot{
+		Screen: "MAP",
+		Run: map[string]any{
+			"floor":     7,
+			"gold":      90,
+			"currentHp": 24,
+			"maxHp":     80,
+		},
+	}
+
+	restEstimate := estimateMapNodeDepth(state, map[string]any{"index": 0, "nodeType": "rest"})
+	eliteEstimate := estimateMapNodeDepth(state, map[string]any{"index": 1, "nodeType": "elite"})
+
+	if restEstimate.Score <= eliteEstimate.Score {
+		t.Fatalf("expected rest to have higher depth score than elite when fragile, got rest=%.2f elite=%.2f", restEstimate.Score, eliteEstimate.Score)
+	}
+	if restEstimate.SurvivalOdds <= eliteEstimate.SurvivalOdds {
+		t.Fatalf("expected rest to have higher survival odds than elite, got rest=%.2f elite=%.2f", restEstimate.SurvivalOdds, eliteEstimate.SurvivalOdds)
+	}
+}
+
 func TestShouldBuyCardRemovalWhenLowHPAndAffordable(t *testing.T) {
 	t.Parallel()
 
@@ -590,5 +614,57 @@ func TestChooseDeterministicActionAvoidsGreedyRewardWhenLowHP(t *testing.T) {
 	}
 	if request.OptionIndex == nil || *request.OptionIndex != 1 {
 		t.Fatalf("expected low-HP reward choice to prefer immediate block at index 1, got %+v", request)
+	}
+}
+
+func TestEstimateRewardCardDepthPrefersImmediateStabilityWhenLowHP(t *testing.T) {
+	t.Parallel()
+
+	state := &game.StateSnapshot{
+		Screen: "REWARD",
+		Run: map[string]any{
+			"floor":     8,
+			"currentHp": 24,
+			"maxHp":     80,
+		},
+	}
+
+	barricade := estimateRewardCardDepth(state, map[string]any{"cardId": "BARRICADE", "name": "Barricade"})
+	shrug := estimateRewardCardDepth(state, map[string]any{"cardId": "SHRUG_IT_OFF", "name": "Shrug It Off"})
+
+	if shrug.Score <= barricade.Score {
+		t.Fatalf("expected immediate stability card to outrank greedy scaling, got shrug=%.2f barricade=%.2f", shrug.Score, barricade.Score)
+	}
+	if shrug.SurvivalOdds <= barricade.SurvivalOdds {
+		t.Fatalf("expected shrug to improve survival odds more, got shrug=%.2f barricade=%.2f", shrug.SurvivalOdds, barricade.SurvivalOdds)
+	}
+}
+
+func TestEstimateCardRemovalDepthBeatsFillerShopCardWhenGoldIsIdle(t *testing.T) {
+	t.Parallel()
+
+	state := &game.StateSnapshot{
+		Screen: "SHOP",
+		Run: map[string]any{
+			"floor":     5,
+			"gold":      150,
+			"deckCount": 14,
+			"currentHp": 64,
+			"maxHp":     80,
+		},
+	}
+
+	removal := estimateCardRemovalDepth(state)
+	defend := estimateShopCardDepth(state, map[string]any{
+		"cardId": "DEFEND_IRONCLAD",
+		"name":   "Defend",
+		"price":  45,
+	})
+
+	if removal.Score <= defend.Score {
+		t.Fatalf("expected removal to beat filler card when gold is idle, got removal=%.2f defend=%.2f", removal.Score, defend.Score)
+	}
+	if removal.ResourceConversionOdds <= defend.ResourceConversionOdds {
+		t.Fatalf("expected removal to have better conversion odds, got removal=%.2f defend=%.2f", removal.ResourceConversionOdds, defend.ResourceConversionOdds)
 	}
 }

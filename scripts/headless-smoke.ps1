@@ -66,6 +66,23 @@ $processEnvironment["GOPROXY"] = if ($processEnvironment.Contains("GOPROXY") -an
 $processEnvironment["SPIRE2MIND_GAME_FAST_MODE"] = $FastMode
 $processEnvironment["SPIRE2MIND_COMBAT_PLANNER"] = $Planner
 
+function Set-ConsoleUtf8 {
+    try {
+        & cmd /c chcp 65001 > $null
+    }
+    catch {
+    }
+
+    try {
+        $utf8 = [System.Text.UTF8Encoding]::new($false)
+        [Console]::InputEncoding = $utf8
+        [Console]::OutputEncoding = $utf8
+        $global:OutputEncoding = $utf8
+    }
+    catch {
+    }
+}
+
 function Test-BridgeReady {
     param(
         [string]$Url
@@ -146,6 +163,19 @@ $job = Start-Job -ScriptBlock {
     param($repoRoot, $goExe, $attempts, $stdoutPath, $stderrPath, $environmentOverrides)
 
     Set-Location $repoRoot
+    try {
+        & cmd /c chcp 65001 > $null
+    }
+    catch {
+    }
+    try {
+        $utf8 = [System.Text.UTF8Encoding]::new($false)
+        [Console]::InputEncoding = $utf8
+        [Console]::OutputEncoding = $utf8
+        $global:OutputEncoding = $utf8
+    }
+    catch {
+    }
     foreach ($entry in $environmentOverrides.GetEnumerator()) {
         [System.Environment]::SetEnvironmentVariable([string]$entry.Key, [string]$entry.Value, "Process")
     }

@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"spire2mind/internal/i18n"
 )
 
 const (
@@ -56,7 +58,7 @@ func (c *Client) GetState(ctx context.Context) (*StateSnapshot, error) {
 	if err := c.get(ctx, "/state", nil, state); err != nil {
 		return nil, err
 	}
-	return state, nil
+	return NormalizeStateSnapshot(state), nil
 }
 
 func (c *Client) GetMarkdownState(ctx context.Context) (*MarkdownState, error) {
@@ -64,6 +66,8 @@ func (c *Client) GetMarkdownState(ctx context.Context) (*MarkdownState, error) {
 	if err := c.get(ctx, "/state", map[string]string{"format": "markdown"}, result); err != nil {
 		return nil, err
 	}
+	result.Markdown = i18n.RepairText(result.Markdown)
+	NormalizeStateSnapshot(&result.Snapshot)
 	return result, nil
 }
 
@@ -71,6 +75,14 @@ func (c *Client) GetAvailableActions(ctx context.Context) (*AvailableActions, er
 	result := new(AvailableActions)
 	if err := c.get(ctx, "/actions/available", nil, result); err != nil {
 		return nil, err
+	}
+	result.Screen = i18n.RepairText(result.Screen)
+	result.AvailableActions = normalizeStringSlice(result.AvailableActions)
+	for i := range result.Descriptors {
+		result.Descriptors[i].Action = i18n.RepairText(result.Descriptors[i].Action)
+		result.Descriptors[i].Description = i18n.RepairText(result.Descriptors[i].Description)
+		result.Descriptors[i].RequiredParameters = normalizeStringSlice(result.Descriptors[i].RequiredParameters)
+		result.Descriptors[i].OptionalParameters = normalizeStringSlice(result.Descriptors[i].OptionalParameters)
 	}
 	return result, nil
 }
@@ -97,6 +109,10 @@ func (c *Client) Act(ctx context.Context, request ActionRequest) (*ActionResult,
 	if err := decodeEnvelope(resp, &envelope); err != nil {
 		return nil, err
 	}
+	envelope.Data.Action = i18n.RepairText(envelope.Data.Action)
+	envelope.Data.Status = i18n.RepairText(envelope.Data.Status)
+	envelope.Data.Message = i18n.RepairText(envelope.Data.Message)
+	NormalizeStateSnapshot(&envelope.Data.State)
 	return &envelope.Data, nil
 }
 

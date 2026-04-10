@@ -159,7 +159,7 @@ func (t *TodoManager) PromptBlockForLanguage(language i18n.Language) string {
 	loc := i18n.New(language)
 	lines := []string{
 		loc.Label("Current goal", "当前目标") + ": " + localizeTodoText(t.currentGoal, loc),
-		loc.Label("Room goal", "当前房间目标") + ": " + localizeTodoText(t.roomGoal, loc),
+		loc.Label("Room goal", "房间目标") + ": " + localizeTodoText(t.roomGoal, loc),
 		loc.Label("Next intent", "下一步意图") + ": " + localizeTodoText(t.nextIntent, loc),
 	}
 	if t.lastFailure != "" {
@@ -200,7 +200,7 @@ func (t *TodoManager) PromptBlockCompactForLanguage(language i18n.Language) stri
 	loc := i18n.New(language)
 	lines := []string{
 		loc.Label("Current goal", "当前目标") + ": " + localizeTodoText(t.currentGoal, loc),
-		loc.Label("Room goal", "当前房间目标") + ": " + localizeTodoText(t.roomGoal, loc),
+		loc.Label("Room goal", "房间目标") + ": " + localizeTodoText(t.roomGoal, loc),
 		loc.Label("Next intent", "下一步意图") + ": " + localizeTodoText(t.nextIntent, loc),
 	}
 	if t.lastFailure != "" {
@@ -339,93 +339,94 @@ func localizeTodoText(text string, loc i18n.Localizer) string {
 		return text
 	}
 
+	localized := text
 	switch text {
 	case "Start or continue a single-player run.":
-		return "开始或继续当前单人跑局。"
+		localized = "开始或继续当前单人跑局。"
 	case "Resume the existing run from the main menu.":
-		return "从主菜单继续当前已有跑局。"
+		localized = "从主菜单继续当前已有跑局。"
 	case "Use continue_run.":
-		return "执行 continue_run。"
+		localized = "执行 continue_run。"
 	case "Continue the save unless the game blocks it.":
-		return "优先继续当前存档，除非游戏阻止。"
+		localized = "优先继续当前存档，除非游戏阻止。"
 	case "Start a new single-player run.":
-		return "开始一局新的单人跑局。"
+		localized = "开始一局新的单人跑局。"
 	case "Enter character select and embark.":
-		return "进入角色选择并出发。"
+		localized = "进入角色选择并出发。"
 	case "Open character select, choose a strong unlocked character, then embark.":
-		return "打开角色选择，选一个强度稳定的已解锁角色，然后出发。"
+		localized = "打开角色选择，选一个强度稳定的已解锁角色，然后出发。"
 	case "Launch a fresh run.":
-		return "开启一局新跑局。"
+		localized = "开启一局新跑局。"
 	case "Choose a character and embark.":
-		return "选择角色并出发。"
+		localized = "选择角色并出发。"
 	case "Prefer the first unlocked non-random character unless a better reason appears.":
-		return "默认优先第一个已解锁且非随机的角色，除非当前有更好的理由。"
+		localized = "默认优先第一个已解锁且非随机的角色，除非当前有更好的理由。"
 	case "Advance the run through the map.":
-		return "通过地图推进这一局。"
+		localized = "通过地图推进这一局。"
 	case "Choose the strongest reasonable node.":
-		return "选择当前最合理、最强的一条节点。"
+		localized = "选择当前最合理、最强的一条节点。"
 	case "Use map information to pick the next node and keep momentum.":
-		return "结合地图信息选择下一节点，保持推进节奏。"
+		localized = "结合地图信息选择下一节点，保持推进节奏。"
 	case "Win the current combat.":
-		return "赢下当前战斗。"
+		localized = "赢下当前战斗。"
 	case "Play the best legal turn.":
-		return "打出当前最好的合法回合。"
+		localized = "打出当前最好的合法回合。"
 	case "Use available combat actions to maximize survival and damage.":
-		return "利用当前可用战斗动作，兼顾生存和输出最大化。"
+		localized = "利用当前可用战斗动作，兼顾生存和输出最大化。"
 	case "Resolve the reward screen cleanly.":
-		return "干净地处理奖励界面。"
+		localized = "干净地处理奖励界面。"
 	case "Claim rewards, pick or skip cards, then proceed.":
-		return "领取奖励，选牌或跳牌，然后继续。"
+		localized = "领取奖励，选牌或跳牌，然后继续。"
 	case "Do not leave reward value behind unless skipping is clearly better.":
-		return "除非明显更该跳过，否则不要白白留下奖励价值。"
+		localized = "除非明显更该跳过，否则不要白白留下奖励价值。"
 	case "Resolve the current event.":
-		return "处理当前事件。"
+		localized = "处理当前事件。"
 	case "Pick the strongest available option and proceed.":
-		return "选择当前最强的可用选项并继续。"
+		localized = "选择当前最强的可用选项并继续。"
 	case "Prefer options with durable upside and avoid obvious run-killing downside.":
-		return "优先长期稳定收益，避开明显会毁局的负面选项。"
+		localized = "优先长期稳定收益，避开明显会毁局的负面选项。"
 	case "Extract value from the merchant without stalling.":
-		return "在不拖节奏的前提下把商店价值吃满。"
+		localized = "在不拖节奏的前提下把商店价值吃满。"
 	case "Open inventory if useful, evaluate purchases, then proceed.":
-		return "有需要就先看背包，评估购买后继续。"
+		localized = "有需要就先看背包，评估购买后继续。"
 	case "Do not waste gold on weak buys; prioritize card removal and strong relics.":
-		return "不要把金币花在低价值购买上，优先移除卡牌和强力遗物。"
+		localized = "不要把金币花在低价值购买上，优先移除卡牌和强力遗物。"
 	case "Use the rest site well.":
-		return "把火堆收益用好。"
+		localized = "把火堆收益用好。"
 	case "Choose the best rest option, complete selection if needed, then proceed.":
-		return "选择最好的火堆动作，如有后续选牌就完成它，然后继续。"
+		localized = "选择最好的火堆动作，如有后续选牌就完成它，然后继续。"
 	case "Prefer smith or high-value rest actions when safe.":
-		return "安全时优先锻造或高价值火堆动作。"
+		localized = "安全时优先锻造或高价值火堆动作。"
 	case "Resolve the treasure room.":
-		return "处理宝箱房。"
+		localized = "处理宝箱房。"
 	case "Open the chest, take the best relic, then proceed.":
-		return "开箱，拿最好的遗物，然后继续。"
+		localized = "开箱，拿最好的遗物，然后继续。"
 	case "Do not leave the relic unclaimed.":
-		return "不要漏拿遗物。"
+		localized = "不要漏拿遗物。"
 	case "Finish the current card selection.":
-		return "完成当前选牌。"
+		localized = "完成当前选牌。"
 	case "Choose the best required card and confirm if needed.":
-		return "选出当前最好的必要卡牌，如需确认就确认。"
+		localized = "选出当前最好的必要卡牌，如需确认就确认。"
 	case "Use the prompt and current run context to make the card choice.":
-		return "结合当前提示和整局上下文完成选牌。"
+		localized = "结合当前提示和整局上下文完成选牌。"
 	case "Clear the blocking modal.":
-		return "先清掉阻塞弹窗。"
+		localized = "先清掉阻塞弹窗。"
 	case "Confirm or dismiss the modal immediately.":
-		return "立刻确认或关闭弹窗。"
+		localized = "立刻确认或关闭弹窗。"
 	case "Remove the modal before anything else.":
-		return "先处理弹窗，再做其他事。"
+		localized = "先处理弹窗，再做其他事。"
 	case "Resolve the game over screen cleanly.":
-		return "干净地处理结算界面。"
+		localized = "干净地处理结算界面。"
 	case "Advance the summary and return to the main menu if another attempt should start.":
-		return "推进结算流程，如需再开新局则回到主菜单。"
+		localized = "推进结算流程，如需再开新局则回到主菜单。"
 	case "Use the exposed game over actions to close this run before deciding whether to start the next attempt.":
-		return "先用当前可用的结算动作关掉这局，再决定是否开始下一局。"
+		localized = "先用当前可用的结算动作关掉这一局，再决定是否开始下一局。"
 	case "Keep the run moving forward.":
-		return "保持这局继续向前推进。"
+		localized = "保持这局继续向前推进。"
 	case "Inspect the live state and choose the next best action.":
-		return "查看当前实时状态并选出下一步最优动作。"
+		localized = "查看当前实时状态并选出下一步最优动作。"
 	case "Avoid stalling and prefer legal forward progress.":
-		return "不要停滞，优先一切合法的向前推进。"
+		localized = "不要停滞，优先一切合法的向前推进。"
 	}
 
 	if strings.HasPrefix(text, "After ") && strings.Contains(text, ", reassess the ") && strings.HasSuffix(text, " state and keep moving.") {
@@ -433,16 +434,16 @@ func localizeTodoText(text string, loc i18n.Localizer) string {
 		parts := strings.SplitN(rest, ", reassess the ", 2)
 		if len(parts) == 2 {
 			screen := strings.TrimSuffix(parts[1], " state and keep moving.")
-			return fmt.Sprintf("%s 之后，重新判断当前 %s 状态并继续推进。", parts[0], screen)
+			localized = fmt.Sprintf("%s 之后，重新判断当前 %s 状态并继续推进。", parts[0], screen)
 		}
 	}
 	if strings.Contains(text, " failed: ") {
 		parts := strings.SplitN(text, " failed: ", 2)
 		if len(parts) == 2 {
-			return fmt.Sprintf("%s 失败：%s", parts[0], parts[1])
+			localized = fmt.Sprintf("%s 失败：%s", parts[0], parts[1])
 		}
 	}
-	return text
+	return i18n.RepairText(localized)
 }
 
 func localizeLessonBucketTitle(title string, loc i18n.Localizer) string {
@@ -453,7 +454,7 @@ func localizeLessonBucketTitle(title string, loc i18n.Localizer) string {
 	case "Combat survival":
 		return "战斗生存"
 	case "Pathing":
-		return "路线规划"
+		return "路径规划"
 	case "Reward choice":
 		return "奖励选择"
 	case "Shop economy":
@@ -461,7 +462,7 @@ func localizeLessonBucketTitle(title string, loc i18n.Localizer) string {
 	case "Runtime":
 		return "运行时"
 	default:
-		return title
+		return i18n.RepairText(title)
 	}
 }
 

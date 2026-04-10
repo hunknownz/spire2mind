@@ -4,8 +4,8 @@
 
 ## 概览
 
-- 更新时间: `2026-04-09T12:37:04.7327354Z`
-- 扫描 runs: `11`
+- 更新时间: `2026-04-10T04:35:09.5138894Z`
+- 扫描 runs: `19`
 - 扫描反思: `2`
 
 ## 战斗优先级
@@ -15,29 +15,32 @@
 
 ## 已观测怪物
 
-- 怪物: Leaf Slime (S) (出现 `10`, 层数 `3`)
-- 怪物: Twig Slime (S) (出现 `10`, 层数 `3`)
-- 怪物: Leaf Slime (M) (出现 `10`, 层数 `2`)
-- 怪物: Fuzzy Wurm Crawler (出现 `8`, 层数 `3`)
-- 怪物: Slithering Strangler (出现 `5`, 层数 `5`)
-- 怪物: Eye With Teeth (出现 `3`, 层数 `6`)
-- 怪物: Fogmog (出现 `3`, 层数 `6`)
-- 怪物: Shrinker Beetle (出现 `2`, 层数 `2`)
-- 怪物: Nibbit (出现 `1`, 层数 `1`)
-- 怪物: Snapping Jaxfruit (出现 `1`, 层数 `7`)
-- 怪物: Flyconid (出现 `1`, 层数 `7`)
-- 怪物: Twig Slime (M) (出现 `1`, 层数 `3`)
+- 怪物: Leaf Slime (S) (出现 `17`, 层数 `3`)
+- 怪物: Twig Slime (S) (出现 `17`, 层数 `3`)
+- 怪物: Leaf Slime (M) (出现 `17`, 层数 `2`)
+- 怪物: Fuzzy Wurm Crawler (出现 `15`, 层数 `3`)
+- 怪物: Slithering Strangler (出现 `12`, 层数 `5`)
+- 怪物: Fogmog (出现 `10`, 层数 `7`)
+- 怪物: Eye With Teeth (出现 `10`, 层数 `7`)
+- 怪物: Shrinker Beetle (出现 `9`, 层数 `2`)
+- 怪物: Brute Raider (出现 `7`, 层数 `4`)
+- 怪物: Crossbow Raider (出现 `7`, 层数 `4`)
+- 怪物: Tracker Raider (出现 `7`, 层数 `4`)
+- 怪物: Nibbit (出现 `7`, 层数 `1`)
 
 ## 已观测战斗资源
 
-- 卡牌: Defend (出现 `10`, 层数 `2`)
-- 卡牌: Strike (出现 `10`, 层数 `2`)
-- 卡牌: Bash (出现 `10`, 层数 `2`)
-- 卡牌: Slimed (出现 `10`, 层数 `3`)
-- 卡牌: Twin Strike (出现 `10`, 层数 `7`)
-- 卡牌: Thunderclap (出现 `8`, 层数 `1`)
-- 卡牌: Grapple (出现 `8`, 层数 `5`)
-- 卡牌: Bully (出现 `8`, 层数 `3`)
+- 卡牌: Defend (出现 `17`, 层数 `7`)
+- 卡牌: Strike (出现 `17`, 层数 `7`)
+- 卡牌: Bash (出现 `17`, 层数 `7`)
+- 卡牌: Slimed (出现 `17`, 层数 `3`)
+- 卡牌: Twin Strike (出现 `17`, 层数 `7`)
+- 卡牌: Thunderclap (出现 `15`, 层数 `7`)
+- 卡牌: Howl from Beyond (出现 `15`, 层数 `5`)
+- 卡牌: Grapple (出现 `15`, 层数 `5`)
+- 遗物: Lantern (出现 `3`, 层数 `5`)
+- 遗物: Stone Calendar (出现 `3`, 层数 `5`)
+- 遗物: The Abacus (出现 `3`, 层数 `5`)
 
 ## 战斗失败模式
 
@@ -47,7 +50,7 @@
 
 ## 战斗接缝观察
 
-- No recovery hotspots recorded yet.
+- hard_replan / same_screen_state_drift: `0.50`
 
 ## 近期故事种子
 

@@ -6,6 +6,7 @@ var (
 	appBackground = lipgloss.Color("#0A1224")
 	panelBg       = lipgloss.Color("#121B30")
 	panelBorder   = lipgloss.Color("#34507A")
+	panelGlow     = lipgloss.Color("#4E74AE")
 	mutedText     = lipgloss.Color("#93A9D1")
 	brightText    = lipgloss.Color("#F4F7FF")
 	hotText       = lipgloss.Color("#F6C76D")
@@ -13,6 +14,8 @@ var (
 	successText   = lipgloss.Color("#85E2B8")
 	infoText      = lipgloss.Color("#82CBFF")
 	accentText    = lipgloss.Color("#8BC5FF")
+	violetText    = lipgloss.Color("#C4A8FF")
+	cyanText      = lipgloss.Color("#8EF0FF")
 )
 
 var (
@@ -111,6 +114,29 @@ func previewStyle() lipgloss.Style {
 		Foreground(brightText).
 		Background(lipgloss.Color("#0C1427")).
 		Border(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("#294266")).
+		BorderForeground(panelGlow).
+		Padding(0, 1)
+}
+
+func headerGlowStyle() lipgloss.Style {
+	return lipgloss.NewStyle().
+		Foreground(cyanText).
+		Bold(true)
+}
+
+func waitingBadgeStyle() lipgloss.Style {
+	return lipgloss.NewStyle().
+		Foreground(cyanText).
+		Background(lipgloss.Color("#17374A")).
+		Padding(0, 1).
+		Bold(true)
+}
+
+func streamerBlockStyle() lipgloss.Style {
+	return lipgloss.NewStyle().
+		Foreground(brightText).
+		Background(lipgloss.Color("#101932")).
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(violetText).
 		Padding(0, 1)
 }

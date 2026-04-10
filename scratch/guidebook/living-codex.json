@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-04-09T20:37:04.7327354+08:00",
-  "runs_scanned": 11,
+  "updated_at": "2026-04-10T12:35:09.5138894+08:00",
+  "runs_scanned": 19,
   "reflections_scanned": 2,
   "run_quality": {
     "complete_runs": 2,
@@ -41,7 +41,7 @@
     "knowledge_assets_ok": true
   },
   "seen_content": {
-    "updated_at": "2026-04-09T20:37:04.2541726+08:00",
+    "updated_at": "2026-04-10T12:35:09.1552851+08:00",
     "cards": [
       {
         "category": "cards",
@@ -57,7 +57,7 @@
         "last_screen": "CARD_SELECTION",
         "first_floor": 2,
         "last_floor": 2,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "damage_tool"
         ],
@@ -86,7 +86,7 @@
         "last_screen": "CARD_SELECTION",
         "first_floor": 1,
         "last_floor": 1,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "damage_tool"
         ],
@@ -108,14 +108,14 @@
         "raw_name": "痛击",
         "name_en": "Bash",
         "first_seen_at": "2026-04-09T15:24:03.6814286+08:00",
-        "last_seen_at": "2026-04-09T20:34:07.1163387+08:00",
+        "last_seen_at": "2026-04-10T12:05:58.042193+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
         "last_run_id": "3ZW4L03A5J",
         "first_screen": "COMBAT",
         "last_screen": "COMBAT",
         "first_floor": 2,
-        "last_floor": 2,
-        "seen_count": 10,
+        "last_floor": 7,
+        "seen_count": 17,
         "risk_tags": [
           "damage_tool"
         ],
@@ -137,14 +137,14 @@
         "raw_name": "全身撞击",
         "name_en": "Body Slam",
         "first_seen_at": "2026-04-09T19:21:53.7518845+08:00",
-        "last_seen_at": "2026-04-09T19:21:53.7518845+08:00",
+        "last_seen_at": "2026-04-09T20:59:04.0624779+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
-        "last_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
         "first_screen": "CARD_SELECTION",
         "last_screen": "CARD_SELECTION",
         "first_floor": 6,
-        "last_floor": 6,
-        "seen_count": 1,
+        "last_floor": 3,
+        "seen_count": 8,
         "risk_tags": [
           "damage_tool"
         ],
@@ -173,7 +173,7 @@
         "last_screen": "COMBAT",
         "first_floor": 1,
         "last_floor": 7,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "damage_tool",
           "aoe_tool"
@@ -203,7 +203,7 @@
         "last_screen": "CARD_SELECTION",
         "first_floor": 3,
         "last_floor": 3,
-        "seen_count": 8,
+        "seen_count": 15,
         "risk_tags": [
           "damage_tool"
         ],
@@ -220,19 +220,72 @@
       },
       {
         "category": "cards",
+        "id": "burning_pact",
+        "name": "Burning Pact",
+        "raw_name": "燃烧契约",
+        "name_en": "Burning Pact",
+        "first_seen_at": "2026-04-10T02:08:34.0885786+08:00",
+        "last_seen_at": "2026-04-10T11:50:21.5685262+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 4,
+        "last_floor": 4,
+        "seen_count": 4,
+        "risk_tags": [
+          "draw_tool",
+          "deck_clogger"
+        ],
+        "response_hints": [
+          "Use Burning Pact to smooth the turn before ending with unspent energy.",
+          "Treat Burning Pact as a dead draw unless it solves the immediate turn."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "crimson_mantle",
+        "name": "Crimson Mantle",
+        "raw_name": "绯红披风",
+        "name_en": "Crimson Mantle",
+        "first_seen_at": "2026-04-10T02:08:34.0885786+08:00",
+        "last_seen_at": "2026-04-10T12:02:40.4969047+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "COMBAT",
+        "first_floor": 4,
+        "last_floor": 7,
+        "seen_count": 4,
+        "risk_tags": [
+          "scaling_tool"
+        ],
+        "response_hints": [
+          "Only invest in Crimson Mantle when the current turn is already safe.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "cards",
         "id": "defend_ironclad",
         "name": "Defend",
         "raw_name": "防御",
         "name_en": "Defend",
         "first_seen_at": "2026-04-09T15:22:35.7982202+08:00",
-        "last_seen_at": "2026-04-09T20:36:46.0134696+08:00",
+        "last_seen_at": "2026-04-10T12:07:24.8443998+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
         "last_run_id": "3ZW4L03A5J",
         "first_screen": "COMBAT",
         "last_screen": "COMBAT",
         "first_floor": 2,
-        "last_floor": 2,
-        "seen_count": 10,
+        "last_floor": 7,
+        "seen_count": 17,
         "risk_tags": [
           "survival_tool"
         ],
@@ -261,7 +314,7 @@
         "last_screen": "CARD_SELECTION",
         "first_floor": 5,
         "last_floor": 5,
-        "seen_count": 3,
+        "seen_count": 10,
         "risk_tags": [
           "damage_tool"
         ],
@@ -278,6 +331,32 @@
       },
       {
         "category": "cards",
+        "id": "fasten",
+        "name": "Fasten",
+        "raw_name": "勒紧",
+        "name_en": "Fasten",
+        "first_seen_at": "2026-04-10T11:51:49.4758035+08:00",
+        "last_seen_at": "2026-04-10T11:54:19.2827427+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "SHOP",
+        "last_screen": "SHOP",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 3,
+        "risk_tags": [
+          "scaling_tool"
+        ],
+        "response_hints": [
+          "Only invest in Fasten when the current turn is already safe.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "cards",
         "id": "fight_me",
         "name": "Fight Me!",
         "raw_name": "与我一战！",
@@ -290,7 +369,7 @@
         "last_screen": "CARD_SELECTION",
         "first_floor": 3,
         "last_floor": 3,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "damage_tool"
         ],
@@ -307,6 +386,59 @@
       },
       {
         "category": "cards",
+        "id": "flame_barrier",
+        "name": "Flame Barrier",
+        "raw_name": "火焰屏障",
+        "name_en": "Flame Barrier",
+        "first_seen_at": "2026-04-10T11:51:49.4758035+08:00",
+        "last_seen_at": "2026-04-10T11:54:19.2827427+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "SHOP",
+        "last_screen": "SHOP",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 3,
+        "risk_tags": [
+          "survival_tool",
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Treat Flame Barrier as a stabilizer when HP is low or incoming damage is not covered.",
+          "Lean on Flame Barrier when it secures lethal or trims a high-threat enemy."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "cards",
+        "id": "forgotten_ritual",
+        "name": "Forgotten Ritual",
+        "raw_name": "被遗忘的仪式",
+        "name_en": "Forgotten Ritual",
+        "first_seen_at": "2026-04-10T12:34:43.8495971+08:00",
+        "last_seen_at": "2026-04-10T12:34:43.8495971+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 7,
+        "last_floor": 7,
+        "seen_count": 1,
+        "risk_tags": [
+          "utility_tool"
+        ],
+        "response_hints": [
+          "Use Forgotten Ritual to keep sequencing flexible rather than forcing a greedy line.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "cards",
         "id": "grapple",
         "name": "Grapple",
         "raw_name": "擒拿",
@@ -319,7 +451,7 @@
         "last_screen": "CARD_SELECTION",
         "first_floor": 2,
         "last_floor": 5,
-        "seen_count": 8,
+        "seen_count": 15,
         "risk_tags": [
           "damage_tool"
         ],
@@ -336,6 +468,32 @@
       },
       {
         "category": "cards",
+        "id": "hand_of_greed",
+        "name": "Hand of Greed",
+        "raw_name": "贪婪之手",
+        "name_en": "Hand of Greed",
+        "first_seen_at": "2026-04-10T11:51:49.4758035+08:00",
+        "last_seen_at": "2026-04-10T11:54:19.2827427+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "SHOP",
+        "last_screen": "SHOP",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 3,
+        "risk_tags": [
+          "damage_tool"
+        ],
+        "response_hints": [
+          "Lean on Hand of Greed when it secures lethal or trims a high-threat enemy.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "cards",
         "id": "headbutt",
         "name": "Headbutt",
         "raw_name": "头槌",
@@ -348,7 +506,7 @@
         "last_screen": "CARD_SELECTION",
         "first_floor": 1,
         "last_floor": 4,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "damage_tool",
           "draw_tool"
@@ -371,14 +529,14 @@
         "raw_name": "彼岸咆哮",
         "name_en": "Howl from Beyond",
         "first_seen_at": "2026-04-09T16:19:20.3910341+08:00",
-        "last_seen_at": "2026-04-09T16:19:20.3910341+08:00",
+        "last_seen_at": "2026-04-10T11:54:19.2827427+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
-        "last_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
         "first_screen": "CARD_SELECTION",
-        "last_screen": "CARD_SELECTION",
+        "last_screen": "SHOP",
         "first_floor": 3,
-        "last_floor": 3,
-        "seen_count": 8,
+        "last_floor": 5,
+        "seen_count": 15,
         "risk_tags": [
           "damage_tool",
           "aoe_tool"
@@ -401,14 +559,14 @@
         "raw_name": "燃烧",
         "name_en": "Inflame",
         "first_seen_at": "2026-04-09T18:54:02.1907164+08:00",
-        "last_seen_at": "2026-04-09T19:24:42.6194814+08:00",
+        "last_seen_at": "2026-04-10T11:54:19.2827427+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
-        "last_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
         "first_screen": "COMBAT",
-        "last_screen": "COMBAT",
+        "last_screen": "SHOP",
         "first_floor": 5,
-        "last_floor": 7,
-        "seen_count": 5,
+        "last_floor": 5,
+        "seen_count": 12,
         "risk_tags": [
           "scaling_tool"
         ],
@@ -430,14 +588,14 @@
         "raw_name": "铁斩波",
         "name_en": "Iron Wave",
         "first_seen_at": "2026-04-09T19:21:53.7518845+08:00",
-        "last_seen_at": "2026-04-09T20:32:48.2337865+08:00",
+        "last_seen_at": "2026-04-10T12:05:15.9685904+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
         "last_run_id": "3ZW4L03A5J",
         "first_screen": "CARD_SELECTION",
-        "last_screen": "CARD_SELECTION",
+        "last_screen": "COMBAT",
         "first_floor": 6,
-        "last_floor": 1,
-        "seen_count": 1,
+        "last_floor": 7,
+        "seen_count": 8,
         "risk_tags": [
           "survival_tool",
           "damage_tool"
@@ -460,14 +618,14 @@
         "raw_name": "完美打击",
         "name_en": "Perfected Strike",
         "first_seen_at": "2026-04-09T19:41:40.3157864+08:00",
-        "last_seen_at": "2026-04-09T20:36:46.0134696+08:00",
+        "last_seen_at": "2026-04-10T12:06:33.295054+08:00",
         "first_run_id": "A6RYL65D6T",
         "last_run_id": "3ZW4L03A5J",
         "first_screen": "CARD_SELECTION",
         "last_screen": "COMBAT",
         "first_floor": 2,
-        "last_floor": 2,
-        "seen_count": 2,
+        "last_floor": 7,
+        "seen_count": 9,
         "risk_tags": [
           "damage_tool"
         ],
@@ -496,7 +654,7 @@
         "last_screen": "CARD_SELECTION",
         "first_floor": 2,
         "last_floor": 2,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "damage_tool",
           "draw_tool"
@@ -526,7 +684,7 @@
         "last_screen": "CARD_SELECTION",
         "first_floor": 6,
         "last_floor": 3,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "damage_tool"
         ],
@@ -555,7 +713,7 @@
         "last_screen": "COMBAT",
         "first_floor": 5,
         "last_floor": 7,
-        "seen_count": 5,
+        "seen_count": 12,
         "risk_tags": [
           "survival_tool",
           "draw_tool"
@@ -585,7 +743,7 @@
         "last_screen": "COMBAT",
         "first_floor": 2,
         "last_floor": 3,
-        "seen_count": 10,
+        "seen_count": 17,
         "risk_tags": [
           "draw_tool",
           "deck_clogger"
@@ -603,19 +761,45 @@
       },
       {
         "category": "cards",
+        "id": "stone_armor",
+        "name": "Stone Armor",
+        "raw_name": "岩石铠甲",
+        "name_en": "Stone Armor",
+        "first_seen_at": "2026-04-10T12:34:43.8495971+08:00",
+        "last_seen_at": "2026-04-10T12:34:43.8495971+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "CARD_SELECTION",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 7,
+        "last_floor": 7,
+        "seen_count": 1,
+        "risk_tags": [
+          "scaling_tool"
+        ],
+        "response_hints": [
+          "Only invest in Stone Armor when the current turn is already safe.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "cards",
         "id": "strike_ironclad",
         "name": "Strike",
         "raw_name": "打击",
         "name_en": "Strike",
         "first_seen_at": "2026-04-09T15:22:35.7982202+08:00",
-        "last_seen_at": "2026-04-09T20:36:29.0145641+08:00",
+        "last_seen_at": "2026-04-10T12:07:24.8443998+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
         "last_run_id": "3ZW4L03A5J",
         "first_screen": "COMBAT",
         "last_screen": "COMBAT",
         "first_floor": 2,
-        "last_floor": 2,
-        "seen_count": 10,
+        "last_floor": 7,
+        "seen_count": 17,
         "risk_tags": [
           "damage_tool"
         ],
@@ -644,7 +828,7 @@
         "last_screen": "COMBAT",
         "first_floor": 5,
         "last_floor": 7,
-        "seen_count": 3,
+        "seen_count": 10,
         "risk_tags": [
           "damage_tool"
         ],
@@ -666,14 +850,14 @@
         "raw_name": "闪电霹雳",
         "name_en": "Thunderclap",
         "first_seen_at": "2026-04-09T16:07:14.5282048+08:00",
-        "last_seen_at": "2026-04-09T19:33:08.549738+08:00",
+        "last_seen_at": "2026-04-10T12:07:24.8443998+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
-        "last_run_id": "A6RYL65D6T",
+        "last_run_id": "3ZW4L03A5J",
         "first_screen": "CARD_SELECTION",
-        "last_screen": "CARD_SELECTION",
+        "last_screen": "COMBAT",
         "first_floor": 2,
-        "last_floor": 1,
-        "seen_count": 8,
+        "last_floor": 7,
+        "seen_count": 15,
         "risk_tags": [
           "damage_tool",
           "aoe_tool"
@@ -703,7 +887,7 @@
         "last_screen": "CARD_SELECTION",
         "first_floor": 2,
         "last_floor": 2,
-        "seen_count": 8,
+        "seen_count": 15,
         "risk_tags": [
           "utility_tool"
         ],
@@ -720,6 +904,32 @@
       },
       {
         "category": "cards",
+        "id": "true_grit",
+        "name": "True Grit",
+        "raw_name": "坚毅",
+        "name_en": "True Grit",
+        "first_seen_at": "2026-04-10T11:51:49.4758035+08:00",
+        "last_seen_at": "2026-04-10T12:34:43.8495971+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "SHOP",
+        "last_screen": "CARD_SELECTION",
+        "first_floor": 5,
+        "last_floor": 7,
+        "seen_count": 3,
+        "risk_tags": [
+          "survival_tool"
+        ],
+        "response_hints": [
+          "Treat True Grit as a stabilizer when HP is low or incoming damage is not covered.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "cards",
         "id": "twin_strike",
         "name": "Twin Strike",
         "raw_name": "双重打击",
@@ -732,7 +942,7 @@
         "last_screen": "COMBAT",
         "first_floor": 2,
         "last_floor": 7,
-        "seen_count": 10,
+        "seen_count": 17,
         "risk_tags": [
           "damage_tool"
         ],
@@ -761,7 +971,7 @@
         "last_screen": "COMBAT",
         "first_floor": 3,
         "last_floor": 7,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "damage_tool"
         ],
@@ -783,14 +993,14 @@
         "raw_name": "旋风斩",
         "name_en": "Whirlwind",
         "first_seen_at": "2026-04-09T20:06:40.5738572+08:00",
-        "last_seen_at": "2026-04-09T20:06:40.5738572+08:00",
+        "last_seen_at": "2026-04-10T12:06:04.4781444+08:00",
         "first_run_id": "A6RYL65D6T",
-        "last_run_id": "A6RYL65D6T",
+        "last_run_id": "3ZW4L03A5J",
         "first_screen": "CARD_SELECTION",
-        "last_screen": "CARD_SELECTION",
+        "last_screen": "COMBAT",
         "first_floor": 4,
-        "last_floor": 4,
-        "seen_count": 1,
+        "last_floor": 7,
+        "seen_count": 8,
         "risk_tags": [
           "damage_tool",
           "aoe_tool"
@@ -807,7 +1017,231 @@
         ]
       }
     ],
+    "relics": [
+      {
+        "category": "relics",
+        "id": "lantern",
+        "name": "Lantern",
+        "raw_name": "灯笼",
+        "name_en": "Lantern",
+        "first_seen_at": "2026-04-10T11:51:49.4758035+08:00",
+        "last_seen_at": "2026-04-10T11:54:19.2827427+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "SHOP",
+        "last_screen": "SHOP",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 3,
+        "risk_tags": [
+          "combat_swing"
+        ],
+        "response_hints": [
+          "Treat Lantern as a combat swing tool and route aggressively only if it already covers the risk.",
+          "Convert gold earlier: prioritize card removal, strong relics, or key shop cards before gold becomes useless."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "relics",
+        "id": "stone_calendar",
+        "name": "Stone Calendar",
+        "raw_name": "历石",
+        "name_en": "Stone Calendar",
+        "first_seen_at": "2026-04-10T11:51:49.4758035+08:00",
+        "last_seen_at": "2026-04-10T11:54:19.2827427+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "SHOP",
+        "last_screen": "SHOP",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 3,
+        "risk_tags": [
+          "combat_swing"
+        ],
+        "response_hints": [
+          "Treat Stone Calendar as a combat swing tool and route aggressively only if it already covers the risk.",
+          "Convert gold earlier: prioritize card removal, strong relics, or key shop cards before gold becomes useless."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier"
+        ]
+      },
+      {
+        "category": "relics",
+        "id": "the_abacus",
+        "name": "The Abacus",
+        "raw_name": "算盘",
+        "name_en": "The Abacus",
+        "first_seen_at": "2026-04-10T11:51:49.4758035+08:00",
+        "last_seen_at": "2026-04-10T11:54:19.2827427+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "SHOP",
+        "last_screen": "SHOP",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 3,
+        "risk_tags": [
+          "economy_conversion",
+          "combat_swing"
+        ],
+        "response_hints": [
+          "Convert The Abacus into immediate deck or economy value instead of hoarding it passively.",
+          "Treat The Abacus as a combat swing tool and route aggressively only if it already covers the risk."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left",
+          "Died with 82 unspent gold — convert resources into survivability or power earlier",
+          "Died with 163 unspent gold — convert resources into survivability or power earlier"
+        ]
+      }
+    ],
+    "potions": [
+      {
+        "category": "potions",
+        "id": "colorless_potion",
+        "name": "Colorless Potion",
+        "raw_name": "无色药水",
+        "name_en": "Colorless Potion",
+        "first_seen_at": "2026-04-10T11:51:49.4758035+08:00",
+        "last_seen_at": "2026-04-10T11:54:19.2827427+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "SHOP",
+        "last_screen": "SHOP",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 3,
+        "risk_tags": [
+          "tactical_resource"
+        ],
+        "response_hints": [
+          "Spend Colorless Potion to stabilize or swing a fight before the potion slot gets stranded.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "potions",
+        "id": "flex_potion",
+        "name": "Flex Potion",
+        "raw_name": "肌肉药水",
+        "name_en": "Flex Potion",
+        "first_seen_at": "2026-04-10T11:51:49.4758035+08:00",
+        "last_seen_at": "2026-04-10T11:54:19.2827427+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "SHOP",
+        "last_screen": "SHOP",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 3,
+        "risk_tags": [
+          "tactical_resource",
+          "combat_swing"
+        ],
+        "response_hints": [
+          "Spend Flex Potion to stabilize or swing a fight before the potion slot gets stranded.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "potions",
+        "id": "skill_potion",
+        "name": "Skill Potion",
+        "raw_name": "技能药水",
+        "name_en": "Skill Potion",
+        "first_seen_at": "2026-04-10T11:51:49.4758035+08:00",
+        "last_seen_at": "2026-04-10T11:54:19.2827427+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "SHOP",
+        "last_screen": "SHOP",
+        "first_floor": 5,
+        "last_floor": 5,
+        "seen_count": 3,
+        "risk_tags": [
+          "tactical_resource"
+        ],
+        "response_hints": [
+          "Spend Skill Potion to stabilize or swing a fight before the potion slot gets stranded.",
+          "Play safer at low health: value block over damage and stop spending HP to race."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      }
+    ],
     "monsters": [
+      {
+        "category": "monsters",
+        "id": "brute_ruby_raider",
+        "name": "Brute Raider",
+        "raw_name": "劫掠者暴徒",
+        "name_en": "Brute Raider",
+        "first_seen_at": "2026-04-09T21:01:10.6129841+08:00",
+        "last_seen_at": "2026-04-10T02:07:35.1142323+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 4,
+        "last_floor": 4,
+        "seen_count": 7,
+        "risk_tags": [
+          "combat_threat",
+          "early_run_gatekeeper"
+        ],
+        "response_hints": [
+          "Track Brute Raider's intent first, then decide whether to race, block, or set up.",
+          "Treat Brute Raider as an early consistency check; do not enter underpowered."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "monsters",
+        "id": "crossbow_ruby_raider",
+        "name": "Crossbow Raider",
+        "raw_name": "劫掠者弩手",
+        "name_en": "Crossbow Raider",
+        "first_seen_at": "2026-04-09T21:01:10.6129841+08:00",
+        "last_seen_at": "2026-04-10T02:06:18.3397966+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 4,
+        "last_floor": 4,
+        "seen_count": 7,
+        "risk_tags": [
+          "combat_threat",
+          "burst_threat",
+          "early_run_gatekeeper"
+        ],
+        "response_hints": [
+          "Track Crossbow Raider's intent first, then decide whether to race, block, or set up.",
+          "Respect Crossbow Raider's burst turn; block or kill before trying to race.",
+          "Treat Crossbow Raider as an early consistency check; do not enter underpowered."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
       {
         "category": "monsters",
         "id": "eye_with_teeth",
@@ -815,14 +1249,14 @@
         "raw_name": "利齿之眼",
         "name_en": "Eye With Teeth",
         "first_seen_at": "2026-04-09T19:00:14.5845502+08:00",
-        "last_seen_at": "2026-04-09T19:21:22.1733571+08:00",
+        "last_seen_at": "2026-04-10T12:06:39.3985606+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
-        "last_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
         "first_screen": "COMBAT",
         "last_screen": "COMBAT",
         "first_floor": 6,
-        "last_floor": 6,
-        "seen_count": 3,
+        "last_floor": 7,
+        "seen_count": 10,
         "risk_tags": [
           "combat_threat",
           "punishes_low_hp"
@@ -852,7 +1286,7 @@
         "last_screen": "COMBAT",
         "first_floor": 7,
         "last_floor": 7,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "combat_threat",
           "burst_threat",
@@ -879,14 +1313,14 @@
         "raw_name": "雾菇",
         "name_en": "Fogmog",
         "first_seen_at": "2026-04-09T18:58:44.0734532+08:00",
-        "last_seen_at": "2026-04-09T19:21:22.1733571+08:00",
+        "last_seen_at": "2026-04-10T12:07:24.8443998+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
-        "last_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
         "first_screen": "COMBAT",
         "last_screen": "COMBAT",
         "first_floor": 6,
-        "last_floor": 6,
-        "seen_count": 3,
+        "last_floor": 7,
+        "seen_count": 10,
         "risk_tags": [
           "combat_threat",
           "burst_threat",
@@ -914,14 +1348,14 @@
         "raw_name": "毛绒伏地虫",
         "name_en": "Fuzzy Wurm Crawler",
         "first_seen_at": "2026-04-09T16:08:58.110511+08:00",
-        "last_seen_at": "2026-04-09T16:17:53.176364+08:00",
+        "last_seen_at": "2026-04-09T20:56:51.1610156+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
-        "last_run_id": "L2ZHQ4MU8Y",
+        "last_run_id": "3ZW4L03A5J",
         "first_screen": "COMBAT",
         "last_screen": "COMBAT",
         "first_floor": 3,
         "last_floor": 3,
-        "seen_count": 8,
+        "seen_count": 15,
         "risk_tags": [
           "combat_threat",
           "punishes_low_hp"
@@ -951,7 +1385,7 @@
         "last_screen": "COMBAT",
         "first_floor": 2,
         "last_floor": 2,
-        "seen_count": 10,
+        "seen_count": 17,
         "risk_tags": [
           "combat_threat",
           "punishes_low_hp",
@@ -983,7 +1417,7 @@
         "last_screen": "COMBAT",
         "first_floor": 2,
         "last_floor": 3,
-        "seen_count": 10,
+        "seen_count": 17,
         "risk_tags": [
           "combat_threat",
           "punishes_low_hp",
@@ -1015,7 +1449,7 @@
         "last_screen": "COMBAT",
         "first_floor": 7,
         "last_floor": 1,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "combat_threat",
           "burst_threat",
@@ -1049,7 +1483,7 @@
         "last_screen": "COMBAT",
         "first_floor": 1,
         "last_floor": 2,
-        "seen_count": 2,
+        "seen_count": 9,
         "risk_tags": [
           "combat_threat",
           "burst_threat",
@@ -1083,7 +1517,7 @@
         "last_screen": "COMBAT",
         "first_floor": 5,
         "last_floor": 5,
-        "seen_count": 5,
+        "seen_count": 12,
         "risk_tags": [
           "combat_threat",
           "burst_threat",
@@ -1117,7 +1551,7 @@
         "last_screen": "COMBAT",
         "first_floor": 7,
         "last_floor": 7,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "combat_threat",
           "punishes_low_hp",
@@ -1137,6 +1571,33 @@
       },
       {
         "category": "monsters",
+        "id": "tracker_ruby_raider",
+        "name": "Tracker Raider",
+        "raw_name": "劫掠者追踪手",
+        "name_en": "Tracker Raider",
+        "first_seen_at": "2026-04-09T21:01:10.6129841+08:00",
+        "last_seen_at": "2026-04-10T02:06:18.3397966+08:00",
+        "first_run_id": "3ZW4L03A5J",
+        "last_run_id": "3ZW4L03A5J",
+        "first_screen": "COMBAT",
+        "last_screen": "COMBAT",
+        "first_floor": 4,
+        "last_floor": 4,
+        "seen_count": 7,
+        "risk_tags": [
+          "combat_threat",
+          "setup_window"
+        ],
+        "response_hints": [
+          "Track Tracker Raider's intent first, then decide whether to race, block, or set up.",
+          "Use Tracker Raider as a setup window only when the current turn is otherwise safe."
+        ],
+        "failure_links": [
+          "Died at critical HP (0/80) — the run collapsed with no safety margin left"
+        ]
+      },
+      {
+        "category": "monsters",
         "id": "twig_slime_m",
         "name": "Twig Slime (M)",
         "raw_name": "树枝史莱姆（中）",
@@ -1149,7 +1610,7 @@
         "last_screen": "COMBAT",
         "first_floor": 3,
         "last_floor": 3,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "combat_threat",
           "burst_threat",
@@ -1183,7 +1644,7 @@
         "last_screen": "COMBAT",
         "first_floor": 2,
         "last_floor": 3,
-        "seen_count": 10,
+        "seen_count": 17,
         "risk_tags": [
           "combat_threat",
           "punishes_low_hp",
@@ -1217,7 +1678,7 @@
         "last_screen": "EVENT",
         "first_floor": 4,
         "last_floor": 4,
-        "seen_count": 8,
+        "seen_count": 15,
         "risk_tags": [
           "event_tradeoff",
           "resource_tradeoff",
@@ -1252,7 +1713,7 @@
         "last_screen": "EVENT",
         "first_floor": 5,
         "last_floor": 5,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "event_tradeoff",
           "resource_tradeoff",
@@ -1286,7 +1747,7 @@
         "last_run_id": "run_unknown",
         "first_screen": "CHARACTER_SELECT",
         "last_screen": "CHARACTER_SELECT",
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "baseline_run_context"
         ],
@@ -1314,7 +1775,7 @@
         "first_screen": "GAME_OVER",
         "last_screen": "CHARACTER_SELECT",
         "first_floor": 7,
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "baseline_run_context"
         ],
@@ -1335,14 +1796,14 @@
         "name": "铁甲战士",
         "raw_name": "铁甲战士",
         "first_seen_at": "2026-04-09T15:22:35.7982202+08:00",
-        "last_seen_at": "2026-04-09T20:37:04.2541726+08:00",
+        "last_seen_at": "2026-04-10T12:35:09.1552851+08:00",
         "first_run_id": "L2ZHQ4MU8Y",
         "last_run_id": "3ZW4L03A5J",
         "first_screen": "COMBAT",
         "last_screen": "REWARD",
         "first_floor": 2,
-        "last_floor": 2,
-        "seen_count": 10,
+        "last_floor": 7,
+        "seen_count": 17,
         "risk_tags": [
           "baseline_run_context"
         ],
@@ -1369,7 +1830,7 @@
         "last_run_id": "run_unknown",
         "first_screen": "CHARACTER_SELECT",
         "last_screen": "CHARACTER_SELECT",
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "baseline_run_context"
         ],
@@ -1395,7 +1856,7 @@
         "last_run_id": "run_unknown",
         "first_screen": "CHARACTER_SELECT",
         "last_screen": "CHARACTER_SELECT",
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "baseline_run_context"
         ],
@@ -1422,7 +1883,7 @@
         "last_run_id": "run_unknown",
         "first_screen": "CHARACTER_SELECT",
         "last_screen": "CHARACTER_SELECT",
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "baseline_run_context"
         ],
@@ -1449,7 +1910,7 @@
         "last_run_id": "run_unknown",
         "first_screen": "CHARACTER_SELECT",
         "last_screen": "CHARACTER_SELECT",
-        "seen_count": 1,
+        "seen_count": 7,
         "risk_tags": [
           "baseline_run_context"
         ],
@@ -1486,7 +1947,40 @@
     "Attempt 1 on floor 7: Died at critical HP (0/80) — the run collapsed with no safety margin left",
     "Attempt 2 on floor 7: Died at critical HP (0/80) — the run collapsed with no safety margin left"
   ],
+  "recovery_hotspots": [
+    {
+      "recovery_kind": "hard_replan",
+      "drift_kind": "same_screen_state_drift",
+      "count": 1
+    },
+    {
+      "recovery_kind": "invalid_action",
+      "count": 1
+    }
+  ],
   "recent_recovery_window": 6,
+  "recent_recovery_hotspots": [
+    {
+      "recovery_kind": "hard_replan",
+      "drift_kind": "same_screen_state_drift",
+      "count": 1
+    },
+    {
+      "recovery_kind": "invalid_action",
+      "count": 1
+    }
+  ],
+  "weighted_recovery_hotspots": [
+    {
+      "recovery_kind": "hard_replan",
+      "drift_kind": "same_screen_state_drift",
+      "score": 0.5
+    },
+    {
+      "recovery_kind": "invalid_action",
+      "score": 0.5
+    }
+  ],
   "recent_attempts": [
     {
       "time": "2026-04-09T20:24:35.9566928+08:00",

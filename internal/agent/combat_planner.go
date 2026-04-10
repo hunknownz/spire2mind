@@ -25,12 +25,13 @@ type CombatPlan struct {
 }
 
 type CombatPlanCandidate struct {
-	Action      string  `json:"action"`
-	Label       string  `json:"label"`
-	Score       float64 `json:"score"`
-	CardIndex   *int    `json:"card_index,omitempty"`
-	TargetIndex *int    `json:"target_index,omitempty"`
-	OptionIndex *int    `json:"option_index,omitempty"`
+	Action        string               `json:"action"`
+	Label         string               `json:"label"`
+	Score         float64              `json:"score"`
+	CardIndex     *int                 `json:"card_index,omitempty"`
+	TargetIndex   *int                 `json:"target_index,omitempty"`
+	OptionIndex   *int                 `json:"option_index,omitempty"`
+	TradeEstimate *CombatTradeEstimate `json:"trade_estimate,omitempty"`
 }
 
 func (c CombatPlanCandidate) ActionRequest() (game.ActionRequest, bool) {
@@ -58,6 +59,8 @@ type CombatSnapshot struct {
 	Enemies          []CombatEnemyState
 	CanPlayCard      bool
 	CanEndTurn       bool
+	Floor            int
+	Gold             int
 	IncomingDamage   int
 	LowestEnemyLabel string
 	LowestEnemyHP    int
@@ -106,6 +109,75 @@ type CombatAction struct {
 	Label   string
 }
 
+type CombatTradeEstimate struct {
+	DamageDealt     int `json:"damage_dealt,omitempty"`
+	Kills           int `json:"kills,omitempty"`
+	ThreatReduction int `json:"threat_reduction,omitempty"`
+	CoveredDamage   int `json:"covered_damage,omitempty"`
+	PredictedHPLoss int `json:"predicted_hp_loss,omitempty"`
+	WastedBlock     int `json:"wasted_block,omitempty"`
+}
+
+func (e *CombatTradeEstimate) Summary(language i18n.Language) string {
+	if e == nil {
+		return ""
+	}
+
+	loc := i18n.New(language)
+	parts := []string{
+		loc.Label(
+			fmt.Sprintf("hp loss %d", e.PredictedHPLoss),
+			fmt.Sprintf("战损 %d", e.PredictedHPLoss),
+		),
+	}
+	if e.CoveredDamage > 0 {
+		parts = append(parts, loc.Label(
+			fmt.Sprintf("cover %d", e.CoveredDamage),
+			fmt.Sprintf("格挡 %d", e.CoveredDamage),
+		))
+	}
+	if e.ThreatReduction > 0 {
+		parts = append(parts, loc.Label(
+			fmt.Sprintf("threat -%d", e.ThreatReduction),
+			fmt.Sprintf("减压 %d", e.ThreatReduction),
+		))
+	}
+	if e.DamageDealt > 0 {
+		parts = append(parts, loc.Label(
+			fmt.Sprintf("deal %d", e.DamageDealt),
+			fmt.Sprintf("伤害 %d", e.DamageDealt),
+		))
+	}
+	if e.Kills > 0 {
+		parts = append(parts, loc.Label(
+			fmt.Sprintf("kill %d", e.Kills),
+			fmt.Sprintf("击杀 %d", e.Kills),
+		))
+	}
+	if e.WastedBlock > 0 {
+		parts = append(parts, loc.Label(
+			fmt.Sprintf("waste %d block", e.WastedBlock),
+			fmt.Sprintf("溢出格挡 %d", e.WastedBlock),
+		))
+	}
+	return strings.Join(parts, ", ")
+}
+
+func (e *CombatTradeEstimate) DataMap(language i18n.Language) map[string]any {
+	if e == nil {
+		return nil
+	}
+	return map[string]any{
+		"damage_dealt":      e.DamageDealt,
+		"kills":             e.Kills,
+		"threat_reduction":  e.ThreatReduction,
+		"covered_damage":    e.CoveredDamage,
+		"predicted_hp_loss": e.PredictedHPLoss,
+		"wasted_block":      e.WastedBlock,
+		"summary":           e.Summary(language),
+	}
+}
+
 func (p *CombatPlan) PromptBlock(language i18n.Language) string {
 	if p == nil {
 		return ""
@@ -132,14 +204,18 @@ func (p *CombatPlan) PromptBlock(language i18n.Language) string {
 	if len(p.Candidates) > 0 {
 		lines = append(lines, "- "+loc.Label("Top candidates", "候选动作")+":")
 		for _, candidate := range p.Candidates {
-			lines = append(lines, fmt.Sprintf("  - `%s` %.2f %s", candidate.Action, candidate.Score, candidate.Label))
+			line := fmt.Sprintf("  - `%s` %.2f %s", candidate.Action, candidate.Score, candidate.Label)
+			if trade := strings.TrimSpace(candidate.TradeEstimate.Summary(language)); trade != "" {
+				line += " | " + trade
+			}
+			lines = append(lines, line)
 		}
 	}
 
 	return strings.Join(lines, "\n")
 }
 
-func (p *CombatPlan) DataMap() map[string]any {
+func (p *CombatPlan) DataMap(language i18n.Language) map[string]any {
 	if p == nil {
 		return nil
 	}
@@ -160,11 +236,16 @@ func (p *CombatPlan) DataMap() map[string]any {
 	if len(p.Candidates) > 0 {
 		candidates := make([]map[string]any, 0, len(p.Candidates))
 		for _, candidate := range p.Candidates {
-			candidates = append(candidates, map[string]any{
+			item := map[string]any{
 				"action": candidate.Action,
 				"label":  candidate.Label,
 				"score":  candidate.Score,
-			})
+			}
+			if candidate.TradeEstimate != nil {
+				item["trade_estimate"] = candidate.TradeEstimate.DataMap(language)
+				item["trade_summary"] = candidate.TradeEstimate.Summary(language)
+			}
+			candidates = append(candidates, item)
 		}
 		data["candidates"] = candidates
 	}
@@ -306,6 +387,8 @@ func buildCombatSnapshot(state *game.StateSnapshot, codex *SeenContentRegistry) 
 		},
 		CanPlayCard: hasAction(state, "play_card"),
 		CanEndTurn:  hasAction(state, "end_turn"),
+		Floor:       fieldIntValue(state.Run, "floor"),
+		Gold:        fieldIntValue(state.Run, "gold"),
 	}
 
 	for _, card := range nestedList(state.Combat, "hand") {
@@ -411,7 +494,7 @@ func rankCombatActions(snapshot CombatSnapshot, language i18n.Language) []Combat
 	candidates := make([]CombatPlanCandidate, 0, len(actions))
 	for _, action := range actions {
 		score := scoreCombatAction(snapshot, action)
-		candidates = append(candidates, combatPlanCandidateFromAction(action, score))
+		candidates = append(candidates, combatPlanCandidateFromAction(snapshot, action, score))
 	}
 
 	sort.SliceStable(candidates, func(i, j int) bool {
@@ -465,7 +548,7 @@ func scoreCombatAction(snapshot CombatSnapshot, action CombatAction) float64 {
 		score += 2.0
 	}
 	score += chosen.KnowledgePrior
-	effect := estimateCardEffect(*chosen)
+	effect := estimateCardEffect(*chosen, snapshot.Player.Energy)
 	lowPressureTurn := isLowPressureCombatTurn(snapshot)
 	if chosen.EnergyCost <= 0 {
 		score += 0.7
@@ -525,15 +608,36 @@ func topCombatPlanCandidates(candidates []CombatPlanCandidate, maxCount int) []C
 	return append([]CombatPlanCandidate(nil), candidates[:maxCount]...)
 }
 
-func combatPlanCandidateFromAction(action CombatAction, score float64) CombatPlanCandidate {
+func combatPlanCandidateFromAction(snapshot CombatSnapshot, action CombatAction, score float64) CombatPlanCandidate {
 	return CombatPlanCandidate{
-		Action:      action.Request.Action,
-		Label:       action.Label,
-		Score:       score,
-		CardIndex:   cloneIntPointer(action.Request.CardIndex),
-		TargetIndex: cloneIntPointer(action.Request.TargetIndex),
-		OptionIndex: cloneIntPointer(action.Request.OptionIndex),
+		Action:        action.Request.Action,
+		Label:         action.Label,
+		Score:         score,
+		CardIndex:     cloneIntPointer(action.Request.CardIndex),
+		TargetIndex:   cloneIntPointer(action.Request.TargetIndex),
+		OptionIndex:   cloneIntPointer(action.Request.OptionIndex),
+		TradeEstimate: estimateCombatTrade(snapshot, simulateCombatAction(combatSearchState{Snapshot: cloneCombatSnapshot(snapshot)}, action)),
 	}
+}
+
+func estimateCombatTrade(initial CombatSnapshot, state combatSearchState) *CombatTradeEstimate {
+	estimate := &CombatTradeEstimate{
+		DamageDealt:     max(0, totalEnemyHP(initial)-totalEnemyHP(state.Snapshot)),
+		Kills:           max(0, livingEnemyCount(initial)-livingEnemyCount(state.Snapshot)),
+		ThreatReduction: max(0, initial.IncomingDamage-state.Snapshot.IncomingDamage),
+		CoveredDamage:   min(state.Snapshot.IncomingDamage, state.Snapshot.Player.Block),
+		PredictedHPLoss: max(0, state.Snapshot.IncomingDamage-state.Snapshot.Player.Block),
+		WastedBlock:     max(0, state.Snapshot.Player.Block-state.Snapshot.IncomingDamage),
+	}
+	if estimate.DamageDealt == 0 &&
+		estimate.Kills == 0 &&
+		estimate.ThreatReduction == 0 &&
+		estimate.CoveredDamage == 0 &&
+		estimate.PredictedHPLoss == 0 &&
+		estimate.WastedBlock == 0 {
+		return nil
+	}
+	return estimate
 }
 
 func combatTargetLabel(snapshot CombatSnapshot, targetIndex int) string {

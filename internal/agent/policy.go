@@ -548,6 +548,18 @@ func bestAffordableShopPotion(state *game.StateSnapshot) (*int, float64, bool) {
 	return bestAffordableShopOption(state, "potions", scoreShopPotionChoice, 2.0)
 }
 
+func bestAffordableShopRelicEstimate(state *game.StateSnapshot) (*int, DepthEstimate, bool) {
+	return bestAffordableShopOptionEstimate(state, "relics", estimateShopRelicDepth, 3.0)
+}
+
+func bestAffordableShopCardEstimate(state *game.StateSnapshot) (*int, DepthEstimate, bool) {
+	return bestAffordableShopOptionEstimate(state, "cards", estimateShopCardDepth, 4.0)
+}
+
+func bestAffordableShopPotionEstimate(state *game.StateSnapshot) (*int, DepthEstimate, bool) {
+	return bestAffordableShopOptionEstimate(state, "potions", estimateShopPotionDepth, 2.0)
+}
+
 func bestAffordableShopOption(state *game.StateSnapshot, key string, scorer func(*game.StateSnapshot, map[string]any) float64, minimumScore float64) (*int, float64, bool) {
 	if state == nil {
 		return nil, 0, false
@@ -578,6 +590,38 @@ func bestAffordableShopOption(state *game.StateSnapshot, key string, scorer func
 	return &bestIndex, bestScore, true
 }
 
+func bestAffordableShopOptionEstimate(state *game.StateSnapshot, key string, estimator func(*game.StateSnapshot, map[string]any) DepthEstimate, minimumScore float64) (*int, DepthEstimate, bool) {
+	if state == nil {
+		return nil, DepthEstimate{}, false
+	}
+
+	bestIndex := -1
+	bestScore := minimumScore
+	bestEstimate := DepthEstimate{}
+	for _, option := range nestedList(state.Shop, key) {
+		if !fieldBool(option, "enoughGold") {
+			continue
+		}
+		index, ok := fieldInt(option, "index")
+		if !ok {
+			continue
+		}
+		estimate := estimator(state, option)
+		if estimate.Score < minimumScore {
+			continue
+		}
+		if bestIndex < 0 || estimate.Score > bestScore || (estimate.Score == bestScore && index < bestIndex) {
+			bestIndex = index
+			bestScore = estimate.Score
+			bestEstimate = estimate
+		}
+	}
+	if bestIndex < 0 {
+		return nil, DepthEstimate{}, false
+	}
+	return &bestIndex, bestEstimate, true
+}
+
 func scoreShopCardChoice(state *game.StateSnapshot, card map[string]any) float64 {
 	score := scoreRewardCardChoice(state, card)
 	price := fieldIntValue(card, "price")
@@ -600,12 +644,13 @@ func scoreShopCardChoice(state *game.StateSnapshot, card map[string]any) float64
 	if floor <= 10 && hp < 0.60 && containsAny(cardID, "SHRUG_IT_OFF", "TRUE_GRIT", "IRON_WAVE", "CLOTHESLINE", "HEADBUTT") {
 		score += 1.5
 	}
+	score += estimateShopCardDepth(state, card).Score
 
 	return score
 }
 
 func scoreShopRelicChoice(state *game.StateSnapshot, relic map[string]any) float64 {
-	score := 7.0
+	score := 7.0 + estimateShopRelicDepth(state, relic).Score
 	price := fieldIntValue(relic, "price")
 	gold := fieldIntValue(state.Run, "gold")
 	floor := fieldIntValue(state.Run, "floor")
@@ -647,7 +692,7 @@ func scoreShopPotionChoice(state *game.StateSnapshot, potion map[string]any) flo
 		return -10
 	}
 
-	score := 2.5
+	score := 2.5 + estimateShopPotionDepth(state, potion).Score
 	price := fieldIntValue(potion, "price")
 	score -= float64(price) / 45.0
 
@@ -707,25 +752,20 @@ func preferredMapNodeIndex(state *game.StateSnapshot) *int {
 	}
 
 	type rankedNode struct {
-		index    int
-		priority int
+		index int
+		score float64
 	}
 
-	hp := hpRatio(state)
 	ranked := make([]rankedNode, 0, len(nodes))
 	for _, node := range nodes {
 		index, ok := fieldInt(node, "index")
 		if !ok {
 			continue
 		}
-		remainingGold := fieldIntValue(state.Run, "gold")
-		floor := fieldIntValue(state.Run, "floor")
-		currentHP := fieldIntValue(state.Run, "currentHp")
-		maxHP := fieldIntValue(state.Run, "maxHp")
-
+		estimate := estimateMapNodeDepth(state, node)
 		ranked = append(ranked, rankedNode{
-			index:    index,
-			priority: mapNodePriority(fieldString(node, "nodeType"), hp, remainingGold, floor, currentHP, maxHP),
+			index: index,
+			score: estimate.Score,
 		})
 	}
 
@@ -735,7 +775,7 @@ func preferredMapNodeIndex(state *game.StateSnapshot) *int {
 
 	best := ranked[0]
 	for _, candidate := range ranked[1:] {
-		if candidate.priority < best.priority || (candidate.priority == best.priority && candidate.index < best.index) {
+		if candidate.score > best.score || (candidate.score == best.score && candidate.index < best.index) {
 			best = candidate
 		}
 	}
@@ -902,7 +942,7 @@ func rewardCardOptions(state *game.StateSnapshot) []map[string]any {
 func scoreRewardCardChoice(state *game.StateSnapshot, card map[string]any) float64 {
 	cardID := strings.ToUpper(strings.TrimSpace(firstNonEmpty(fieldString(card, "cardId"), fieldString(card, "id"))))
 	name := strings.ToLower(strings.TrimSpace(fieldString(card, "name")))
-	score := 0.0
+	score := estimateRewardCardDepth(state, card).Score
 
 	floor := fieldIntValue(state.Run, "floor")
 	hp := hpRatio(state)

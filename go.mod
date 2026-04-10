@@ -8,6 +8,7 @@ require (
 	charm.land/bubbletea/v2 v2.0.2
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/hunknownz/open-agent-sdk-go v0.4.2
+	golang.org/x/text v0.31.0
 	modernc.org/sqlite v1.39.1
 )
 

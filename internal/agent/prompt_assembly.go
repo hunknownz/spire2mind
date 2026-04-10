@@ -79,6 +79,9 @@ func (p *PromptAssemblyPipeline) Build(mode PromptMode, state *game.StateSnapsho
 	if block := strings.TrimSpace(p.minimalStatePayloadBlock(state, loc)); block != "" {
 		blocks = append(blocks, promptBlock{Name: "minimal_state", Text: block})
 	}
+	if block := strings.TrimSpace(highLeverageProbabilityBlock(state, language)); block != "" {
+		blocks = append(blocks, promptBlock{Name: "depth_odds", Text: block})
+	}
 
 	switch mode {
 	case PromptModeStructured:
@@ -493,10 +496,12 @@ func (p *PromptAssemblyPipeline) structuredScreenGuidance(state *game.StateSnaps
 		return loc.Paragraph(
 			`Shop guidance:
 - buy_card, buy_relic, buy_potion, and similar choice actions use option_index.
+- If open_shop_inventory is legal while buy_* actions are not, treat the inventory as closed and do not pick buy_* yet.
 - Do not spend gold on filler when a stronger purchase or removal is available.
 - Convert gold into survivability or power before it becomes stranded in a losing run.`,
 			`商店指引：
 - buy_card、buy_relic、buy_potion 以及类似选项动作使用 option_index。
+- 如果当前只能 open_shop_inventory / proceed，就把商店背包视为关闭状态，这一步不要直接选 buy_*。
 - 如果有更强的购买或移除路线，不要把金币花在填充物上。
 - 如果没有明显值得买的东西，优先推进对局。`,
 		)
@@ -761,7 +766,15 @@ func minimalEventPayload(state *game.StateSnapshot) map[string]any {
 }
 
 func minimalShopPayload(state *game.StateSnapshot) map[string]any {
-	payload := map[string]any{}
+	inventoryOpen := shopInventoryOpen(state)
+	payload := map[string]any{
+		"inventory_open": inventoryOpen,
+	}
+	if !inventoryOpen {
+		payload["can_open_inventory"] = hasAction(state, "open_shop_inventory")
+		payload["can_proceed"] = hasAction(state, "proceed")
+		return payload
+	}
 	for _, section := range []struct {
 		source string
 		target string

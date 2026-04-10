@@ -3,7 +3,7 @@ package agentruntime
 import "testing"
 
 func TestCompactTextPreservesUTF8Boundaries(t *testing.T) {
-	input := "铁甲战士 对阵 小啃兽"
+	input := "铁甲战士 对阵 小啮兽"
 
 	got := compactText(input, 8)
 	if got == input {

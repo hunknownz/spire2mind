@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 
@@ -100,6 +101,7 @@ type Model struct {
 	guideRunQualityRecentDiedWithGoldRuns   int
 	guideRunQualityRecentAverageDeathGold   int
 	tacticalHints                           []string
+	depthOdds                               []string
 	combatPlannerMode                       string
 	combatPlanSummary                       string
 	combatPlanGoal                          string
@@ -110,6 +112,7 @@ type Model struct {
 	width                                   int
 	height                                  int
 	paused                                  bool
+	spinnerFrame                            int
 }
 
 type sessionEventMsg struct {
@@ -121,6 +124,7 @@ type sessionErrMsg struct {
 }
 
 type sessionDoneMsg struct{}
+type spinnerTickMsg struct{}
 
 func New(ctx context.Context, cfg config.Config) (*Model, error) {
 	session, err := agentruntime.StartSession(ctx, cfg)
@@ -129,7 +133,7 @@ func New(ctx context.Context, cfg config.Config) (*Model, error) {
 	}
 
 	model := &Model{
-		repoRoot:       cfg.RepoRoot,
+		repoRoot:      cfg.RepoRoot,
 		session:       session,
 		loc:           i18n.New(cfg.Language),
 		status:        "running",
@@ -145,7 +149,10 @@ func New(ctx context.Context, cfg config.Config) (*Model, error) {
 }
 
 func (m *Model) Init() tea.Cmd {
-	return listenSessionCmd(m.session.Events(), m.session.Errors())
+	return tea.Batch(
+		listenSessionCmd(m.session.Events(), m.session.Errors()),
+		spinnerTickCmd(),
+	)
 }
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -180,6 +187,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.status = "done"
 		}
 		return m, nil
+	case spinnerTickMsg:
+		m.spinnerFrame = (m.spinnerFrame + 1) % len(spinnerFrames)
+		return m, spinnerTickCmd()
 	}
 
 	return m, nil
@@ -429,6 +439,12 @@ func (m *Model) handleSessionEvent(event agentruntime.SessionEvent) {
 	if tacticalHints, ok := event.Data["tactical_hints"].([]interface{}); ok {
 		m.tacticalHints = interfaceStrings(tacticalHints)
 	}
+	if depthOdds, ok := event.Data["depth_odds"].([]string); ok {
+		m.depthOdds = append([]string(nil), depthOdds...)
+	}
+	if depthOdds, ok := event.Data["depth_odds"].([]interface{}); ok {
+		m.depthOdds = interfaceStrings(depthOdds)
+	}
 	if _, ok := event.Data["combat_plan"]; !ok && event.Kind == agentruntime.SessionEventState {
 		m.clearCombatPlan()
 	}
@@ -461,8 +477,13 @@ func (m *Model) handleSessionEvent(event agentruntime.SessionEvent) {
 				action, _ := item["action"].(string)
 				label, _ := item["label"].(string)
 				score, _ := item["score"].(float64)
+				trade, _ := item["trade_summary"].(string)
 				if strings.TrimSpace(label) == "" {
 					label = action
+				}
+				if strings.TrimSpace(trade) != "" {
+					labels = append(labels, fmt.Sprintf("%s (%.2f | %s)", label, score, trade))
+					continue
 				}
 				labels = append(labels, fmt.Sprintf("%s (%.2f)", label, score))
 			}
@@ -680,4 +701,12 @@ func listenSessionCmd(events <-chan agentruntime.SessionEvent, errs <-chan error
 			return sessionDoneMsg{}
 		}
 	}
+}
+
+var spinnerFrames = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+
+func spinnerTickCmd() tea.Cmd {
+	return tea.Tick(140*time.Millisecond, func(time.Time) tea.Msg {
+		return spinnerTickMsg{}
+	})
 }

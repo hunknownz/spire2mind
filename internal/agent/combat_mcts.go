@@ -66,6 +66,31 @@ type estimatedCardEffect struct {
 	RandomHits      int
 }
 
+type combatSurvivalProfile struct {
+	Label                 string
+	RoutePressure         string
+	UnblockedDamageWeight float64
+	CoveredDamageWeight   float64
+	WastedBlockWeight     float64
+	ThreatReductionWeight float64
+	DamageWeight          float64
+	KillWeight            float64
+	LethalPenalty         float64
+	NearLethalPenalty     float64
+}
+
+type combatRoutePressure struct {
+	Label                  string
+	UnblockedDamageDelta   float64
+	CoveredDamageDelta     float64
+	WastedBlockDelta       float64
+	ThreatReductionDelta   float64
+	DamageDelta            float64
+	KillDelta              float64
+	LethalPenaltyDelta     float64
+	NearLethalPenaltyDelta float64
+}
+
 func newMCTSCombatPlanner() CombatPlanner {
 	return mctsCombatPlanner{
 		iterations:   defaultMCTSIterations,
@@ -97,7 +122,7 @@ func (m mctsCombatPlanner) Analyze(state *game.StateSnapshot, codex *SeenContent
 	result := runCombatMCTS(snapshot, m.iterations, m.rolloutDepth, m.exploration)
 	candidates := make([]CombatPlanCandidate, 0, min(3, len(result.Candidates)))
 	for _, candidate := range result.Candidates {
-		candidates = append(candidates, combatPlanCandidateFromAction(candidate.Action, candidate.MeanValue))
+		candidates = append(candidates, combatPlanCandidateFromAction(snapshot, candidate.Action, candidate.MeanValue))
 		if len(candidates) >= 3 {
 			break
 		}
@@ -123,6 +148,17 @@ func (m mctsCombatPlanner) Analyze(state *game.StateSnapshot, codex *SeenContent
 			fmt.Sprintf("Searched %d shallow combat rollouts before suggesting a line.", result.Iterations),
 			fmt.Sprintf("在给出建议前，已完成 %d 次浅层战斗搜索。", result.Iterations),
 		),
+	}
+	profile := combatSurvivalProfileFor(snapshot)
+	reasons = append(reasons, loc.Label(
+		fmt.Sprintf("Current survival posture: %s.", profile.Label),
+		fmt.Sprintf("当前生存姿态：%s。", profile.Label),
+	))
+	if strings.TrimSpace(profile.RoutePressure) != "" && !strings.EqualFold(profile.RoutePressure, "none") {
+		reasons = append(reasons, loc.Label(
+			fmt.Sprintf("Current route pressure: %s.", profile.RoutePressure),
+			fmt.Sprintf("当前路线压力：%s。", profile.RoutePressure),
+		))
 	}
 	if len(result.Candidates) > 0 {
 		best := result.Candidates[0]
@@ -241,7 +277,7 @@ func rootActionTempoBias(snapshot CombatSnapshot, action CombatAction) float64 {
 	if !found {
 		return 0
 	}
-	effect := estimateCardEffect(card)
+	effect := estimateCardEffect(card, snapshot.Player.Energy)
 	bias := 0.0
 	if effect.Damage > 0 {
 		bias += 2.0 + float64(effect.Damage)*0.1
@@ -332,7 +368,7 @@ func simulateCombatAction(state combatSearchState, action CombatAction) combatSe
 		if !found {
 			return next
 		}
-		effect := estimateCardEffect(card)
+		effect := estimateCardEffect(card, next.Snapshot.Player.Energy)
 		next.Snapshot.Player.Energy = max(0, next.Snapshot.Player.Energy-card.EnergyCost)
 		removeCombatCard(&next.Snapshot, card.Index)
 		next.Snapshot.Player.Block += effect.Block
@@ -373,7 +409,7 @@ func simulateCombatAction(state combatSearchState, action CombatAction) combatSe
 	}
 }
 
-func estimateCardEffect(card CombatCardState) estimatedCardEffect {
+func estimateCardEffect(card CombatCardState, availableEnergy int) estimatedCardEffect {
 	key := strings.ToUpper(strings.TrimSpace(card.CardID))
 	name := strings.ToLower(strings.TrimSpace(card.Name))
 	switch {
@@ -383,6 +419,29 @@ func estimateCardEffect(card CombatCardState) estimatedCardEffect {
 		return estimatedCardEffect{Block: 5, Utility: 0.2}
 	case strings.Contains(key, "BASH"):
 		return estimatedCardEffect{Damage: 8, ApplyVulnerable: 2, Utility: 0.8}
+	case strings.Contains(key, "WHIRLWIND"):
+		hits := max(1, availableEnergy)
+		return estimatedCardEffect{Damage: 5 * hits, TargetsAll: true, Utility: 1.1}
+	case strings.Contains(key, "IRON_WAVE"):
+		return estimatedCardEffect{Damage: 5, Block: 5, Utility: 0.8}
+	case strings.Contains(key, "SHRUG_IT_OFF"):
+		return estimatedCardEffect{Block: 8, Draw: 1, Utility: 0.9}
+	case strings.Contains(key, "POMMEL_STRIKE"):
+		return estimatedCardEffect{Damage: 9, Draw: 1, Utility: 0.9}
+	case strings.Contains(key, "CLOTHESLINE"):
+		return estimatedCardEffect{Damage: 12, ApplyVulnerable: 2, Utility: 1.0}
+	case strings.Contains(key, "HEADBUTT"):
+		return estimatedCardEffect{Damage: 9, Utility: 1.0}
+	case strings.Contains(key, "PERFECTED_STRIKE"):
+		return estimatedCardEffect{Damage: 14, Utility: 0.9}
+	case strings.Contains(key, "CLEAVE"):
+		return estimatedCardEffect{Damage: 8, TargetsAll: true, Utility: 0.9}
+	case strings.Contains(key, "THUNDERCLAP"):
+		return estimatedCardEffect{Damage: 4, TargetsAll: true, ApplyVulnerable: 1, Utility: 1.0}
+	case strings.Contains(key, "TWIN_STRIKE"):
+		return estimatedCardEffect{Damage: 10, Utility: 0.7}
+	case strings.Contains(key, "ANGER"):
+		return estimatedCardEffect{Damage: 6, Utility: 0.75}
 	case strings.Contains(key, "TRUE_GRIT"):
 		return estimatedCardEffect{Block: 7, ExhaustBadCard: true, Utility: 0.7}
 	case strings.Contains(key, "ARMAMENTS"):
@@ -409,6 +468,7 @@ func estimateCardEffect(card CombatCardState) estimatedCardEffect {
 }
 
 func evaluateCombatSearchState(initial CombatSnapshot, state combatSearchState) float64 {
+	profile := combatSurvivalProfileFor(initial)
 	initialEnemyHP := totalEnemyHP(initial)
 	remainingEnemyHP := totalEnemyHP(state.Snapshot)
 	initialEnemies := len(initial.Enemies)
@@ -423,14 +483,14 @@ func evaluateCombatSearchState(initial CombatSnapshot, state combatSearchState) 
 	hpRatio := combatPlayerHPRatio(state.Snapshot)
 
 	score := 0.0
-	score += float64(damageDealt) * 1.05
-	score += float64(kills) * 14.0
-	score += float64(covered) * 0.75
-	score -= float64(unblocked) * 1.65
+	score += float64(damageDealt) * profile.DamageWeight
+	score += float64(kills) * profile.KillWeight
+	score += float64(covered) * profile.CoveredDamageWeight
+	score -= float64(unblocked) * profile.UnblockedDamageWeight
 	score += state.UtilityBonus
 	score += state.DrawCredit
 	score += float64(state.ExhaustedBadCards) * 0.8
-	score += combatKnowledgeThreatReduction(initial, state) * 0.45
+	score += combatKnowledgeThreatReduction(initial, state) * profile.ThreatReductionWeight
 
 	switch {
 	case hpRatio <= 0.2:
@@ -442,19 +502,17 @@ func evaluateCombatSearchState(initial CombatSnapshot, state combatSearchState) 
 	}
 	if incoming == 0 {
 		score -= float64(state.Snapshot.Player.Block) * 0.45
-	} else if hpRatio > 0.2 && incoming*3 < max(1, state.Snapshot.Player.CurrentHP) {
-		score -= float64(wastedBlock) * 0.35
 	} else {
-		score -= float64(wastedBlock) * 0.12
+		score -= float64(wastedBlock) * profile.WastedBlockWeight
 	}
 
 	if remainingEnemies == 0 {
 		score += 100.0
 	}
 	if lethalMargin <= 0 {
-		score -= 120.0
+		score -= profile.LethalPenalty
 	} else if lethalMargin <= 5 {
-		score -= 10.0
+		score -= profile.NearLethalPenalty
 	}
 	if state.TurnEnded && countPlayableCards(state.Snapshot) > 0 {
 		score -= 2.5
@@ -462,6 +520,130 @@ func evaluateCombatSearchState(initial CombatSnapshot, state combatSearchState) 
 	score -= float64(max(0, state.Snapshot.Player.Energy)) * 0.15
 
 	return score
+}
+
+func combatSurvivalProfileFor(snapshot CombatSnapshot) combatSurvivalProfile {
+	hpRatio := combatPlayerHPRatio(snapshot)
+	profile := combatSurvivalProfile{
+		Label:                 "balanced",
+		RoutePressure:         "none",
+		UnblockedDamageWeight: 1.65,
+		CoveredDamageWeight:   0.75,
+		WastedBlockWeight:     0.22,
+		ThreatReductionWeight: 0.45,
+		DamageWeight:          1.05,
+		KillWeight:            14.0,
+		LethalPenalty:         120.0,
+		NearLethalPenalty:     10.0,
+	}
+
+	switch {
+	case hpRatio <= 0.25:
+		profile.Label = "critical-hp preservation"
+		profile.UnblockedDamageWeight = 3.0
+		profile.CoveredDamageWeight = 1.15
+		profile.WastedBlockWeight = 0.08
+		profile.ThreatReductionWeight = 0.8
+		profile.DamageWeight = 0.95
+		profile.KillWeight = 15.0
+		profile.LethalPenalty = 190.0
+		profile.NearLethalPenalty = 18.0
+	case snapshot.Floor > 0 && snapshot.Floor <= 8 && hpRatio <= 0.55:
+		profile.Label = "early-floor hp preservation"
+		profile.UnblockedDamageWeight = 2.45
+		profile.CoveredDamageWeight = 0.95
+		profile.WastedBlockWeight = 0.12
+		profile.ThreatReductionWeight = 0.65
+		profile.DamageWeight = 1.0
+		profile.KillWeight = 14.5
+		profile.LethalPenalty = 150.0
+		profile.NearLethalPenalty = 14.0
+	case snapshot.Floor > 0 && snapshot.Floor <= 4 && hpRatio >= 0.75:
+		profile.Label = "healthy early aggression"
+		profile.UnblockedDamageWeight = 1.3
+		profile.CoveredDamageWeight = 0.55
+		profile.WastedBlockWeight = 0.34
+		profile.ThreatReductionWeight = 0.38
+		profile.DamageWeight = 1.15
+		profile.KillWeight = 15.0
+		profile.LethalPenalty = 115.0
+		profile.NearLethalPenalty = 8.0
+	case hpRatio <= 0.45:
+		profile.Label = "mid-fight stabilization"
+		profile.UnblockedDamageWeight = 2.15
+		profile.CoveredDamageWeight = 0.9
+		profile.WastedBlockWeight = 0.14
+		profile.ThreatReductionWeight = 0.58
+		profile.DamageWeight = 1.0
+		profile.KillWeight = 14.0
+		profile.LethalPenalty = 145.0
+		profile.NearLethalPenalty = 12.0
+	}
+
+	routePressure := combatRoutePressureFor(snapshot)
+	profile.RoutePressure = routePressure.Label
+	profile.UnblockedDamageWeight += routePressure.UnblockedDamageDelta
+	profile.CoveredDamageWeight += routePressure.CoveredDamageDelta
+	profile.WastedBlockWeight += routePressure.WastedBlockDelta
+	profile.ThreatReductionWeight += routePressure.ThreatReductionDelta
+	profile.DamageWeight += routePressure.DamageDelta
+	profile.KillWeight += routePressure.KillDelta
+	profile.LethalPenalty += routePressure.LethalPenaltyDelta
+	profile.NearLethalPenalty += routePressure.NearLethalPenaltyDelta
+	profile.UnblockedDamageWeight = maxFloat(0.5, profile.UnblockedDamageWeight)
+	profile.CoveredDamageWeight = maxFloat(0.2, profile.CoveredDamageWeight)
+	profile.WastedBlockWeight = maxFloat(0.02, profile.WastedBlockWeight)
+	profile.ThreatReductionWeight = maxFloat(0.1, profile.ThreatReductionWeight)
+	profile.DamageWeight = maxFloat(0.4, profile.DamageWeight)
+	profile.KillWeight = maxFloat(6.0, profile.KillWeight)
+	profile.LethalPenalty = maxFloat(60.0, profile.LethalPenalty)
+	profile.NearLethalPenalty = maxFloat(4.0, profile.NearLethalPenalty)
+
+	return profile
+}
+
+func combatRoutePressureFor(snapshot CombatSnapshot) combatRoutePressure {
+	hpRatio := combatPlayerHPRatio(snapshot)
+
+	switch {
+	case snapshot.Floor > 0 && snapshot.Floor <= 10 && snapshot.Gold >= 120 && hpRatio <= 0.65:
+		return combatRoutePressure{
+			Label:                  "protect the shop/conversion window",
+			UnblockedDamageDelta:   0.55,
+			CoveredDamageDelta:     0.18,
+			WastedBlockDelta:       -0.08,
+			ThreatReductionDelta:   0.12,
+			DamageDelta:            -0.05,
+			KillDelta:              0.6,
+			LethalPenaltyDelta:     18.0,
+			NearLethalPenaltyDelta: 3.0,
+		}
+	case snapshot.Floor > 0 && snapshot.Floor <= 5 && hpRatio >= 0.78 && snapshot.Gold < 90:
+		return combatRoutePressure{
+			Label:                  "push early snowball tempo",
+			UnblockedDamageDelta:   -0.18,
+			CoveredDamageDelta:     -0.08,
+			WastedBlockDelta:       0.10,
+			ThreatReductionDelta:   0.06,
+			DamageDelta:            0.12,
+			KillDelta:              1.0,
+			LethalPenaltyDelta:     -4.0,
+			NearLethalPenaltyDelta: -1.0,
+		}
+	case snapshot.Floor > 0 && snapshot.Floor <= 17 && hpRatio <= 0.45:
+		return combatRoutePressure{
+			Label:                  "stabilize before stronger rooms",
+			UnblockedDamageDelta:   0.32,
+			CoveredDamageDelta:     0.12,
+			WastedBlockDelta:       -0.04,
+			ThreatReductionDelta:   0.10,
+			KillDelta:              0.4,
+			LethalPenaltyDelta:     12.0,
+			NearLethalPenaltyDelta: 2.0,
+		}
+	default:
+		return combatRoutePressure{Label: "none"}
+	}
 }
 
 func cloneCombatSearchState(state combatSearchState) combatSearchState {

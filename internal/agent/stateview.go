@@ -240,6 +240,15 @@ func eventDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localize
 
 func shopDetailLines(state *game.StateSnapshot, maxItems int, loc i18n.Localizer) []string {
 	lines := []string{}
+	if !shopInventoryOpen(state) {
+		lines = append(lines,
+			fmt.Sprintf(
+				"- %s",
+				loc.Label("Shop inventory is closed; only open_shop_inventory or proceed is legal right now.", "商店背包当前关闭；这一步只能打开商店背包或直接离开。"),
+			),
+		)
+		return lines
+	}
 	addItems := func(label string, items []map[string]any) {
 		for i, item := range items {
 			if i >= maxItems {

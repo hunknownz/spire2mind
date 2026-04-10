@@ -34,8 +34,11 @@ func (s *Session) recordState(state *game.StateSnapshot) {
 	if hints := BuildTacticalHintsForLanguage(state, s.cfg.Language); len(hints) > 0 {
 		data["tactical_hints"] = hints
 	}
+	if depthOdds := highLeverageProbabilityLines(state, s.cfg.Language); len(depthOdds) > 0 {
+		data["depth_odds"] = depthOdds
+	}
 	if plan := s.currentCombatPlan(state); plan != nil {
-		data["combat_plan"] = plan.DataMap()
+		data["combat_plan"] = plan.DataMap(s.cfg.Language)
 		data["combat_plan_summary"] = plan.Summary
 		data["combat_planner"] = plan.Mode
 	}
@@ -79,6 +82,7 @@ func (s *Session) recordState(state *game.StateSnapshot) {
 }
 
 func (s *Session) emit(event SessionEvent) {
+	event = normalizeSessionEvent(event)
 	if event.Attempt == 0 {
 		if event.RunID != "" {
 			if attempt, ok := s.seenRunIDs[event.RunID]; ok {

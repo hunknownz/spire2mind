@@ -40,7 +40,7 @@ func (l Localizer) Language() Language {
 
 func (l Localizer) Label(english string, chinese string) string {
 	english = strings.TrimSpace(english)
-	chinese = strings.TrimSpace(chinese)
+	chinese = strings.TrimSpace(RepairText(chinese))
 
 	switch l.language {
 	case LanguageChinese:
@@ -67,7 +67,7 @@ func (l Localizer) Label(english string, chinese string) string {
 
 func (l Localizer) Paragraph(english string, chinese string) string {
 	english = strings.TrimSpace(english)
-	chinese = strings.TrimSpace(chinese)
+	chinese = strings.TrimSpace(RepairText(chinese))
 
 	switch l.language {
 	case LanguageChinese:

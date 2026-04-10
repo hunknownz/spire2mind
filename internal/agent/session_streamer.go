@@ -31,7 +31,7 @@ func (s *Session) maybeEmitStreamerBeatForMoment(ctx context.Context, moment Str
 			Kind:    SessionEventStatus,
 			Cycle:   s.cycle,
 			Attempt: s.currentAttemptForState(state),
-			Message: s.say("streamer commentary skipped because generation failed", "主播解说生成失败，本轮跳过"),
+			Message: s.say("streamer commentary skipped because generation failed", "主播解说生成失败，本轮跳过。"),
 			Screen:  state.Screen,
 			RunID:   state.RunID,
 			Data: map[string]interface{}{
@@ -86,7 +86,7 @@ func (s *Session) maybeEmitPassiveStreamerBeat(ctx context.Context, state *game.
 		s.maybeEmitStreamerBeatForMoment(ctx, StreamerMoment{
 			AfterState: state,
 			Trigger:    "game_over",
-			Outcome:    s.say("the run has ended", "这一局已经结束"),
+			Outcome:    s.say("the run has ended", "这一局已经结束。"),
 		})
 	}
 }

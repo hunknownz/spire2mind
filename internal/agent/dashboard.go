@@ -95,6 +95,7 @@ type DebugDashboard struct {
 	guideRunQualityRecentDiedWithGoldRuns   int
 	guideRunQualityRecentAverageDeathGold   int
 	tacticalHints                           []string
+	depthOdds                               []string
 	combatPlannerMode                       string
 	combatPlanSummary                       string
 	combatPlanGoal                          string
@@ -363,6 +364,12 @@ func (d *DebugDashboard) ApplyEvent(event SessionEvent) string {
 	if tacticalHints, ok := event.Data["tactical_hints"].([]interface{}); ok {
 		d.tacticalHints = stringifySlice(tacticalHints)
 	}
+	if depthOdds, ok := event.Data["depth_odds"].([]string); ok {
+		d.depthOdds = append([]string(nil), depthOdds...)
+	}
+	if depthOdds, ok := event.Data["depth_odds"].([]interface{}); ok {
+		d.depthOdds = stringifySlice(depthOdds)
+	}
 	if _, ok := event.Data["combat_plan"]; !ok && event.Kind == SessionEventState {
 		d.clearCombatPlan()
 	}
@@ -395,8 +402,13 @@ func (d *DebugDashboard) ApplyEvent(event SessionEvent) string {
 				action := stringData(item["action"])
 				label := stringData(item["label"])
 				score := floatData(item["score"])
+				trade := stringData(item["trade_summary"])
 				if label == "" {
 					label = action
+				}
+				if strings.TrimSpace(trade) != "" {
+					labels = append(labels, fmt.Sprintf("%s (%.2f | %s)", label, score, trade))
+					continue
 				}
 				labels = append(labels, fmt.Sprintf("%s (%.2f)", label, score))
 			}
@@ -606,6 +618,14 @@ func (d *DebugDashboard) RenderMarkdown() string {
 	} else {
 		for _, hint := range d.tacticalHints {
 			lines = append(lines, "- "+hint)
+		}
+	}
+	lines = append(lines, "", "## "+loc.Label("Depth Odds", "深层概率"), "")
+	if len(d.depthOdds) == 0 {
+		lines = append(lines, "- -")
+	} else {
+		for _, line := range d.depthOdds {
+			lines = append(lines, line)
 		}
 	}
 	if d.combatPlanSummary != "" || d.combatPlanGoal != "" || d.combatPlanTarget != "" || len(d.combatPlanReasons) > 0 {
