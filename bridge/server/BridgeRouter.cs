@@ -84,6 +84,32 @@ internal static class BridgeRouter
                         await GameThread.InvokeAsync(ModelDbAccess.GetPotions).ConfigureAwait(false)).ConfigureAwait(false);
                     return;
 
+                case ("POST", "/console"):
+                {
+                    var consoleRequest = JsonHelper.Deserialize<ConsoleCommandRequest>(context.Request.InputStream);
+                    if (consoleRequest == null || string.IsNullOrWhiteSpace(consoleRequest.Command))
+                    {
+                        await WriteErrorAsync(context, requestId, 400, "invalid_request", "Missing 'command' field.", retryable: false).ConfigureAwait(false);
+                        return;
+                    }
+
+                    var result = await GameThread.InvokeAsync(() => ConsoleCommandExecutor.Execute(consoleRequest.Command)).ConfigureAwait(false);
+                    await WriteSuccessAsync(context, requestId, result).ConfigureAwait(false);
+                    return;
+                }
+
+                case ("GET", "/save/status"):
+                    await WriteSuccessAsync(context, requestId,
+                        await GameThread.InvokeAsync(SaveOperations.GetSaveStatus).ConfigureAwait(false)).ConfigureAwait(false);
+                    return;
+
+                case ("POST", "/save/restart"):
+                {
+                    var result = await GameThread.InvokeAsync(SaveOperations.RestartRoom).ConfigureAwait(false);
+                    await WriteSuccessAsync(context, requestId, result).ConfigureAwait(false);
+                    return;
+                }
+
                 case ("GET", "/actions/available"):
                 {
                     var snapshot = BridgeRuntime.StateReadsEnabled

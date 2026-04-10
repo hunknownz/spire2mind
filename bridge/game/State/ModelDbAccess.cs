@@ -17,7 +17,7 @@ internal static class ModelDbAccess
                 name = ReflectionUtils.LocalizedText(card),
                 type = card.Type.ToString(),
                 rarity = card.Rarity.ToString(),
-                cost = DynamicAccessor.ToNullableInt(DynamicAccessor.GetMemberValue(card.EnergyCost, "BaseValue", "BaseCost", "Value")),
+                cost = ResolveCost(card.EnergyCost),
                 targetType = card.TargetType.ToString()
             })
             .ToList();
@@ -45,6 +45,23 @@ internal static class ModelDbAccess
                 type = power.Type.ToString()
             })
             .ToList();
+    }
+
+    private static int? ResolveCost(object? energyCost)
+    {
+        if (energyCost == null) return null;
+        // Try known property/field names across game versions
+        return DynamicAccessor.ToNullableInt(
+            DynamicAccessor.GetMemberValue(energyCost, "BaseValue", "BaseCost", "Value", "_baseValue", "_value")
+            ?? DynamicAccessor.InvokeMethod(energyCost, "GetBaseValue")
+            ?? DynamicAccessor.InvokeMethod(energyCost, "GetWithModifiers",
+                   ResolveEnumValue("MegaCrit.Sts2.Core.Entities.Cards.CostModifiers", "None")));
+    }
+
+    private static object? ResolveEnumValue(string fullName, string valueName)
+    {
+        var enumType = Type.GetType($"{fullName}, sts2");
+        return enumType == null ? null : Enum.Parse(enumType, valueName);
     }
 
     public static object GetPotions()
