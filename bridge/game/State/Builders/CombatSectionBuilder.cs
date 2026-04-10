@@ -1,13 +1,10 @@
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Context;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.MonsterMoves.Intents;
 using Spire2Mind.Bridge.Models;
-using Spire2Mind.Bridge.Game.Threading;
-using Spire2Mind.Bridge.Game.Ui;
-using Spire2Mind.Bridge.Game.Threading;
-using Spire2Mind.Bridge.Game.Util;
-using Spire2Mind.Bridge.Game.Threading;
 using Spire2Mind.Bridge.Game.Ui;
 using Spire2Mind.Bridge.Game.Threading;
 
@@ -40,6 +37,7 @@ internal static class CombatSectionBuilder
                     Block = (int?)enemy.Block,
                     IsAlive = enemy.IsAlive,
                     IsHittable = true,
+                    Powers = BuildPowers(enemy),
                     MoveId = ReflectionUtils.ModelId(monster?.NextMove),
                     Intents = BuildEnemyIntents(enemy, combatState)
                 };
@@ -49,6 +47,11 @@ internal static class CombatSectionBuilder
         var hand = playerCombatState?.Hand?.Cards
             .Select((card, index) => CardSummaryBuilder.Build(card, index, combatState))
             .ToList() ?? new List<CardSummary>();
+
+        // Pile contents
+        var drawPile = BuildPileCards(localPlayer, PileType.Draw);
+        var discardPile = BuildPileCards(localPlayer, PileType.Discard);
+        var exhaustPile = BuildPileCards(localPlayer, PileType.Exhaust);
 
         var diagnostic = CombatActionAvailability.CaptureDiagnostic(currentScreen, combatState);
 
@@ -74,10 +77,17 @@ internal static class CombatSectionBuilder
                 MaxHp = (int?)playerCreature?.MaxHp,
                 Block = (int?)playerCreature?.Block,
                 Energy = playerCombatState?.Energy,
-                Stars = playerCombatState?.Stars
+                Stars = playerCombatState?.Stars,
+                Powers = BuildPowers(playerCreature)
             },
             Enemies = enemies,
-            Hand = hand
+            Hand = hand,
+            DrawPileCount = drawPile.Count,
+            DiscardPileCount = discardPile.Count,
+            ExhaustPileCount = exhaustPile.Count,
+            DrawPile = drawPile,
+            DiscardPile = discardPile,
+            ExhaustPile = exhaustPile
         };
     }
 
@@ -153,5 +163,41 @@ internal static class CombatSectionBuilder
         {
             return null;
         }
+    }
+
+    private static IReadOnlyList<PowerSummary> BuildPowers(Creature? creature)
+    {
+        if (creature?.Powers == null)
+        {
+            return Array.Empty<PowerSummary>();
+        }
+
+        return creature.Powers
+            .Select(power => new PowerSummary
+            {
+                PowerId = ReflectionUtils.ModelId(power),
+                Name = ReflectionUtils.LocalizedText(power),
+                Amount = (int?)power.Amount,
+                PowerType = power.Type.ToString()
+            })
+            .ToList();
+    }
+
+    private static IReadOnlyList<CardSummary> BuildPileCards(Player? player, PileType pileType)
+    {
+        if (player == null)
+        {
+            return Array.Empty<CardSummary>();
+        }
+
+        var pile = pileType.GetPile(player);
+        if (pile?.Cards == null)
+        {
+            return Array.Empty<CardSummary>();
+        }
+
+        return pile.Cards
+            .Select((card, index) => CardSummaryBuilder.Build(card, index))
+            .ToList();
     }
 }

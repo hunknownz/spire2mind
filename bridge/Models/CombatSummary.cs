@@ -17,6 +17,18 @@ internal sealed class CombatSummary
     public IReadOnlyList<EnemySummary> Enemies { get; init; } = Array.Empty<EnemySummary>();
 
     public IReadOnlyList<CardSummary> Hand { get; init; } = Array.Empty<CardSummary>();
+
+    public int? DrawPileCount { get; init; }
+
+    public int? DiscardPileCount { get; init; }
+
+    public int? ExhaustPileCount { get; init; }
+
+    public IReadOnlyList<CardSummary> DrawPile { get; init; } = Array.Empty<CardSummary>();
+
+    public IReadOnlyList<CardSummary> DiscardPile { get; init; } = Array.Empty<CardSummary>();
+
+    public IReadOnlyList<CardSummary> ExhaustPile { get; init; } = Array.Empty<CardSummary>();
 }
 
 internal sealed class PlayerSummary
@@ -30,6 +42,8 @@ internal sealed class PlayerSummary
     public int? Energy { get; init; }
 
     public int? Stars { get; init; }
+
+    public IReadOnlyList<PowerSummary> Powers { get; init; } = Array.Empty<PowerSummary>();
 }
 
 internal sealed class EnemySummary
@@ -52,6 +66,8 @@ internal sealed class EnemySummary
 
     public string? MoveId { get; init; }
 
+    public IReadOnlyList<PowerSummary> Powers { get; init; } = Array.Empty<PowerSummary>();
+
     public IReadOnlyList<EnemyIntentSummary> Intents { get; init; } = Array.Empty<EnemyIntentSummary>();
 }
 
@@ -70,6 +86,17 @@ internal sealed class EnemyIntentSummary
     public int? TotalDamage { get; init; }
 
     public int? StatusCardCount { get; init; }
+}
+
+internal sealed class PowerSummary
+{
+    public string? PowerId { get; init; }
+
+    public string? Name { get; init; }
+
+    public int? Amount { get; init; }
+
+    public string? PowerType { get; init; }
 }
 
 internal sealed class CardSummary
