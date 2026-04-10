@@ -6,6 +6,6 @@
   "version": "0.1.0-mvp",
   "has_pck": true,
   "has_dll": true,
-  "dependencies": [],
+  "dependencies": ["BaseLib"],
   "affects_gameplay": false
 }

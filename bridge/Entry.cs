@@ -6,6 +6,9 @@ using HarmonyLib = Harmony::HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Nodes;
+using Spire2Mind.Bridge.Game.Threading;
+using Spire2Mind.Bridge.Game.Hooks;
+using Spire2Mind.Bridge.Game.Util;
 
 namespace Spire2Mind.Bridge;
 
@@ -34,7 +37,12 @@ public static class Entry
             _harmony = new HarmonyLib.Harmony(ModId);
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            Log.Info($"[{ModId}] Initialized bridge patches for {DisplayName} {BridgeVersion}.");
+            // BridgeHooker (CustomSingletonModel) registers combat/run hooks.
+            // Guard inside constructor prevents duplicate subscription if BaseLib
+            // also discovers and instantiates it during post-mod-init scan.
+            _ = new BridgeHooker();
+
+            Log.Info($"[{ModId}] Initialized bridge patches and hooks for {DisplayName} {BridgeVersion}.");
 
             if (NGame.Instance != null)
             {

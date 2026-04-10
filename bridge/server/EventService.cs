@@ -1,7 +1,9 @@
 using System.Net;
 using System.Text;
 using System.Threading.Channels;
-using Spire2Mind.Bridge.Game;
+using Spire2Mind.Bridge.Game.State;
+using Spire2Mind.Bridge.Game.Threading;
+using Spire2Mind.Bridge.Game.Util;
 using Spire2Mind.Bridge.Models;
 
 namespace Spire2Mind.Bridge.Http;
@@ -15,6 +17,12 @@ internal sealed class EventService : IDisposable
     private Task? _pollLoop;
     private StateDigest? _lastDigest;
 
+    /// <summary>
+    /// Signal used by BridgeHooker to wake the poll loop immediately
+    /// instead of waiting for the next timer tick.
+    /// </summary>
+    private readonly SemaphoreSlim _hookSignal = new(0);
+
     public void Start()
     {
         lock (_sync)
@@ -24,6 +32,7 @@ internal sealed class EventService : IDisposable
                 return;
             }
 
+            BridgeHooker.OnHookFired += OnHookFired;
             _pollLoop = Task.Run(() => PollLoopAsync(_cts.Token), _cts.Token);
         }
     }
@@ -114,6 +123,7 @@ internal sealed class EventService : IDisposable
 
     public void Dispose()
     {
+        BridgeHooker.OnHookFired -= OnHookFired;
         _cts.Cancel();
 
         Task? pollLoop;
@@ -138,6 +148,8 @@ internal sealed class EventService : IDisposable
         {
             // Best effort only.
         }
+
+        _hookSignal.Dispose();
     }
 
     private async Task PollLoopAsync(CancellationToken cancellationToken)
@@ -162,6 +174,33 @@ internal sealed class EventService : IDisposable
             }
 
             PublishChanges(snapshot);
+        }
+    }
+
+    private void OnHookFired(string hookName, object? data)
+    {
+        // Publish a lightweight hook-specific event immediately
+        Publish(new BridgeEvent
+        {
+            Type = $"hook:{hookName}",
+            Sequence = NextSequence(),
+            TimestampUtc = DateTime.UtcNow,
+            RunId = _lastDigest?.RunId ?? "run_unknown",
+            Screen = _lastDigest?.Screen ?? ScreenIds.Unknown,
+            InCombat = _lastDigest?.InCombat ?? false,
+            Turn = _lastDigest?.Turn,
+            AvailableActions = _lastDigest?.AvailableActions ?? Array.Empty<string>(),
+            Data = data
+        });
+
+        // Wake the poll loop to rebuild full state
+        try
+        {
+            _hookSignal.Release();
+        }
+        catch (SemaphoreFullException)
+        {
+            // Already signaled, no problem
         }
     }
 

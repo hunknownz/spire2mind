@@ -19,9 +19,25 @@
   </Target>
 
   <ItemGroup>
+    <PackageReference Include="Alchyr.Sts2.BaseLib" Version="0.3.0" PrivateAssets="all" />
+    <PackageReference Include="Krafs.Publicizer" Version="2.3.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Spire2Mind.Bridge.Game.Threading" />
+    <Using Include="Spire2Mind.Bridge.Game.Hooks" />
+    <Using Include="Spire2Mind.Bridge.Game.State" />
+    <Using Include="Spire2Mind.Bridge.Game.State.Builders" />
+    <Using Include="Spire2Mind.Bridge.Game.Actions" />
+    <Using Include="Spire2Mind.Bridge.Game.Ui" />
+    <Using Include="Spire2Mind.Bridge.Game.Util" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="sts2">
       <HintPath>$(Sts2DataDir)\sts2.dll</HintPath>
       <Private>false</Private>
+      <Publicize>True</Publicize>
     </Reference>
     <Reference Include="GodotSharp">
       <HintPath>$(Sts2DataDir)\GodotSharp.dll</HintPath>

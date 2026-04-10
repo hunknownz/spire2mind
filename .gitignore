@@ -7,6 +7,12 @@ spire2mind.exe
 research/airi/
 research/MeloTTS/
 research/kokoro/
+research/BaseLib-StS2/
+research/ModTemplate-StS2/
+research/Minty-Spire-2/
+research/StS2-Quick-Restart/
+research/WatcherMod/
+research/sts2-quickRestart/
 tools/local-tts/__pycache__/
 scratch/*
 !scratch/guidebook/

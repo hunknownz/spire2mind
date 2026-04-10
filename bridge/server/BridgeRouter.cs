@@ -1,6 +1,8 @@
 using System.Net;
 using MegaCrit.Sts2.Core.Logging;
-using Spire2Mind.Bridge.Game;
+using Spire2Mind.Bridge.Game.State;
+using Spire2Mind.Bridge.Game.Threading;
+using Spire2Mind.Bridge.Game.Util;
 using Spire2Mind.Bridge.Models;
 
 namespace Spire2Mind.Bridge.Http;
