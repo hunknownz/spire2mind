@@ -1,4 +1,3 @@
-using MegaCrit.Sts2.Core.DevConsole;
 using MegaCrit.Sts2.Core.Nodes;
 
 namespace Spire2Mind.Bridge.Game.Actions;
@@ -9,6 +8,8 @@ namespace Spire2Mind.Bridge.Game.Actions;
 /// </summary>
 internal static class ConsoleCommandExecutor
 {
+    private static object? _cachedConsole;
+
     public static object Execute(string command)
     {
         var game = NGame.Instance;
@@ -17,55 +18,54 @@ internal static class ConsoleCommandExecutor
             return new { success = false, message = "Game not ready." };
         }
 
-        // DevConsole is a Godot node in the scene tree. Search common paths.
         var console = FindDevConsole(game);
-        if (console != null)
+        if (console == null)
         {
-            try
-            {
-                console.ProcessCommand(command);
-                return new { success = true, command, message = "Command executed." };
-            }
-            catch (Exception ex)
-            {
-                return new { success = false, command, message = ex.Message };
-            }
+            return new { success = false, command, message = "DevConsole not found. Try pressing backtick (`) in-game first to activate the console." };
         }
 
-        // Fallback: try invoking the command processor via reflection
         try
         {
-            var result = DynamicAccessor.InvokeMethod(
-                DynamicAccessor.GetMemberValue(game, "DevConsole", "_devConsole", "Console"),
-                "ProcessCommand", command);
-            if (result != null)
-            {
-                return new { success = true, command, message = "Command executed (fallback)." };
-            }
+            var result = DynamicAccessor.InvokeMethod(console, "ProcessCommand", command);
+            return new { success = true, command, message = "Command executed." };
         }
-        catch
+        catch (Exception ex)
         {
+            return new { success = false, command, message = ex.Message };
         }
-
-        return new { success = false, command, message = "DevConsole not available. The game may need to be launched with the debug console enabled (backtick key)." };
     }
 
-    private static DevConsole? FindDevConsole(NGame game)
+    private static object? FindDevConsole(NGame game)
     {
-        // Try direct paths
-        var console = game.GetNodeOrNull<DevConsole>("%DevConsole")
-            ?? game.GetNodeOrNull<DevConsole>("DevConsole")
-            ?? game.GetNodeOrNull<DevConsole>("Ui/DevConsole")
-            ?? game.GetNodeOrNull<DevConsole>("/root/NGame/DevConsole");
-
-        if (console != null)
+        // Return cached if still valid
+        if (_cachedConsole != null)
         {
-            return console;
+            return _cachedConsole;
         }
 
-        // Search entire tree
-        return TextExtractor.Descendants(game)
-            .OfType<DevConsole>()
-            .FirstOrDefault();
+        // Search from scene root using FindChild (recursive)
+        var root = game.GetTree()?.Root;
+        if (root != null)
+        {
+            var node = root.FindChild("DevConsole", true, false);
+            if (node != null)
+            {
+                _cachedConsole = node;
+                return _cachedConsole;
+            }
+        }
+
+        // Search via reflection on NGame
+        _cachedConsole = DynamicAccessor.GetMemberValue(game, "DevConsole", "_devConsole");
+        if (_cachedConsole != null)
+        {
+            return _cachedConsole;
+        }
+
+        // Full tree search by type name
+        _cachedConsole = TextExtractor.Descendants(root ?? (Godot.Node)game)
+            .FirstOrDefault(n => n.GetType().Name == "DevConsole");
+
+        return _cachedConsole;
     }
 }
