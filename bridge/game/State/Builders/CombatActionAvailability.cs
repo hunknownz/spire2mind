@@ -79,7 +79,7 @@ internal static class CombatActionAvailability
             return diagnostic;
         }
 
-        var hand = ReflectionUtils.GetMemberValue(ReflectionUtils.GetMemberValue(room, "Ui"), "Hand");
+        var hand = room.Ui?.Hand;
         var player = LocalContext.GetMe(combatState) as Player;
         var handCards = player?.PlayerCombatState?.Hand?.Cards;
 
@@ -94,8 +94,8 @@ internal static class CombatActionAvailability
             IsPlayPhase = diagnostic.IsPlayPhase,
             PlayerActionsDisabled = diagnostic.PlayerActionsDisabled,
             HandVisible = hand != null,
-            InCardPlay = ReflectionUtils.ToNullableBool(ReflectionUtils.GetMemberValue(hand, "InCardPlay")) == true,
-            IsInCardSelection = ReflectionUtils.ToNullableBool(ReflectionUtils.GetMemberValue(hand, "IsInCardSelection")) == true,
+            InCardPlay = hand?.InCardPlay == true,
+            IsInCardSelection = hand?.IsInCardSelection == true,
             LocalPlayerAlive = player?.Creature?.IsAlive == true,
             HandCount = handCards?.Count ?? 0,
             PlayableCardCount = handCards?.Count(card => card.CanPlay()) ?? 0
@@ -127,10 +127,8 @@ internal static class CombatActionAvailability
             return false;
         }
 
-        var hand = ReflectionUtils.GetMemberValue(ReflectionUtils.GetMemberValue(room, "Ui"), "Hand");
-        if (hand == null ||
-            ReflectionUtils.ToNullableBool(ReflectionUtils.GetMemberValue(hand, "InCardPlay")) == true ||
-            ReflectionUtils.ToNullableBool(ReflectionUtils.GetMemberValue(hand, "IsInCardSelection")) == true)
+        var hand = room.Ui?.Hand;
+        if (hand == null || hand.InCardPlay || hand.IsInCardSelection)
         {
             return false;
         }

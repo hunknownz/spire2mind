@@ -58,7 +58,7 @@ internal static partial class BridgeActionExecutor
         node.ForceClick();
         var stable = await WaitForStableSnapshotAsync(
             snapshot => snapshot.Screen != ScreenIds.Map && IsSnapshotActionableOrSettled(snapshot),
-            TimeSpan.FromSeconds(12));
+            BridgeDefaults.NavigationTimeout);
 
         return BuildResult(ActionIds.ChooseMapNode, stable);
     }
@@ -92,7 +92,7 @@ internal static partial class BridgeActionExecutor
 
                 return GameUiAccess.GetRewardButtons(screen).Count(ReflectionUtils.IsAvailable) != previousCount;
             },
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.ClaimReward, stable);
     }
@@ -119,7 +119,7 @@ internal static partial class BridgeActionExecutor
 
                 return GameUiAccess.GetCardRewardOptions(screen).Count != previousCount;
             },
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.ChooseRewardCard, stable);
     }
@@ -135,7 +135,7 @@ internal static partial class BridgeActionExecutor
         ClickControl(button);
         var stable = await WaitUntilAsync(
             () => !ReferenceEquals(ActiveScreenContext.Instance.GetCurrentScreen(), currentScreen),
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.SkipRewardCards, stable);
     }
@@ -205,7 +205,7 @@ internal static partial class BridgeActionExecutor
                 return !snapshot.AvailableActions.Contains(ActionIds.ConfirmSelection, StringComparer.Ordinal) &&
                     !snapshot.AvailableActions.Contains(ActionIds.SelectDeckCard, StringComparer.Ordinal);
             },
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.ConfirmSelection, stable);
     }
@@ -222,7 +222,7 @@ internal static partial class BridgeActionExecutor
             snapshot =>
                 !ReferenceEquals(ActiveScreenContext.Instance.GetCurrentScreen(), currentScreen) &&
                 IsSnapshotActionableOrSettled(snapshot),
-            TimeSpan.FromSeconds(12));
+            BridgeDefaults.NavigationTimeout);
 
         return BuildResult(ActionIds.Proceed, stable);
     }
@@ -251,7 +251,7 @@ internal static partial class BridgeActionExecutor
             await NEventRoom.Proceed();
             var stable = await WaitUntilAsync(
                 () => ScreenClassifier.Classify(ActiveScreenContext.Instance.GetCurrentScreen()) != ScreenIds.Event,
-                TimeSpan.FromSeconds(10));
+                BridgeDefaults.CombatActionTimeout);
 
             return BuildResult(ActionIds.ChooseEventOption, stable);
         }
@@ -281,7 +281,7 @@ internal static partial class BridgeActionExecutor
                 var currentEvent = ReflectionUtils.InvokeMethod(eventSynchronizer, "GetLocalEvent");
                 return currentEvent != null && BuildEventSignature(currentEvent) != previousSignature;
             },
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.ChooseEventOption, stableOption);
     }
@@ -300,7 +300,7 @@ internal static partial class BridgeActionExecutor
 
         var stable = await WaitUntilAsync(
             () => GameUiAccess.GetTreasureRelicCollection(ActiveScreenContext.Instance.GetCurrentScreen()) != null,
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.OpenChest, stable);
     }
@@ -316,7 +316,7 @@ internal static partial class BridgeActionExecutor
         ReflectionUtils.InvokeMethod(synchronizer, "PickRelicLocally", optionIndex);
         var stable = await WaitUntilAsync(
             () => GameUiAccess.GetProceedButton(ActiveScreenContext.Instance.GetCurrentScreen()) != null,
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.ChooseTreasureRelic, stable);
     }
@@ -343,7 +343,7 @@ internal static partial class BridgeActionExecutor
                 var currentOptions = ReflectionUtils.Enumerate(ReflectionUtils.InvokeMethod(synchronizer, "GetLocalOptions")).ToList();
                 return BuildOptionSignature(currentOptions) != beforeSignature || ScreenClassifier.Classify(ActiveScreenContext.Instance.GetCurrentScreen()) != ScreenIds.Rest;
             },
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.ChooseRestOption, stable);
     }
@@ -360,7 +360,7 @@ internal static partial class BridgeActionExecutor
         merchantRoom.OpenInventory();
         var stable = await WaitUntilAsync(
             () => GameUiAccess.GetMerchantInventoryScreen(ActiveScreenContext.Instance.GetCurrentScreen())?.IsOpen == true,
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.OpenShopInventory, stable);
     }
@@ -379,7 +379,7 @@ internal static partial class BridgeActionExecutor
         var stable = await WaitUntilAsync(
             () => ScreenClassifier.Classify(ActiveScreenContext.Instance.GetCurrentScreen()) == ScreenIds.Shop &&
                   GameUiAccess.GetMerchantInventoryScreen(ActiveScreenContext.Instance.GetCurrentScreen())?.IsOpen != true,
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.CloseShopInventory, stable);
     }
@@ -420,7 +420,7 @@ internal static partial class BridgeActionExecutor
             entry,
             previousGold,
             previousCardId,
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.BuyCard, stable);
     }
@@ -461,7 +461,7 @@ internal static partial class BridgeActionExecutor
             entry,
             previousGold,
             previousRelicId,
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.BuyRelic, stable);
     }
@@ -502,7 +502,7 @@ internal static partial class BridgeActionExecutor
             entry,
             previousGold,
             previousPotionId,
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.BuyPotion, stable);
     }
@@ -515,7 +515,7 @@ internal static partial class BridgeActionExecutor
         var inventory = GameUiAccess.GetMerchantInventory(currentScreen) ?? throw StateUnavailable(ActionIds.RemoveCardAtShop, "Shop inventory is unavailable.");
         var entry = GameUiAccess.GetMerchantCardRemovalEntry(currentScreen) ?? throw StateUnavailable(ActionIds.RemoveCardAtShop, "Card removal entry is unavailable.");
         _ = ObserveBackgroundResultAsync(entry.OnTryPurchaseWrapper(inventory), ActionIds.RemoveCardAtShop);
-        var stable = await WaitForShopCardRemovalTransitionAsync(TimeSpan.FromSeconds(10));
+        var stable = await WaitForShopCardRemovalTransitionAsync(BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.RemoveCardAtShop, stable);
     }
@@ -632,7 +632,7 @@ internal static partial class BridgeActionExecutor
 
                     return false;
                 },
-                TimeSpan.FromSeconds(10));
+                BridgeDefaults.CombatActionTimeout);
         }
 
         switch (selectionContext.ScreenContext)
@@ -640,11 +640,11 @@ internal static partial class BridgeActionExecutor
             case NChooseACardSelectionScreen:
                 return await WaitUntilAsync(
                     () => ActiveScreenContext.Instance.GetCurrentScreen() is not NChooseACardSelectionScreen,
-                    TimeSpan.FromSeconds(10));
+                    BridgeDefaults.CombatActionTimeout);
 
             case NCardGridSelectionScreen gridSelectionScreen:
             {
-                var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+                var deadline = DateTime.UtcNow + BridgeDefaults.CombatActionTimeout;
                 while (DateTime.UtcNow < deadline)
                 {
                     await WaitForNextFrameAsync();
@@ -677,7 +677,7 @@ internal static partial class BridgeActionExecutor
 
                         return HasSelectionProgressAdvanced(currentContext, selectedOptionIndex, initialProgress);
                     },
-                    TimeSpan.FromSeconds(10));
+                    BridgeDefaults.CombatActionTimeout);
         }
     }
 

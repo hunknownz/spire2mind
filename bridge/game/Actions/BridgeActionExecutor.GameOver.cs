@@ -58,7 +58,7 @@ internal static partial class BridgeActionExecutor
 
                 return snapshot.GameOver?.CanContinue != true;
             },
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.ContinueAfterGameOver, stable);
     }
@@ -82,7 +82,7 @@ internal static partial class BridgeActionExecutor
 
         var stable = await WaitForStableSnapshotAsync(
             snapshot => snapshot.Screen == ScreenIds.MainMenu && snapshot.AvailableActions.Count > 0,
-            TimeSpan.FromSeconds(15));
+            BridgeDefaults.TransitionTimeout);
 
         return BuildResult(ActionIds.ReturnToMainMenu, stable);
     }

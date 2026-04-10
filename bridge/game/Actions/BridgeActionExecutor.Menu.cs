@@ -66,7 +66,7 @@ internal static partial class BridgeActionExecutor
 
                 return !string.Equals(BuildModalSignature(currentModal), previousSignature, StringComparison.Ordinal);
             },
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(actionName, stable);
     }
@@ -81,7 +81,7 @@ internal static partial class BridgeActionExecutor
 
         var stable = await WaitForStableSnapshotAsync(
             snapshot => snapshot.Screen != ScreenIds.MainMenu && IsSnapshotActionableOrSettled(snapshot),
-            TimeSpan.FromSeconds(15));
+            BridgeDefaults.TransitionTimeout);
 
         return BuildResult(ActionIds.ContinueRun, stable);
     }
@@ -96,7 +96,7 @@ internal static partial class BridgeActionExecutor
 
         var stable = await WaitUntilAsync(
             () => GameUiAccess.GetOpenModal() != null || ScreenClassifier.Classify(ActiveScreenContext.Instance.GetCurrentScreen()) != ScreenIds.MainMenu,
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.AbandonRun, stable);
     }
@@ -122,7 +122,7 @@ internal static partial class BridgeActionExecutor
 
         var stable = await WaitUntilAsync(
             () => ScreenClassifier.Classify(ActiveScreenContext.Instance.GetCurrentScreen()) == ScreenIds.CharacterSelect,
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.OpenCharacterSelect, stable);
     }
@@ -163,7 +163,7 @@ internal static partial class BridgeActionExecutor
 
         var stable = await WaitForStableSnapshotAsync(
             snapshot => snapshot.Screen != ScreenIds.CharacterSelect && IsSnapshotActionableOrSettled(snapshot),
-            TimeSpan.FromSeconds(15));
+            BridgeDefaults.TransitionTimeout);
 
         return BuildResult(ActionIds.Embark, stable);
     }

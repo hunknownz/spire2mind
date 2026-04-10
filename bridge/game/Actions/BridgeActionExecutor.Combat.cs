@@ -81,7 +81,7 @@ internal static partial class BridgeActionExecutor
                        currentHand.Count != previousHandCount ||
                        currentPlayer?.PlayerCombatState?.Energy != previousEnergy;
             },
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.PlayCard, stable);
     }
@@ -110,7 +110,7 @@ internal static partial class BridgeActionExecutor
                        currentCombat.CurrentSide != CombatSide.Player ||
                        !CombatManager.Instance.IsPlayPhase;
             },
-            TimeSpan.FromSeconds(10));
+            BridgeDefaults.CombatActionTimeout);
 
         return BuildResult(ActionIds.EndTurn, stable);
     }
