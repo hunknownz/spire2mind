@@ -64,6 +64,26 @@ internal static class BridgeRouter
                     return;
                 }
 
+                case ("GET", "/data/cards"):
+                    await WriteSuccessAsync(context, requestId,
+                        await GameThread.InvokeAsync(ModelDbAccess.GetCards).ConfigureAwait(false)).ConfigureAwait(false);
+                    return;
+
+                case ("GET", "/data/relics"):
+                    await WriteSuccessAsync(context, requestId,
+                        await GameThread.InvokeAsync(ModelDbAccess.GetRelics).ConfigureAwait(false)).ConfigureAwait(false);
+                    return;
+
+                case ("GET", "/data/powers"):
+                    await WriteSuccessAsync(context, requestId,
+                        await GameThread.InvokeAsync(ModelDbAccess.GetPowers).ConfigureAwait(false)).ConfigureAwait(false);
+                    return;
+
+                case ("GET", "/data/potions"):
+                    await WriteSuccessAsync(context, requestId,
+                        await GameThread.InvokeAsync(ModelDbAccess.GetPotions).ConfigureAwait(false)).ConfigureAwait(false);
+                    return;
+
                 case ("GET", "/actions/available"):
                 {
                     var snapshot = BridgeRuntime.StateReadsEnabled
