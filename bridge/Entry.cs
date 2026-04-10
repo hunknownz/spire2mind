@@ -6,6 +6,7 @@ using HarmonyLib = Harmony::HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Nodes;
+using BaseLib.Config;
 using Spire2Mind.Bridge.Game.Threading;
 using Spire2Mind.Bridge.Game.Hooks;
 using Spire2Mind.Bridge.Game.Util;
@@ -34,6 +35,8 @@ public static class Entry
 
         try
         {
+            ModConfigRegistry.Register(ModId, new BridgeConfig());
+
             _harmony = new HarmonyLib.Harmony(ModId);
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
 

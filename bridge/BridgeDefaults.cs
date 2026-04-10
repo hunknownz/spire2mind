@@ -1,3 +1,5 @@
+using Spire2Mind.Bridge.Game.Hooks;
+
 namespace Spire2Mind.Bridge;
 
 internal static class BridgeDefaults
@@ -12,28 +14,35 @@ internal static class BridgeDefaults
 
     public static readonly TimeSpan PortRetryDelay = TimeSpan.FromMilliseconds(250);
 
-    public static readonly TimeSpan EventPollInterval = TimeSpan.FromMilliseconds(120);
-
     public static readonly TimeSpan EventKeepAliveInterval = TimeSpan.FromSeconds(15);
 
     /// <summary>
-    /// Default timeout for combat actions (play card, end turn). Override with STS2_COMBAT_TIMEOUT_MS.
+    /// Event poll interval. Reads from BridgeConfig if available, else 120ms.
     /// </summary>
-    public static readonly TimeSpan CombatActionTimeout = ResolveTimeout("STS2_COMBAT_TIMEOUT_MS", 10_000);
+    public static TimeSpan EventPollInterval =>
+        TimeSpan.FromMilliseconds(BridgeConfig.PollIntervalMs);
 
     /// <summary>
-    /// Default timeout for navigation actions (map, proceed). Override with STS2_NAV_TIMEOUT_MS.
+    /// Combat action timeout (play card, end turn). Reads from config or STS2_COMBAT_TIMEOUT_MS env var.
     /// </summary>
-    public static readonly TimeSpan NavigationTimeout = ResolveTimeout("STS2_NAV_TIMEOUT_MS", 12_000);
+    public static TimeSpan CombatActionTimeout =>
+        ResolveTimeout("STS2_COMBAT_TIMEOUT_MS", BridgeConfig.CombatTimeoutMs);
 
     /// <summary>
-    /// Default timeout for major transitions (embark, return to menu). Override with STS2_TRANSITION_TIMEOUT_MS.
+    /// Navigation timeout (map, proceed). Reads from config or STS2_NAV_TIMEOUT_MS env var.
     /// </summary>
-    public static readonly TimeSpan TransitionTimeout = ResolveTimeout("STS2_TRANSITION_TIMEOUT_MS", 15_000);
+    public static TimeSpan NavigationTimeout =>
+        ResolveTimeout("STS2_NAV_TIMEOUT_MS", BridgeConfig.NavigationTimeoutMs);
 
-    private static TimeSpan ResolveTimeout(string envVar, int defaultMs)
+    /// <summary>
+    /// Major transition timeout (embark, return to menu). Reads from config or STS2_TRANSITION_TIMEOUT_MS env var.
+    /// </summary>
+    public static TimeSpan TransitionTimeout =>
+        ResolveTimeout("STS2_TRANSITION_TIMEOUT_MS", BridgeConfig.TransitionTimeoutMs);
+
+    private static TimeSpan ResolveTimeout(string envVar, int configMs)
     {
         var raw = Environment.GetEnvironmentVariable(envVar);
-        return int.TryParse(raw, out var ms) ? TimeSpan.FromMilliseconds(ms) : TimeSpan.FromMilliseconds(defaultMs);
+        return int.TryParse(raw, out var ms) ? TimeSpan.FromMilliseconds(ms) : TimeSpan.FromMilliseconds(configMs);
     }
 }
