@@ -11,6 +11,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 
 	agentruntime "spire2mind/internal/agent"
+	"spire2mind/internal/analyst"
 	"spire2mind/internal/config"
 	"spire2mind/internal/tui"
 )
@@ -34,6 +35,11 @@ func main() {
 	case "doctor":
 		if err := agentruntime.RunDoctor(ctx, cfg); err != nil {
 			fmt.Fprintf(os.Stderr, "doctor failed: %v\n", err)
+			os.Exit(1)
+		}
+	case "analyze":
+		if err := runAnalyze(ctx, cfg, args[1:]); err != nil {
+			fmt.Fprintf(os.Stderr, "analyze failed: %v\n", err)
 			os.Exit(1)
 		}
 	case "play":
@@ -72,9 +78,38 @@ func main() {
 
 func usage() {
 	exe := filepath.Base(os.Args[0])
-	fmt.Fprintf(os.Stderr, "usage: %s doctor | play [--headless] [--attempts N] [--max-cycles N]\n", exe)
-	fmt.Fprintln(os.Stderr, "  --attempts 0 runs continuously until stopped")
-	fmt.Fprintln(os.Stderr, "  --max-cycles 0 disables the autoplay cycle cap")
+	fmt.Fprintf(os.Stderr, "usage: %s <command>\n\n", exe)
+	fmt.Fprintln(os.Stderr, "commands:")
+	fmt.Fprintln(os.Stderr, "  doctor                         Check system health")
+	fmt.Fprintln(os.Stderr, "  play [--headless] [--attempts N] [--max-cycles N]")
+	fmt.Fprintln(os.Stderr, "                                 Play the game with AI agent")
+	fmt.Fprintln(os.Stderr, "  analyze <target>               Offline knowledge analysis")
+	fmt.Fprintln(os.Stderr, "    targets: cards, enemies, archetypes, all")
+}
+
+func runAnalyze(ctx context.Context, cfg config.Config, args []string) error {
+	a, err := analyst.New(cfg)
+	if err != nil {
+		return err
+	}
+
+	target := "all"
+	if len(args) > 0 {
+		target = strings.ToLower(args[0])
+	}
+
+	switch target {
+	case "cards":
+		return a.AnalyzeCards(ctx)
+	case "enemies":
+		return a.AnalyzeEnemies(ctx)
+	case "archetypes":
+		return a.AnalyzeArchetypes(ctx)
+	case "all":
+		return a.RunAll(ctx)
+	default:
+		return fmt.Errorf("unknown analyze target %q (use: cards, enemies, archetypes, all)", target)
+	}
 }
 
 func parsePlayArgs(args []string) (bool, int, int, error) {
