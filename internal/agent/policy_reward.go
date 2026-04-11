@@ -84,11 +84,59 @@ func rewardCardOptions(state *game.StateSnapshot) []map[string]any {
 	return nil
 }
 
+// activeKnowledge is set by Session on startup for static policy access.
+var activeKnowledge *KnowledgeRetriever
+
 func scoreRewardCardChoice(state *game.StateSnapshot, card map[string]any) float64 {
 	cardID := strings.ToUpper(strings.TrimSpace(firstNonEmpty(fieldString(card, "cardId"), fieldString(card, "id"))))
 	name := strings.ToLower(strings.TrimSpace(fieldString(card, "name")))
-	score := estimateRewardCardDepth(state, card).Score
 
+	// Try knowledge-base score first
+	if activeKnowledge != nil {
+		activeKnowledge.EnsureLoaded()
+		if analysis, ok := activeKnowledge.cards[cardID]; ok {
+			// Use knowledge-base score as primary (scale 1-10 → game score range)
+			score := analysis.Score * 1.5 // Scale to ~0-15 range
+
+			// Apply situational modifiers
+			floor := runFloor(state)
+			hp := hpRatio(state)
+
+			// Timing modifier
+			switch analysis.Timing {
+			case "early":
+				if floor <= 5 {
+					score += 2.0
+				} else if floor >= 12 {
+					score -= 2.0
+				}
+			case "late":
+				if floor >= 10 {
+					score += 2.0
+				} else if floor <= 5 {
+					score -= 3.0
+				}
+			}
+
+			// HP-based modifier for defensive cards
+			if hp < 0.50 && (analysis.Role == "defense" || analysis.Role == "utility") {
+				score += 3.0
+			}
+			if hp < 0.50 && analysis.Tier == "S" && analysis.Role == "scaling" {
+				score -= 2.0 // Don't pick slow scaling when dying
+			}
+
+			// Basic card penalty
+			if containsAny(cardID, "DEFEND", "STRIKE") {
+				score -= 2.0
+			}
+
+			return score
+		}
+	}
+
+	// Fallback: original hardcoded scoring
+	score := estimateRewardCardDepth(state, card).Score
 	floor := runFloor(state)
 	hp := hpRatio(state)
 
@@ -116,17 +164,11 @@ func scoreRewardCardChoice(state *game.StateSnapshot, card map[string]any) float
 		score -= 3.0
 	}
 
-	if containsAny(cardID, "ARMAMENTS") && floor <= 3 {
-		score -= 2.5
-	}
 	if containsAny(cardID, "DEFEND", "STRIKE") {
 		score -= 1.0
 	}
 	if hp < 0.50 && containsAny(cardID, "LIMIT_BREAK", "BARRICADE", "JUGGERNAUT", "DEMON_FORM") {
 		score -= 3.5
-	}
-	if strings.Contains(name, "upgrade") || strings.Contains(name, "ritual") {
-		score -= 0.5
 	}
 
 	return score

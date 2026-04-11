@@ -175,6 +175,9 @@ func StartSession(ctx context.Context, cfg config.Config) (*Session, error) {
 		closeSignal:          make(chan struct{}),
 	}
 
+	// Set global knowledge reference for static policy functions
+	activeKnowledge = session.knowledge
+
 	if err := session.loadCarryForwardState(cfg.ArtifactsDir); err != nil {
 		runtime.Close()
 		return nil, err
