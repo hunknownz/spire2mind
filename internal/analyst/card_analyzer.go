@@ -14,20 +14,44 @@ import (
 
 // CardAnalysis is the LLM-generated deep analysis of a single card.
 type CardAnalysis struct {
-	CardID       string   `json:"card_id"`
-	Name         string   `json:"name"`
-	Type         string   `json:"type"`
-	Rarity       string   `json:"rarity"`
-	Cost         *int     `json:"cost"`
-	Role         string   `json:"role"`          // attack, defense, utility, scaling, draw, exhaust
-	Tier         string   `json:"tier"`          // S/A/B/C/D
-	Timing       string   `json:"timing"`        // early, mid, late, any
-	Synergies    []string `json:"synergies"`     // Card IDs that synergize well
-	AntiSynergies []string `json:"anti_synergies"` // Card IDs that conflict
-	Archetypes   []string `json:"archetypes"`    // strength, block, exhaust, draw, mixed
-	Score        float64  `json:"score"`         // 1-10 pick priority
-	Notes        string   `json:"notes"`         // Free-text strategic notes
-	VsEnemyType  map[string]string `json:"vs_enemy_type"` // enemy_type → assessment
+	CardID        string          `json:"card_id"`
+	Name          string          `json:"name"`
+	Type          string          `json:"type"`
+	Rarity        string          `json:"rarity"`
+	Cost          *int            `json:"cost"`
+	Role          string          `json:"role"`          // attack, defense, utility, scaling, draw, exhaust
+	Tier          string          `json:"tier"`          // S/A/B/C/D
+	Timing        string          `json:"timing"`        // early, mid, late, any
+	Synergies     FlexStringSlice `json:"synergies"`     // Card IDs that synergize well
+	AntiSynergies FlexStringSlice `json:"anti_synergies"` // Card IDs that conflict
+	Archetypes    FlexStringSlice `json:"archetypes"`    // strength, block, exhaust, draw, mixed
+	Score         float64         `json:"score"`         // 1-10 pick priority
+	Notes         string          `json:"notes"`         // Free-text strategic notes
+	VsEnemyType   json.RawMessage `json:"vs_enemy_type"` // Flexible: map or string
+}
+
+// FlexStringSlice handles JSON that might be a string or []string.
+type FlexStringSlice []string
+
+func (f *FlexStringSlice) UnmarshalJSON(data []byte) error {
+	// Try as array first
+	var arr []string
+	if err := json.Unmarshal(data, &arr); err == nil {
+		*f = arr
+		return nil
+	}
+	// Try as single string
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		if s == "" {
+			*f = nil
+		} else {
+			*f = []string{s}
+		}
+		return nil
+	}
+	*f = nil
+	return nil
 }
 
 // CardIndex is the raw card data from Bridge.
