@@ -22,7 +22,7 @@ func deterministicCombatAction(state *game.StateSnapshot, failures *actionFailur
 	}
 
 	stateDigest := digestState(state)
-	for _, card := range choosePlayableCardsTyped(playable) {
+	for _, card := range choosePlayableCardsTyped(playable, hpRatio(state)) {
 		cardIndex := card.Index
 
 		request := game.ActionRequest{Action: "play_card", CardIndex: &cardIndex}
@@ -63,17 +63,17 @@ func choosePlayableCards(playable []map[string]any) []map[string]any {
 	return ordered
 }
 
-func choosePlayableCardsTyped(playable []game.CardState) []game.CardState {
+func choosePlayableCardsTyped(playable []game.CardState, currentHpRatio float64) []game.CardState {
 	if len(playable) == 0 {
 		return nil
 	}
 	ordered := append([]game.CardState(nil), playable...)
 	for i := 0; i < len(ordered)-1; i++ {
 		best := i
-		bestScore := combatCardScoreTyped(ordered[i])
+		bestScore := combatCardScoreTyped(ordered[i], currentHpRatio)
 		bestIndex := ordered[i].Index
 		for j := i + 1; j < len(ordered); j++ {
-			score := combatCardScoreTyped(ordered[j])
+			score := combatCardScoreTyped(ordered[j], currentHpRatio)
 			index := ordered[j].Index
 			if score < bestScore || (score == bestScore && index < bestIndex) {
 				best = j
@@ -113,7 +113,7 @@ func combatCardScore(card map[string]any) int {
 	return score
 }
 
-func combatCardScoreTyped(card game.CardState) int {
+func combatCardScoreTyped(card game.CardState, hpRatio float64) int {
 	score := 0
 	if cardRequiresTarget(nil, card) {
 		score += 3
@@ -128,11 +128,38 @@ func combatCardScoreTyped(card game.CardState) int {
 		score += 4
 	}
 	name := strings.ToLower(card.Name)
-	if strings.Contains(name, "strike") || strings.Contains(name, "打击") {
-		score -= 2
+	cardID := strings.ToUpper(card.CardID)
+
+	isDefensive := strings.Contains(name, "defend") || strings.Contains(name, "防御") ||
+		strings.Contains(name, "block") || strings.Contains(name, "格挡") ||
+		strings.Contains(cardID, "DEFEND") || strings.Contains(cardID, "TRUE_GRIT") ||
+		strings.Contains(cardID, "SHRUG_IT_OFF")
+	isOffensive := strings.Contains(name, "strike") || strings.Contains(name, "打击") ||
+		strings.Contains(cardID, "STRIKE")
+
+	if hpRatio < 0.40 {
+		// Critical HP: prioritize defense heavily
+		if isDefensive {
+			score -= 5
+		} else if isOffensive {
+			score += 1
+		}
+	} else if hpRatio < 0.60 {
+		// Low HP: slight defense preference
+		if isDefensive {
+			score -= 3
+		} else if isOffensive {
+			score -= 1
+		}
+	} else {
+		// Healthy: prefer offense
+		if isOffensive {
+			score -= 2
+		}
+		if isDefensive {
+			score -= 1
+		}
 	}
-	if strings.Contains(name, "defend") || strings.Contains(name, "防御") {
-		score -= 1
-	}
+
 	return score
 }

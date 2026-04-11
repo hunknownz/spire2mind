@@ -102,11 +102,11 @@ func shouldBuyCardRemoval(state *game.StateSnapshot) bool {
 	switch {
 	case deckCount <= 16:
 		return true
-	case floor <= 12 && gold >= 120:
+	case floor <= 12 && gold >= 80:
 		return true
-	case hpRatio(state) < 0.60 && gold >= 90:
+	case hpRatio(state) < 0.70 && gold >= 75:
 		return true
-	case gold >= 160:
+	case gold >= 100:
 		return true
 	default:
 		return false
@@ -118,11 +118,11 @@ func bestAffordableShopRelic(state *game.StateSnapshot) (*int, float64, bool) {
 }
 
 func bestAffordableShopCard(state *game.StateSnapshot) (*int, float64, bool) {
-	return bestAffordableShopOption(state, "cards", scoreShopCardChoice, 4.0)
+	return bestAffordableShopOption(state, "cards", scoreShopCardChoice, 3.0)
 }
 
 func bestAffordableShopPotion(state *game.StateSnapshot) (*int, float64, bool) {
-	return bestAffordableShopOption(state, "potions", scoreShopPotionChoice, 2.0)
+	return bestAffordableShopOption(state, "potions", scoreShopPotionChoice, 1.5)
 }
 
 func bestAffordableShopRelicEstimate(state *game.StateSnapshot) (*int, DepthEstimate, bool) {

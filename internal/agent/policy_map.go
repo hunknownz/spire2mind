@@ -46,25 +46,9 @@ func preferredMapNodeIndex(state *game.StateSnapshot) *int {
 
 func mapNodePriority(nodeType string, hpRatio float64, gold int, floor int, currentHP int, maxHP int) int {
 	normalized := strings.ToLower(strings.TrimSpace(nodeType))
-	if hpRatio >= 0.70 && gold >= 120 && floor <= 10 {
-		switch normalized {
-		case "shop":
-			return 0
-		case "event":
-			return 1
-		case "combat":
-			return 2
-		case "rest":
-			return 3
-		case "elite":
-			return 4
-		case "chest":
-			return 5
-		case "boss":
-			return 6
-		}
-	}
-	if hpRatio < 0.55 {
+
+	// Critical HP: prioritize rest and safety
+	if hpRatio < 0.40 {
 		switch normalized {
 		case "rest":
 			return 0
@@ -72,27 +56,73 @@ func mapNodePriority(nodeType string, hpRatio float64, gold int, floor int, curr
 			return 1
 		case "event":
 			return 2
-		case "combat":
-			return 3
 		case "chest":
-			return 4
-		case "elite":
+			return 3
+		case "combat":
 			return 5
+		case "elite":
+			return 7
 		case "boss":
-			return 6
+			return 8
 		case "":
 			return 10
 		default:
 			return 9
 		}
 	}
+
+	// Low HP: prefer rest/shop, avoid fights
+	if hpRatio < 0.60 {
+		switch normalized {
+		case "rest":
+			return 0
+		case "shop":
+			return 1
+		case "event":
+			return 2
+		case "combat":
+			return 3
+		case "chest":
+			return 4
+		case "elite":
+			return 6
+		case "boss":
+			return 7
+		case "":
+			return 10
+		default:
+			return 9
+		}
+	}
+
+	// Healthy with gold: prioritize shop to spend gold
+	if hpRatio >= 0.70 && gold >= 100 && floor <= 10 {
+		switch normalized {
+		case "shop":
+			return 0
+		case "event":
+			return 1
+		case "combat":
+			return 2
+		case "rest":
+			return 3
+		case "elite":
+			return 4
+		case "chest":
+			return 5
+		case "boss":
+			return 6
+		}
+	}
+
+	// Early game, moderate HP
 	if floor <= 8 && hpRatio < 0.70 && currentHP > 0 && maxHP > 0 {
 		switch normalized {
 		case "event":
 			return 0
-		case "combat":
-			return 1
 		case "rest":
+			return 1
+		case "combat":
 			return 2
 		case "shop":
 			return 3
@@ -101,6 +131,7 @@ func mapNodePriority(nodeType string, hpRatio float64, gold int, floor int, curr
 		}
 	}
 
+	// Default: balanced priority
 	switch normalized {
 	case "shop":
 		return 0
