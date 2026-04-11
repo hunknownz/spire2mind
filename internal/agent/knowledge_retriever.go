@@ -17,6 +17,7 @@ import (
 type KnowledgeRetriever struct {
 	knowledgeDir string
 	cards        map[string]analyst.CardAnalysis
+	enemies      map[string]analyst.EnemyAnalysis
 	loaded       bool
 }
 
@@ -34,13 +35,17 @@ func (kr *KnowledgeRetriever) EnsureLoaded() {
 	}
 	kr.loaded = true
 	kr.cards = make(map[string]analyst.CardAnalysis)
+	kr.enemies = make(map[string]analyst.EnemyAnalysis)
 
 	analysisPath := filepath.Join(kr.knowledgeDir, "cards", "analysis.json")
-	data, err := os.ReadFile(analysisPath)
-	if err != nil {
-		return
+	if data, err := os.ReadFile(analysisPath); err == nil {
+		json.Unmarshal(data, &kr.cards)
 	}
-	json.Unmarshal(data, &kr.cards)
+
+	enemiesPath := filepath.Join(kr.knowledgeDir, "enemies", "strategies.json")
+	if data, err := os.ReadFile(enemiesPath); err == nil {
+		json.Unmarshal(data, &kr.enemies)
+	}
 }
 
 // ForCardSelection generates knowledge context for card pick decisions.
@@ -98,7 +103,6 @@ func (kr *KnowledgeRetriever) ForCombat(state *game.StateSnapshot, loc i18n.Lang
 
 	// Enemy information
 	for _, enemy := range state.Combat.Enemies {
-		// TODO: load from enemies/strategies.json when available
 		lines = append(lines, fmt.Sprintf("敌人 %s: HP %d/%d", enemy.Name, enemy.CurrentHp, enemy.MaxHp))
 		for _, intent := range enemy.Intents {
 			if intent.TotalDamage != nil && *intent.TotalDamage > 0 {
@@ -106,6 +110,11 @@ func (kr *KnowledgeRetriever) ForCombat(state *game.StateSnapshot, loc i18n.Lang
 			} else {
 				lines = append(lines, fmt.Sprintf("  意图: %s", intent.IntentType))
 			}
+		}
+		// Inject strategy from knowledge base
+		strategy := kr.enemyStrategy(&enemy)
+		if strategy != "" {
+			lines = append(lines, fmt.Sprintf("  策略: %s", strategy))
 		}
 	}
 
@@ -132,6 +141,38 @@ func (kr *KnowledgeRetriever) ForCombat(state *game.StateSnapshot, loc i18n.Lang
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+// enemyStrategy returns the strategy string for an enemy from the knowledge base.
+// It tries matching by ID and by name (normalized).
+func (kr *KnowledgeRetriever) enemyStrategy(enemy *game.EnemyState) string {
+	if enemy == nil || len(kr.enemies) == 0 {
+		return ""
+	}
+
+	// Try by ID (exact, then upper-cased)
+	if e, ok := kr.enemies[enemy.ID]; ok {
+		return e.Strategy
+	}
+	if e, ok := kr.enemies[strings.ToUpper(enemy.ID)]; ok {
+		return e.Strategy
+	}
+
+	// Try by normalizing the name to ID-like form
+	normalized := strings.ToUpper(strings.ReplaceAll(strings.TrimSpace(enemy.Name), " ", "_"))
+	if e, ok := kr.enemies[normalized]; ok {
+		return e.Strategy
+	}
+
+	// Partial name match
+	lowerName := strings.ToLower(enemy.Name)
+	for id, e := range kr.enemies {
+		if strings.Contains(strings.ToLower(id), lowerName) || strings.Contains(strings.ToLower(e.Name), lowerName) {
+			return e.Strategy
+		}
+	}
+
+	return ""
 }
 
 // analyzeDeck analyzes the current deck composition.

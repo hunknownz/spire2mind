@@ -1,6 +1,7 @@
 package analyst
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -8,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 
 	"spire2mind/internal/config"
 )
@@ -35,10 +35,17 @@ func newLLMProvider(cfg config.Config) (LLMProvider, error) {
 		baseURL: strings.TrimRight(baseURL, "/"),
 		model:   model,
 		apiKey:  cfg.APIKey,
-		client:  &http.Client{Timeout: 10 * time.Minute},
+		// No client-level timeout: rely on context cancellation.
+		// Individual calls use stream:true to keep the connection alive during generation.
+		client: &http.Client{},
 	}, nil
 }
 
+// Complete sends a prompt to the LLM and returns the full response text.
+// It uses Server-Sent Events (stream:true) so the connection stays alive
+// during long generation runs instead of waiting for a buffered response.
+// For Qwen3 models, thinking is disabled (think:false) to avoid generating
+// thousands of internal reasoning tokens that can push generation past 10 min.
 func (p *openAIProvider) Complete(ctx context.Context, systemPrompt string, userPrompt string) (string, error) {
 	messages := []map[string]string{
 		{"role": "system", "content": systemPrompt},
@@ -48,7 +55,10 @@ func (p *openAIProvider) Complete(ctx context.Context, systemPrompt string, user
 	body := map[string]interface{}{
 		"model":    p.model,
 		"messages": messages,
-		"stream":   false,
+		"stream":   true,
+		// Disable Qwen3 thinking mode to avoid generating massive CoT blocks.
+		// This has no effect on non-Qwen3 models (field is simply ignored).
+		"think": false,
 	}
 
 	bodyBytes, err := json.Marshal(body)
@@ -72,29 +82,47 @@ func (p *openAIProvider) Complete(ctx context.Context, systemPrompt string, user
 	}
 	defer resp.Body.Close()
 
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("read response: %w", err)
-	}
-
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("LLM returned %d: %s", resp.StatusCode, string(respBody))
+		b, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("LLM returned %d: %s", resp.StatusCode, string(b))
 	}
 
-	var result struct {
-		Choices []struct {
-			Message struct {
-				Content string `json:"content"`
-			} `json:"message"`
-		} `json:"choices"`
+	// Parse SSE stream: each line is "data: <json>" or "data: [DONE]"
+	var sb strings.Builder
+	scanner := newSSEScanner(resp.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if !strings.HasPrefix(line, "data: ") {
+			continue
+		}
+		payload := strings.TrimPrefix(line, "data: ")
+		if payload == "[DONE]" {
+			break
+		}
+		var chunk struct {
+			Choices []struct {
+				Delta struct {
+					Content string `json:"content"`
+				} `json:"delta"`
+			} `json:"choices"`
+		}
+		if err := json.Unmarshal([]byte(payload), &chunk); err != nil {
+			continue // skip malformed chunks
+		}
+		if len(chunk.Choices) > 0 {
+			sb.WriteString(chunk.Choices[0].Delta.Content)
+		}
 	}
-	if err := json.Unmarshal(respBody, &result); err != nil {
-		return "", fmt.Errorf("parse response: %w", err)
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("read SSE stream: %w", err)
 	}
 
-	if len(result.Choices) == 0 {
-		return "", fmt.Errorf("no choices in LLM response")
-	}
+	return sb.String(), nil
+}
 
-	return result.Choices[0].Message.Content, nil
+// newSSEScanner returns a line scanner over an SSE response body.
+func newSSEScanner(r io.Reader) *bufio.Scanner {
+	scanner := bufio.NewScanner(r)
+	scanner.Buffer(make([]byte, 64*1024), 64*1024)
+	return scanner
 }
