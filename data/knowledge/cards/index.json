@@ -1,0 +1,4618 @@
+[
+  {
+    "id": "AGGRESSION",
+    "name": "好勇斗狠",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ANGER",
+    "name": "愤怒",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "ARMAMENTS",
+    "name": "武装",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ASHEN_STRIKE",
+    "name": "灰烬打击",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BARRICADE",
+    "name": "壁垒",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "BASH",
+    "name": "痛击",
+    "type": "Attack",
+    "rarity": "Basic",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BATTLE_TRANCE",
+    "name": "战斗专注",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "BLOOD_WALL",
+    "name": "血墙",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "BLOODLETTING",
+    "name": "放血",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "BLUDGEON",
+    "name": "重锤",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BODY_SLAM",
+    "name": "全身撞击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BRAND",
+    "name": "烙印",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "BREAK",
+    "name": "破击",
+    "type": "Attack",
+    "rarity": "Ancient",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BREAKTHROUGH",
+    "name": "突破",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "BULLY",
+    "name": "欺凌",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BURNING_PACT",
+    "name": "燃烧契约",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CASCADE",
+    "name": "倾泻",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "CINDER",
+    "name": "余烬",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "COLOSSUS",
+    "name": "巨像",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CONFLAGRATION",
+    "name": "焚烧",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "CORRUPTION",
+    "name": "腐化",
+    "type": "Power",
+    "rarity": "Ancient",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "CRIMSON_MANTLE",
+    "name": "绯红披风",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CRUELTY",
+    "name": "残酷",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DARK_EMBRACE",
+    "name": "黑暗之拥",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEFEND_IRONCLAD",
+    "name": "防御",
+    "type": "Skill",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEMON_FORM",
+    "name": "恶魔形态",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEMONIC_SHIELD",
+    "name": "恶魔护盾",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyAlly"
+  },
+  {
+    "id": "DISMANTLE",
+    "name": "拆卸",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DOMINATE",
+    "name": "主宰",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DRUM_OF_BATTLE",
+    "name": "战鼓",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "EVIL_EYE",
+    "name": "邪眼",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "EXPECT_A_FIGHT",
+    "name": "跃跃欲试",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "FEED",
+    "name": "狂宴",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FEEL_NO_PAIN",
+    "name": "无惧疼痛",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "FIEND_FIRE",
+    "name": "恶魔之焰",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FIGHT_ME",
+    "name": "与我一战！",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FLAME_BARRIER",
+    "name": "火焰屏障",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "FORGOTTEN_RITUAL",
+    "name": "被遗忘的仪式",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "HAVOC",
+    "name": "破灭",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "HEADBUTT",
+    "name": "头槌",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HELLRAISER",
+    "name": "地狱狂徒",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "HEMOKINESIS",
+    "name": "御血术",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HOWL_FROM_BEYOND",
+    "name": "彼岸咆哮",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 3,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "IMPERVIOUS",
+    "name": "岿然不动",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "INFERNAL_BLADE",
+    "name": "地狱之刃",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "INFERNO",
+    "name": "狱火",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "INFLAME",
+    "name": "燃烧",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "IRON_WAVE",
+    "name": "铁斩波",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "JUGGERNAUT",
+    "name": "势不可当",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "JUGGLING",
+    "name": "杂耍",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "MANGLE",
+    "name": "凌虐",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "MOLTEN_FIST",
+    "name": "熔融之拳",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "NOT_YET",
+    "name": "时候未到",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "OFFERING",
+    "name": "祭品",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "ONE_TWO_PUNCH",
+    "name": "连环拳",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "PACTS_END",
+    "name": "契约终结",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "PERFECTED_STRIKE",
+    "name": "完美打击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "PILLAGE",
+    "name": "劫掠",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "POMMEL_STRIKE",
+    "name": "剑柄打击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "PRIMAL_FORCE",
+    "name": "原始力量",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "PYRE",
+    "name": "薪火之源",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "RAGE",
+    "name": "狂怒",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "RAMPAGE",
+    "name": "暴走",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "RUPTURE",
+    "name": "撕裂",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SECOND_WIND",
+    "name": "重振精神",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SETUP_STRIKE",
+    "name": "预备打击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SHRUG_IT_OFF",
+    "name": "耸肩无视",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SPITE",
+    "name": "怨恨",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "STAMPEDE",
+    "name": "惊逃",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "STOKE",
+    "name": "添柴",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "STOMP",
+    "name": "踩踏",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 3,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "STONE_ARMOR",
+    "name": "岩石铠甲",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "STRIKE_IRONCLAD",
+    "name": "打击",
+    "type": "Attack",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SWORD_BOOMERANG",
+    "name": "飞剑回旋镖",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "RandomEnemy"
+  },
+  {
+    "id": "TANK",
+    "name": "肉盾",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "TAUNT",
+    "name": "挑衅",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "TEAR_ASUNDER",
+    "name": "扯碎",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "THRASH",
+    "name": "痛殴",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "THUNDERCLAP",
+    "name": "闪电霹雳",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "TREMBLE",
+    "name": "战栗",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "TRUE_GRIT",
+    "name": "坚毅",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "TWIN_STRIKE",
+    "name": "双重打击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "UNMOVABLE",
+    "name": "坚定不移",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "UNRELENTING",
+    "name": "无情猛攻",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "UPPERCUT",
+    "name": "上勾拳",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "VICIOUS",
+    "name": "凶恶",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "WHIRLWIND",
+    "name": "旋风斩",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "ABRASIVE",
+    "name": "磨蚀",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "ACCELERANT",
+    "name": "触媒",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ACCURACY",
+    "name": "精准",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ACROBATICS",
+    "name": "杂技",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ADRENALINE",
+    "name": "肾上腺素",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "AFTERIMAGE",
+    "name": "余像",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ANTICIPATE",
+    "name": "预判",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "ASSASSINATE",
+    "name": "刺杀",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BACKFLIP",
+    "name": "后空翻",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BACKSTAB",
+    "name": "背刺",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BLADE_OF_INK",
+    "name": "墨之刃",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BLADE_DANCE",
+    "name": "刀刃之舞",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BLUR",
+    "name": "残影",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BOUNCING_FLASK",
+    "name": "弹跳药瓶",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "RandomEnemy"
+  },
+  {
+    "id": "BUBBLE_BUBBLE",
+    "name": "咕嘟冒泡",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BULLET_TIME",
+    "name": "子弹时间",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "BURST",
+    "name": "爆发",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CALCULATED_GAMBLE",
+    "name": "计算下注",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "CLOAK_AND_DAGGER",
+    "name": "斗篷与匕首",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CORROSIVE_WAVE",
+    "name": "腐蚀波",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DAGGER_SPRAY",
+    "name": "匕首雨",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "DAGGER_THROW",
+    "name": "投掷匕首",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DASH",
+    "name": "冲刺",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DEADLY_POISON",
+    "name": "致命毒药",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DEFEND_SILENT",
+    "name": "防御",
+    "type": "Skill",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEFLECT",
+    "name": "偏折",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "DODGE_AND_ROLL",
+    "name": "闪躲翻滚",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ECHOING_SLASH",
+    "name": "回响斩击",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "ENVENOM",
+    "name": "涂毒",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "ESCAPE_PLAN",
+    "name": "逃脱计划",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "EXPERTISE",
+    "name": "独门技术",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "EXPOSE",
+    "name": "暴露",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FAN_OF_KNIVES",
+    "name": "刀扇",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "FINISHER",
+    "name": "终结技",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FLANKING",
+    "name": "夹击",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FLECHETTES",
+    "name": "飞镖",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FLICK_FLACK",
+    "name": "翻越撑击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "FOLLOW_THROUGH",
+    "name": "跟进",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FOOTWORK",
+    "name": "灵动步法",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "GRAND_FINALE",
+    "name": "华丽收场",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "HAND_TRICK",
+    "name": "手上技法",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "HAZE",
+    "name": "迷雾",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 3,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "HIDDEN_DAGGERS",
+    "name": "隐秘匕首",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "INFINITE_BLADES",
+    "name": "无尽刀刃",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "KNIFE_TRAP",
+    "name": "刀刃陷阱",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "LEADING_STRIKE",
+    "name": "先制打击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "LEG_SWEEP",
+    "name": "扫腿",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "MALAISE",
+    "name": "萎靡",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "MASTER_PLANNER",
+    "name": "谋划专家",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "MEMENTO_MORI",
+    "name": "铭记死亡",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "MIRAGE",
+    "name": "蜃景",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "MURDER",
+    "name": "谋杀",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "NEUTRALIZE",
+    "name": "中和",
+    "type": "Attack",
+    "rarity": "Basic",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "NIGHTMARE",
+    "name": "夜魇",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "NOXIOUS_FUMES",
+    "name": "毒雾",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "OUTBREAK",
+    "name": "毒性爆发",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "PHANTOM_BLADES",
+    "name": "幻影之刃",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "PIERCING_WAIL",
+    "name": "尖啸",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "PINPOINT",
+    "name": "精密瞄准",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "POISONED_STAB",
+    "name": "带毒刺击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "POUNCE",
+    "name": "猛扑",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "PRECISE_CUT",
+    "name": "精确切击",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "PREDATOR",
+    "name": "猎杀者",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "PREPARED",
+    "name": "早有准备",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "REFLEX",
+    "name": "本能反应",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "RICOCHET",
+    "name": "连续反弹",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 2,
+    "targetType": "RandomEnemy"
+  },
+  {
+    "id": "SERPENT_FORM",
+    "name": "群蛇形态",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "SHADOW_STEP",
+    "name": "暗影步",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SHADOWMELD",
+    "name": "融入暗影",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SKEWER",
+    "name": "串刺",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SLICE",
+    "name": "切割",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SNAKEBITE",
+    "name": "蛇咬",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SNEAKY",
+    "name": "鬼祟",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "SPEEDSTER",
+    "name": "速行者",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "STORM_OF_STEEL",
+    "name": "钢铁风暴",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "STRANGLE",
+    "name": "紧勒",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "STRIKE_SILENT",
+    "name": "打击",
+    "type": "Attack",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SUCKER_PUNCH",
+    "name": "突然一拳",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SUPPRESS",
+    "name": "压制",
+    "type": "Attack",
+    "rarity": "Ancient",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SURVIVOR",
+    "name": "生存者",
+    "type": "Skill",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "TACTICIAN",
+    "name": "战术大师",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "THE_HUNT",
+    "name": "狩猎",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "TOOLS_OF_THE_TRADE",
+    "name": "必备工具",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "TRACKING",
+    "name": "跟踪",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "UNTOUCHABLE",
+    "name": "触不可及",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "UP_MY_SLEEVE",
+    "name": "袖里乾坤",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "WELL_LAID_PLANS",
+    "name": "计划妥当",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "WRAITH_FORM",
+    "name": "幽魂形态",
+    "type": "Power",
+    "rarity": "Ancient",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "ALIGNMENT",
+    "name": "星位序列",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "ARSENAL",
+    "name": "武器库",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ASTRAL_PULSE",
+    "name": "星界脉冲",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "BEAT_INTO_SHAPE",
+    "name": "锻打成型",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BEGONE",
+    "name": "下去！",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BIG_BANG",
+    "name": "大爆炸",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "BLACK_HOLE",
+    "name": "黑洞",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BOMBARDMENT",
+    "name": "轰击",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BULWARK",
+    "name": "铸墙",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "BUNDLE_OF_JOY",
+    "name": "新生之喜",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CELESTIAL_MIGHT",
+    "name": "天穹之力",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "CHARGE",
+    "name": "冲锋！！",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CHILD_OF_THE_STARS",
+    "name": "群星之子",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CLOAK_OF_STARS",
+    "name": "群星斗篷",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "COLLISION_COURSE",
+    "name": "碰撞轨迹",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "COMET",
+    "name": "彗星",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "CONQUEROR",
+    "name": "征服者",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "CONVERGENCE",
+    "name": "汇流",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "COSMIC_INDIFFERENCE",
+    "name": "宇宙冷漠",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CRASH_LANDING",
+    "name": "迫降",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "CRESCENT_SPEAR",
+    "name": "新月长矛",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "CRUSH_UNDER",
+    "name": "下砸",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "DECISIONS_DECISIONS",
+    "name": "抉择，抉择",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEFEND_REGENT",
+    "name": "防御",
+    "type": "Skill",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEVASTATE",
+    "name": "葬送",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DYING_STAR",
+    "name": "星灭",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "FALLING_STAR",
+    "name": "陨星",
+    "type": "Attack",
+    "rarity": "Basic",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FOREGONE_CONCLUSION",
+    "name": "既定事项",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "FURNACE",
+    "name": "熔炉",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "GAMMA_BLAST",
+    "name": "伽马爆破",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "GATHER_LIGHT",
+    "name": "收集光辉",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "GENESIS",
+    "name": "创世纪",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "GLIMMER",
+    "name": "微光",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "GLITTERSTREAM",
+    "name": "流光溢彩",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "GLOW",
+    "name": "辉光",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "GUARDS",
+    "name": "护驾！！！",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "GUIDING_STAR",
+    "name": "引导之星",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HAMMER_TIME",
+    "name": "锤子时间",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "HEAVENLY_DRILL",
+    "name": "天际钻头",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HEGEMONY",
+    "name": "霸权",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HEIRLOOM_HAMMER",
+    "name": "传承之锤",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HIDDEN_CACHE",
+    "name": "隐秘藏品",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "I_AM_INVINCIBLE",
+    "name": "所向无敌",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "KINGLY_KICK",
+    "name": "王者之踢",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 4,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "KINGLY_PUNCH",
+    "name": "王者之拳",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "KNOCKOUT_BLOW",
+    "name": "决胜一击",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "KNOW_THY_PLACE",
+    "name": "何人僭越",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "LARGESSE",
+    "name": "慷慨捐助",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyAlly"
+  },
+  {
+    "id": "LUNAR_BLAST",
+    "name": "月面射击",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "MAKE_IT_SO",
+    "name": "如此甚好",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "MANIFEST_AUTHORITY",
+    "name": "君权自授",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "METEOR_SHOWER",
+    "name": "流星雨",
+    "type": "Attack",
+    "rarity": "Ancient",
+    "cost": 0,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "MONARCHS_GAZE",
+    "name": "王之凝视",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "MONOLOGUE",
+    "name": "独白",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "NEUTRON_AEGIS",
+    "name": "中子护盾",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ORBIT",
+    "name": "环绕轨道",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "PALE_BLUE_DOT",
+    "name": "暗淡蓝点",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "PARRY",
+    "name": "招架",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "PARTICLE_WALL",
+    "name": "粒子墙",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "PATTER",
+    "name": "星星点点",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "PHOTON_CUT",
+    "name": "光子切割",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "PILLAR_OF_CREATION",
+    "name": "创世之柱",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "PROPHESIZE",
+    "name": "预言",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "QUASAR",
+    "name": "类星体",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "RADIATE",
+    "name": "辐射",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "REFINE_BLADE",
+    "name": "淬炼刀刃",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "REFLECT",
+    "name": "倒映",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "RESONANCE",
+    "name": "共鸣",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "ROYAL_GAMBLE",
+    "name": "胜券在王",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "ROYALTIES",
+    "name": "王国资产",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SEEKING_EDGE",
+    "name": "追踪之刃",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SEVEN_STARS",
+    "name": "七星",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "SHINING_STRIKE",
+    "name": "明耀打击",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SOLAR_STRIKE",
+    "name": "太阳打击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SPECTRUM_SHIFT",
+    "name": "光谱偏移",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "SPOILS_OF_BATTLE",
+    "name": "战利品",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "STARDUST",
+    "name": "星尘",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "RandomEnemy"
+  },
+  {
+    "id": "STRIKE_REGENT",
+    "name": "打击",
+    "type": "Attack",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SUMMON_FORTH",
+    "name": "征召上前",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SUPERMASSIVE",
+    "name": "超质量体",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SWORD_SAGE",
+    "name": "剑圣",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "TERRAFORMING",
+    "name": "地形改造",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "THE_SEALED_THRONE",
+    "name": "封印王座",
+    "type": "Power",
+    "rarity": "Ancient",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "THE_SMITH",
+    "name": "铸剑者",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "TYRANNY",
+    "name": "暴政",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "VENERATE",
+    "name": "崇拜",
+    "type": "Skill",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "VOID_FORM",
+    "name": "虚空形态",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "WROUGHT_IN_WAR",
+    "name": "战火铸就",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "AFTERLIFE",
+    "name": "来生",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BANSHEES_CRY",
+    "name": "女妖之嚎",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 9,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "BLIGHT_STRIKE",
+    "name": "荒疫打击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BODYGUARD",
+    "name": "护卫",
+    "type": "Skill",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BONE_SHARDS",
+    "name": "碎骨",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "BORROWED_TIME",
+    "name": "预借时间",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BURY",
+    "name": "埋葬",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 4,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "CALCIFY",
+    "name": "钙化",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CALL_OF_THE_VOID",
+    "name": "虚空之唤",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CAPTURE_SPIRIT",
+    "name": "捕捉灵魂",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "CLEANSE",
+    "name": "洁净",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "COUNTDOWN",
+    "name": "倒数计时",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DANSE_MACABRE",
+    "name": "死亡之舞",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEATH_MARCH",
+    "name": "死亡行军",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DEATHBRINGER",
+    "name": "死亡使者",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "DEATHS_DOOR",
+    "name": "死亡之门",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEBILITATE",
+    "name": "摧残",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DEFEND_NECROBINDER",
+    "name": "防御",
+    "type": "Skill",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEFILE",
+    "name": "玷污",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DEFY",
+    "name": "违逆",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DELAY",
+    "name": "拖延",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEMESNE",
+    "name": "领域",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEVOUR_LIFE",
+    "name": "吞噬生命",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DIRGE",
+    "name": "挽歌",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "DRAIN_POWER",
+    "name": "能量汲取",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DREDGE",
+    "name": "清淤",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "EIDOLON",
+    "name": "幻景",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "END_OF_DAYS",
+    "name": "末日降临",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "ENFEEBLING_TOUCH",
+    "name": "弱化之触",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "ERADICATE",
+    "name": "根除",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FEAR",
+    "name": "恐惧",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FETCH",
+    "name": "取回",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FLATTEN",
+    "name": "重压",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FORBIDDEN_GRIMOIRE",
+    "name": "禁忌魔典",
+    "type": "Power",
+    "rarity": "Ancient",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "FRIENDSHIP",
+    "name": "友谊",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "GLIMPSE_BEYOND",
+    "name": "彼岸一瞥",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AllAllies"
+  },
+  {
+    "id": "GRAVE_WARDEN",
+    "name": "守墓人",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "GRAVEBLAST",
+    "name": "坟冢爆射",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HANG",
+    "name": "吊杀",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HAUNT",
+    "name": "纠缠",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "HIGH_FIVE",
+    "name": "击掌",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "INVOKE",
+    "name": "唤起",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "LEGION_OF_BONE",
+    "name": "骸骨军团",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AllAllies"
+  },
+  {
+    "id": "LETHALITY",
+    "name": "致死性",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "MELANCHOLY",
+    "name": "忧郁",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "MISERY",
+    "name": "苦难",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "NECRO_MASTERY",
+    "name": "亡灵精通",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "NEGATIVE_PULSE",
+    "name": "负能量脉冲",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "NEUROSURGE",
+    "name": "精神过载",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "NO_ESCAPE",
+    "name": "无处可逃",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "OBLIVION",
+    "name": "湮灭",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "PAGESTORM",
+    "name": "书页风暴",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "PARSE",
+    "name": "领会",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "POKE",
+    "name": "戳击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "PROTECTOR",
+    "name": "守护者",
+    "type": "Attack",
+    "rarity": "Ancient",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "PULL_AGGRO",
+    "name": "吸引仇恨",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "PULL_FROM_BELOW",
+    "name": "亡魂牵引",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "PUTREFY",
+    "name": "腐败",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "RATTLE",
+    "name": "猛晃",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "REANIMATE",
+    "name": "死者苏生",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "REAP",
+    "name": "收割",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "REAPER_FORM",
+    "name": "死神形态",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "REAVE",
+    "name": "剥夺",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "RIGHT_HAND_HAND",
+    "name": "得力助手",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SACRIFICE",
+    "name": "牺牲",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SCOURGE",
+    "name": "鞭打",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SCULPTING_STRIKE",
+    "name": "雕琢打击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SEANCE",
+    "name": "降灵",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SENTRY_MODE",
+    "name": "哨卫模式",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "SEVERANCE",
+    "name": "切断",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SHARED_FATE",
+    "name": "命运同担",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SHROUD",
+    "name": "厄运之衣",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SIC_EM",
+    "name": "紧追不放",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SLEIGHT_OF_FLESH",
+    "name": "血肉戏法",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "SNAP",
+    "name": "响指",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SOUL_STORM",
+    "name": "灵魂风暴",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SOW",
+    "name": "播种",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "SPIRIT_OF_ASH",
+    "name": "灰烬之灵",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SPUR",
+    "name": "增生",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SQUEEZE",
+    "name": "榨取",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "STRIKE_NECROBINDER",
+    "name": "打击",
+    "type": "Attack",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "THE_SCYTHE",
+    "name": "巨镰",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "TIMES_UP",
+    "name": "大限已至",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "TRANSFIGURE",
+    "name": "重构",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "UNDEATH",
+    "name": "不死",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "UNLEASH",
+    "name": "出击",
+    "type": "Attack",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "VEILPIERCER",
+    "name": "刺破帷幕",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "WISP",
+    "name": "鬼火",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "ADAPTIVE_STRIKE",
+    "name": "适应打击",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "ALL_FOR_ONE",
+    "name": "万物一心",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BALL_LIGHTNING",
+    "name": "球状闪电",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BARRAGE",
+    "name": "弹幕齐射",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BEAM_CELL",
+    "name": "光束射线",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BIASED_COGNITION",
+    "name": "偏差认知",
+    "type": "Power",
+    "rarity": "Ancient",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BOOST_AWAY",
+    "name": "高速脱离",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "BOOT_SEQUENCE",
+    "name": "启动流程",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "BUFFER",
+    "name": "缓冲",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "BULK_UP",
+    "name": "暴涨",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "CAPACITOR",
+    "name": "扩容",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CHAOS",
+    "name": "混沌",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CHARGE_BATTERY",
+    "name": "充电",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CHILL",
+    "name": "冰寒",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "CLAW",
+    "name": "爪击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "COLD_SNAP",
+    "name": "寒流",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "COMPACT",
+    "name": "压缩",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "COMPILE_DRIVER",
+    "name": "编译冲击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "CONSUMING_SHADOW",
+    "name": "吞噬暗影",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "COOLANT",
+    "name": "冷却剂",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "COOLHEADED",
+    "name": "冷静头脑",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CREATIVE_AI",
+    "name": "创造性AI",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "DARKNESS",
+    "name": "漆黑",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEFEND_DEFECT",
+    "name": "防御",
+    "type": "Skill",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DEFRAGMENT",
+    "name": "碎片整理",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DOUBLE_ENERGY",
+    "name": "双倍能量",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DUALCAST",
+    "name": "双重释放",
+    "type": "Skill",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ECHO_FORM",
+    "name": "回响形态",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "ENERGY_SURGE",
+    "name": "能量涌动",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AllAllies"
+  },
+  {
+    "id": "FERAL",
+    "name": "野性",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "FIGHT_THROUGH",
+    "name": "强撑",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "FLAK_CANNON",
+    "name": "散射炮",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "RandomEnemy"
+  },
+  {
+    "id": "FOCUSED_STRIKE",
+    "name": "集中打击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FTL",
+    "name": "超越光速",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FUSION",
+    "name": "聚变",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "GENETIC_ALGORITHM",
+    "name": "遗传算法",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "GLACIER",
+    "name": "冰川",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "GLASSWORK",
+    "name": "玻璃工艺",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "GO_FOR_THE_EYES",
+    "name": "眼部攻击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "GUNK_UP",
+    "name": "污秽攻击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HAILSTORM",
+    "name": "冰雹风暴",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "HELIX_DRILL",
+    "name": "螺旋钻击",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HOLOGRAM",
+    "name": "全息影像",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "HOTFIX",
+    "name": "热修复",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "HYPERBEAM",
+    "name": "超能光束",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "ICE_LANCE",
+    "name": "冰之长枪",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "IGNITION",
+    "name": "引火",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AnyAlly"
+  },
+  {
+    "id": "ITERATION",
+    "name": "迭代",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "LEAP",
+    "name": "飞跃",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "LIGHTNING_ROD",
+    "name": "引雷针",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "LOOP",
+    "name": "循环",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "MACHINE_LEARNING",
+    "name": "机器学习",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "METEOR_STRIKE",
+    "name": "陨石打击",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 5,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "MODDED",
+    "name": "模组改造",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "MOMENTUM_STRIKE",
+    "name": "趁势打击",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "MULTI_CAST",
+    "name": "多重释放",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "NULL",
+    "name": "空值",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "OVERCLOCK",
+    "name": "超频",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "QUADCAST",
+    "name": "四重释放",
+    "type": "Skill",
+    "rarity": "Ancient",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "RAINBOW",
+    "name": "彩虹",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "REBOOT",
+    "name": "重启",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "REFRACT",
+    "name": "折射",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "ROCKET_PUNCH",
+    "name": "火箭飞拳",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SCAVENGE",
+    "name": "内存清理",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SCRAPE",
+    "name": "刮削",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SHADOW_SHIELD",
+    "name": "暗影之盾",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "SHATTER",
+    "name": "打碎",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "SIGNAL_BOOST",
+    "name": "信号增强",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SKIM",
+    "name": "快速检索",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SMOKESTACK",
+    "name": "烟囱",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SPINNER",
+    "name": "旋转工艺",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "STORM",
+    "name": "雷暴",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "STRIKE_DEFECT",
+    "name": "打击",
+    "type": "Attack",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SUBROUTINE",
+    "name": "子程序",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SUNDER",
+    "name": "分离",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SUPERCRITICAL",
+    "name": "超临界态",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "SWEEPING_BEAM",
+    "name": "扫荡射线",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "SYNCHRONIZE",
+    "name": "同步",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SYNTHESIS",
+    "name": "人工合成",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "TEMPEST",
+    "name": "暴风雨",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "TESLA_COIL",
+    "name": "特斯拉线圈",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "THUNDER",
+    "name": "雷霆",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "TRASH_TO_TREASURE",
+    "name": "化废为宝",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "TURBO",
+    "name": "内核加速",
+    "type": "Skill",
+    "rarity": "Common",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "UPROAR",
+    "name": "骚动",
+    "type": "Attack",
+    "rarity": "Common",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "VOLTAIC",
+    "name": "电流相生",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "WHITE_NOISE",
+    "name": "白噪声",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ZAP",
+    "name": "电击",
+    "type": "Skill",
+    "rarity": "Basic",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ALCHEMIZE",
+    "name": "炼制药水",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ANOINTED",
+    "name": "天选",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "AUTOMATION",
+    "name": "自动化",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BEACON_OF_HOPE",
+    "name": "希望灯塔",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BEAT_DOWN",
+    "name": "狠揍",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "RandomEnemy"
+  },
+  {
+    "id": "BELIEVE_IN_YOU",
+    "name": "相信着你",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyAlly"
+  },
+  {
+    "id": "BOLAS",
+    "name": "流星锤",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "CALAMITY",
+    "name": "灾祸",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "CATASTROPHE",
+    "name": "横祸",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "COORDINATE",
+    "name": "协同配合",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyAlly"
+  },
+  {
+    "id": "DARK_SHACKLES",
+    "name": "黑暗镣铐",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DISCOVERY",
+    "name": "发现",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DRAMATIC_ENTRANCE",
+    "name": "闪亮登场",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "ENTROPY",
+    "name": "熵",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "EQUILIBRIUM",
+    "name": "均衡",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "ETERNAL_ARMOR",
+    "name": "永恒铠甲",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "FASTEN",
+    "name": "勒紧",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "FINESSE",
+    "name": "妙计",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "FISTICUFFS",
+    "name": "拳斗",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "FLASH_OF_STEEL",
+    "name": "亮剑",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "GANG_UP",
+    "name": "群起攻之",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "GOLD_AXE",
+    "name": "金斧",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HAND_OF_GREED",
+    "name": "贪婪之手",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "HIDDEN_GEM",
+    "name": "未掘宝石",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "HUDDLE_UP",
+    "name": "抱团",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AllAllies"
+  },
+  {
+    "id": "IMPATIENCE",
+    "name": "急躁",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "INTERCEPT",
+    "name": "拦截",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyAlly"
+  },
+  {
+    "id": "JACK_OF_ALL_TRADES",
+    "name": "花样百出",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "JACKPOT",
+    "name": "大奖",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "KNOCKDOWN",
+    "name": "击倒",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "LIFT",
+    "name": "托举",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyAlly"
+  },
+  {
+    "id": "MASTER_OF_STRATEGY",
+    "name": "战略大师",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "MAYHEM",
+    "name": "乱战",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "MIMIC",
+    "name": "拟态",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AnyAlly"
+  },
+  {
+    "id": "MIND_BLAST",
+    "name": "心灵震慑",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "NOSTALGIA",
+    "name": "怀旧",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "OMNISLICE",
+    "name": "万向斩",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "PANACHE",
+    "name": "神气制胜",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "PANIC_BUTTON",
+    "name": "应急按钮",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "PREP_TIME",
+    "name": "准备时间",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "PRODUCTION",
+    "name": "生产制造",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "PROLONG",
+    "name": "延伸",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "PROWESS",
+    "name": "非凡技艺",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "PURITY",
+    "name": "净化",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "RALLY",
+    "name": "集结",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AllAllies"
+  },
+  {
+    "id": "REND",
+    "name": "撕碎",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "RESTLESSNESS",
+    "name": "心神不宁",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "ROLLING_BOULDER",
+    "name": "滚石",
+    "type": "Power",
+    "rarity": "Rare",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "SALVO",
+    "name": "箭雨",
+    "type": "Attack",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SCRAWL",
+    "name": "潦草急就",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SECRET_TECHNIQUE",
+    "name": "秘密技法",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "SECRET_WEAPON",
+    "name": "秘密武器",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "SEEKER_STRIKE",
+    "name": "探寻打击",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SHOCKWAVE",
+    "name": "震荡波",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "SPLASH",
+    "name": "飞溅",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "STRATAGEM",
+    "name": "计策",
+    "type": "Power",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "TAG_TEAM",
+    "name": "双打组合",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "THE_BOMB",
+    "name": "炸弹",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "THE_GAMBIT",
+    "name": "孤注一掷",
+    "type": "Skill",
+    "rarity": "Rare",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "THINKING_AHEAD",
+    "name": "深谋远虑",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "THRUMMING_HATCHET",
+    "name": "无休手斧",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "ULTIMATE_DEFEND",
+    "name": "究极防御",
+    "type": "Skill",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ULTIMATE_STRIKE",
+    "name": "究极打击",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "VOLLEY",
+    "name": "连射",
+    "type": "Attack",
+    "rarity": "Uncommon",
+    "cost": 0,
+    "targetType": "RandomEnemy"
+  },
+  {
+    "id": "ASCENDERS_BANE",
+    "name": "进阶之灾",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "BAD_LUCK",
+    "name": "霉运",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "CLUMSY",
+    "name": "笨拙",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "CURSE_OF_THE_BELL",
+    "name": "铃铛的诅咒",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "DEBT",
+    "name": "债务",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "DECAY",
+    "name": "腐朽",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "DOUBT",
+    "name": "疑虑",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "ENTHRALLED",
+    "name": "执迷",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": 2,
+    "targetType": "None"
+  },
+  {
+    "id": "FOLLY",
+    "name": "愚行",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "GREED",
+    "name": "贪婪",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "GUILTY",
+    "name": "愧疚",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "INJURY",
+    "name": "受伤",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "NORMALITY",
+    "name": "凡庸",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "POOR_SLEEP",
+    "name": "睡眠不佳",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "REGRET",
+    "name": "悔恨",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "SHAME",
+    "name": "羞耻",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "SPORE_MIND",
+    "name": "孢子心灵",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": 1,
+    "targetType": "None"
+  },
+  {
+    "id": "WRITHE",
+    "name": "苦恼",
+    "type": "Curse",
+    "rarity": "Curse",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "DEPRECATED_CARD",
+    "name": "弃用卡牌",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": 0,
+    "targetType": "None"
+  },
+  {
+    "id": "APOTHEOSIS",
+    "name": "神化",
+    "type": "Skill",
+    "rarity": "Ancient",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "APPARITION",
+    "name": "灵体",
+    "type": "Skill",
+    "rarity": "Ancient",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BRIGHTEST_FLAME",
+    "name": "至亮之焰",
+    "type": "Skill",
+    "rarity": "Ancient",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "BYRD_SWOOP",
+    "name": "异鸟扑击",
+    "type": "Attack",
+    "rarity": "Event",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "CALTROPS",
+    "name": "铁蒺藜",
+    "type": "Power",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "CLASH",
+    "name": "交锋",
+    "type": "Attack",
+    "rarity": "Event",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "DISTRACTION",
+    "name": "声东击西",
+    "type": "Skill",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "DUAL_WIELD",
+    "name": "双持",
+    "type": "Skill",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "ENLIGHTENMENT",
+    "name": "开悟",
+    "type": "Skill",
+    "rarity": "Event",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "ENTRENCH",
+    "name": "巩固",
+    "type": "Skill",
+    "rarity": "Event",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "EXTERMINATE",
+    "name": "杀灭",
+    "type": "Attack",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "AllEnemies"
+  },
+  {
+    "id": "FEEDING_FRENZY",
+    "name": "疯狂进食",
+    "type": "Skill",
+    "rarity": "Event",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "HELLO_WORLD",
+    "name": "你好世界",
+    "type": "Power",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "MAD_SCIENCE",
+    "name": "疯狂科学",
+    "type": "None",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "MAUL",
+    "name": "撕咬",
+    "type": "Attack",
+    "rarity": "Ancient",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "METAMORPHOSIS",
+    "name": "羽化",
+    "type": "Skill",
+    "rarity": "Event",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "NEOWS_FURY",
+    "name": "涅奥之怒",
+    "type": "Attack",
+    "rarity": "Ancient",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "OUTMANEUVER",
+    "name": "抢占先机",
+    "type": "Skill",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "PECK",
+    "name": "啄击",
+    "type": "Attack",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "REBOUND",
+    "name": "弹回",
+    "type": "Attack",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "RELAX",
+    "name": "放松",
+    "type": "Skill",
+    "rarity": "Ancient",
+    "cost": 3,
+    "targetType": "Self"
+  },
+  {
+    "id": "RIP_AND_TEAR",
+    "name": "狂乱撕扯",
+    "type": "Attack",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "RandomEnemy"
+  },
+  {
+    "id": "SQUASH",
+    "name": "压扁",
+    "type": "Attack",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "STACK",
+    "name": "堆栈",
+    "type": "Skill",
+    "rarity": "Event",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "TORIC_TOUGHNESS",
+    "name": "坚韧之环",
+    "type": "Skill",
+    "rarity": "Event",
+    "cost": 2,
+    "targetType": "Self"
+  },
+  {
+    "id": "WISH",
+    "name": "许愿",
+    "type": "Skill",
+    "rarity": "Ancient",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "WHISTLE",
+    "name": "吹哨",
+    "type": "Attack",
+    "rarity": "Ancient",
+    "cost": 3,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "BYRDONIS_EGG",
+    "name": "多尼斯异鸟蛋",
+    "type": "Quest",
+    "rarity": "Quest",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "LANTERN_KEY",
+    "name": "灯火钥匙",
+    "type": "Quest",
+    "rarity": "Quest",
+    "cost": -1,
+    "targetType": "Self"
+  },
+  {
+    "id": "SPOILS_MAP",
+    "name": "藏宝图",
+    "type": "Quest",
+    "rarity": "Quest",
+    "cost": -1,
+    "targetType": "Self"
+  },
+  {
+    "id": "BECKON",
+    "name": "呼唤",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": 1,
+    "targetType": "None"
+  },
+  {
+    "id": "BURN",
+    "name": "灼伤",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "DAZED",
+    "name": "晕眩",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "DEBRIS",
+    "name": "碎屑",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": 1,
+    "targetType": "None"
+  },
+  {
+    "id": "FRANTIC_ESCAPE",
+    "name": "狂乱逃离",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": 1,
+    "targetType": "Self"
+  },
+  {
+    "id": "INFECTION",
+    "name": "感染",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "SLIMED",
+    "name": "黏液",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": 1,
+    "targetType": "None"
+  },
+  {
+    "id": "SOOT",
+    "name": "煤灰",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "TOXIC",
+    "name": "毒素",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": 1,
+    "targetType": "None"
+  },
+  {
+    "id": "VOID",
+    "name": "虚空",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "WOUND",
+    "name": "伤口",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "DISINTEGRATION",
+    "name": "瓦解",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "FUEL",
+    "name": "燃料",
+    "type": "Skill",
+    "rarity": "Token",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "GIANT_ROCK",
+    "name": "巨石",
+    "type": "Attack",
+    "rarity": "Token",
+    "cost": 1,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "LUMINESCE",
+    "name": "冷光",
+    "type": "Skill",
+    "rarity": "Token",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "MIND_ROT",
+    "name": "心灵腐化",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "MINION_DIVE_BOMB",
+    "name": "仆从俯冲",
+    "type": "Attack",
+    "rarity": "Token",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "MINION_SACRIFICE",
+    "name": "仆从捐躯",
+    "type": "Skill",
+    "rarity": "Token",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "MINION_STRIKE",
+    "name": "仆从打击",
+    "type": "Attack",
+    "rarity": "Token",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SHIV",
+    "name": "小刀",
+    "type": "Attack",
+    "rarity": "Token",
+    "cost": 0,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SLOTH",
+    "name": "懒惰",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": -1,
+    "targetType": "None"
+  },
+  {
+    "id": "SOUL",
+    "name": "灵魂",
+    "type": "Skill",
+    "rarity": "Token",
+    "cost": 0,
+    "targetType": "Self"
+  },
+  {
+    "id": "SOVEREIGN_BLADE",
+    "name": "君王之剑",
+    "type": "Attack",
+    "rarity": "Token",
+    "cost": 2,
+    "targetType": "AnyEnemy"
+  },
+  {
+    "id": "SWEEPING_GAZE",
+    "name": "扫荡凝视",
+    "type": "Attack",
+    "rarity": "Token",
+    "cost": 0,
+    "targetType": "RandomEnemy"
+  },
+  {
+    "id": "WASTE_AWAY",
+    "name": "衰朽",
+    "type": "Status",
+    "rarity": "Status",
+    "cost": -1,
+    "targetType": "None"
+  }
+]

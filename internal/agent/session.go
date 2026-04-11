@@ -94,6 +94,7 @@ type Session struct {
 	dashboard              *DebugDashboard
 	guideSnapshot          *GuidebookSnapshot
 	providerState          string
+	knowledge              *KnowledgeRetriever
 	promptBuilder          *PromptAssemblyPipeline
 	gamePrefsPath          string
 	gameFastMode           string
@@ -151,6 +152,7 @@ func StartSession(ctx context.Context, cfg config.Config) (*Session, error) {
 		resolver:             NewActionResolutionPipeline(),
 		gate:                 NewStableStateGate(runtime.Client),
 		streamer:             NewStreamerDirector(cfg, runtime),
+		knowledge:            NewKnowledgeRetriever(cfg.RepoRoot),
 		promptBuilder:        NewPromptAssemblyPipeline(),
 		events:               make(chan SessionEvent, 128),
 		errs:                 make(chan error, 1),
@@ -492,7 +494,7 @@ func (s *Session) loop(ctx context.Context) error {
 		if s.usesStructuredDecisionMode() {
 			promptMode = PromptModeStructured
 		}
-		assembly := s.promptPipeline().Build(promptMode, state, s.todo, s.skills, s.compact, plan, s.cfg.Language)
+		assembly := s.promptPipeline().Build(promptMode, state, s.todo, s.skills, s.compact, plan, s.knowledge, s.cfg.Language)
 		prompt := assembly.Text
 		if err := s.store.RecordPrompt(s.cycle, prompt); err != nil {
 			return err

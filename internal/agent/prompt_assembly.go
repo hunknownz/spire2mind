@@ -53,7 +53,7 @@ func NewPromptAssemblyPipeline() *PromptAssemblyPipeline {
 	return &PromptAssemblyPipeline{}
 }
 
-func (p *PromptAssemblyPipeline) Build(mode PromptMode, state *game.StateSnapshot, todo *TodoManager, skills *SkillLibrary, compact *CompactMemory, planner *CombatPlan, language i18n.Language) PromptAssembly {
+func (p *PromptAssemblyPipeline) Build(mode PromptMode, state *game.StateSnapshot, todo *TodoManager, skills *SkillLibrary, compact *CompactMemory, planner *CombatPlan, knowledge *KnowledgeRetriever, language i18n.Language) PromptAssembly {
 	loc := i18n.New(language)
 	blocks := make([]promptBlock, 0, 10)
 
@@ -78,6 +78,12 @@ func (p *PromptAssemblyPipeline) Build(mode PromptMode, state *game.StateSnapsho
 	}
 	if block := strings.TrimSpace(p.minimalStatePayloadBlock(state, loc)); block != "" {
 		blocks = append(blocks, promptBlock{Name: "minimal_state", Text: block})
+	}
+	// Inject pre-computed knowledge from offline analysis
+	if knowledge != nil {
+		if knowledgeBlock := knowledgeBlockForState(knowledge, state, language); knowledgeBlock != "" {
+			blocks = append(blocks, promptBlock{Name: "card_knowledge", Text: knowledgeBlock})
+		}
 	}
 	if block := strings.TrimSpace(highLeverageProbabilityBlock(state, language)); block != "" {
 		blocks = append(blocks, promptBlock{Name: "depth_odds", Text: block})
@@ -147,13 +153,13 @@ func (p *PromptAssemblyPipeline) structuredPromptBudget(state *game.StateSnapsho
 	case "COMBAT":
 		return promptBudget{
 			MaxBytes:      11000,
-			DropOrder:     []string{"entity_knowledge", "todo", "tactical_hints"},
+			DropOrder:     []string{"entity_knowledge", "todo", "card_knowledge", "tactical_hints"},
 			TruncateOrder: []string{"planner", "screen_summary", "minimal_state"},
 		}
 	case "MAP", "EVENT", "SHOP", "REWARD", "CARD_SELECTION", "REST":
 		return promptBudget{
-			MaxBytes:      7000,
-			DropOrder:     []string{"entity_knowledge", "compact_memory", "todo"},
+			MaxBytes:      8000,
+			DropOrder:     []string{"entity_knowledge", "compact_memory", "card_knowledge", "todo"},
 			TruncateOrder: []string{"screen_summary", "minimal_state"},
 		}
 	default:
@@ -262,6 +268,20 @@ func truncateTextBytes(text string, maxBytes int) string {
 		runes = runes[:len(runes)-1]
 	}
 	return ""
+}
+
+func knowledgeBlockForState(kr *KnowledgeRetriever, state *game.StateSnapshot, language i18n.Language) string {
+	if kr == nil || state == nil {
+		return ""
+	}
+	switch strings.TrimSpace(state.Screen) {
+	case "CARD_SELECTION", "REWARD":
+		return kr.ForCardSelection(state, language)
+	case "COMBAT":
+		return kr.ForCombat(state, language)
+	default:
+		return ""
+	}
 }
 
 func (p *PromptAssemblyPipeline) appendCycleStateBlocks(blocks *[]promptBlock, state *game.StateSnapshot, todo *TodoManager, skills *SkillLibrary, compact *CompactMemory, planner *CombatPlan, language i18n.Language) {
