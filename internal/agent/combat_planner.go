@@ -68,11 +68,15 @@ type CombatSnapshot struct {
 }
 
 type CombatPlayerState struct {
-	CurrentHP int
-	MaxHP     int
-	Block     int
-	Energy    int
-	Stars     int
+	CurrentHP  int
+	MaxHP      int
+	Block      int
+	Energy     int
+	Stars      int
+	Strength   int // Adds to all attack damage
+	Dexterity  int // Adds to all block gained
+	Weak       int // Reduces attack damage by 25% (turns remaining)
+	Frail      int // Reduces block gained by 25% (turns remaining)
 }
 
 type CombatCardState struct {
@@ -94,6 +98,8 @@ type CombatEnemyState struct {
 	Block          int
 	Hittable       bool
 	Vulnerable     int
+	Weak           int // Enemy is weak: deals 25% less damage
+	Strength       int // Enemy strength buff
 	Intents        []CombatIntentState
 	KnowledgePrior float64
 }
@@ -381,11 +387,15 @@ func buildCombatSnapshot(state *game.StateSnapshot, codex *SeenContentRegistry) 
 		p := state.Combat.Player
 		snapshot = CombatSnapshot{
 			Player: CombatPlayerState{
-				CurrentHP: p.CurrentHp,
-				MaxHP:     p.MaxHp,
-				Block:     p.Block,
-				Energy:    p.Energy,
-				Stars:     p.Stars,
+				CurrentHP:  p.CurrentHp,
+				MaxHP:      p.MaxHp,
+				Block:      p.Block,
+				Energy:     p.Energy,
+				Stars:      p.Stars,
+				Strength:   findPowerAmount(p.Powers, "STRENGTH"),
+				Dexterity:  findPowerAmount(p.Powers, "DEXTERITY"),
+				Weak:       findPowerAmount(p.Powers, "WEAK"),
+				Frail:      findPowerAmount(p.Powers, "FRAIL"),
 			},
 			CanPlayCard: hasAction(state, "play_card"),
 			CanEndTurn:  hasAction(state, "end_turn"),
@@ -419,12 +429,15 @@ func buildCombatSnapshot(state *game.StateSnapshot, codex *SeenContentRegistry) 
 			currentHP := enemy.CurrentHp
 			label := fallbackID(enemy.Name, enemy.EnemyID)
 			entry := CombatEnemyState{
-				Index:     enemy.Index,
-				EnemyID:   fallbackID(enemy.EnemyID, ""),
-				Name:      label,
-				CurrentHP: currentHP,
-				Block:     enemy.Block,
-				Hittable:  enemy.IsHittable,
+				Index:      enemy.Index,
+				EnemyID:    fallbackID(enemy.EnemyID, ""),
+				Name:       label,
+				CurrentHP:  currentHP,
+				Block:      enemy.Block,
+				Hittable:   enemy.IsHittable,
+				Vulnerable: findPowerAmount(enemy.Powers, "VULNERABLE"),
+				Weak:       findPowerAmount(enemy.Powers, "WEAK"),
+				Strength:   findPowerAmount(enemy.Powers, "STRENGTH"),
 			}
 			for _, intent := range enemy.Intents {
 				intentState := CombatIntentState{
@@ -679,4 +692,15 @@ func derefInt(pointer *int) int {
 		return 0
 	}
 	return *pointer
+}
+
+// findPowerAmount searches a Power list for a power whose ID contains the given key.
+func findPowerAmount(powers []game.PowerState, key string) int {
+	key = strings.ToUpper(key)
+	for _, p := range powers {
+		if strings.Contains(strings.ToUpper(p.PowerID), key) {
+			return p.Amount
+		}
+	}
+	return 0
 }

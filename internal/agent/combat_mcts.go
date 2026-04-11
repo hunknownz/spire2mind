@@ -371,6 +371,25 @@ func simulateCombatAction(state combatSearchState, action CombatAction) combatSe
 		effect := estimateCardEffect(card, next.Snapshot.Player.Energy)
 		next.Snapshot.Player.Energy = max(0, next.Snapshot.Player.Energy-card.EnergyCost)
 		removeCombatCard(&next.Snapshot, card.Index)
+
+		// Apply Strength to damage, Weak reduces damage by 25%
+		if effect.Damage > 0 {
+			effect.Damage += next.Snapshot.Player.Strength
+			if next.Snapshot.Player.Weak > 0 {
+				effect.Damage = int(float64(effect.Damage) * 0.75)
+			}
+			effect.Damage = max(0, effect.Damage)
+		}
+
+		// Apply Dexterity to block, Frail reduces block by 25%
+		if effect.Block > 0 {
+			effect.Block += next.Snapshot.Player.Dexterity
+			if next.Snapshot.Player.Frail > 0 {
+				effect.Block = int(float64(effect.Block) * 0.75)
+			}
+			effect.Block = max(0, effect.Block)
+		}
+
 		next.Snapshot.Player.Block += effect.Block
 		next.UtilityBonus += effect.Utility
 		next.DrawCredit += float64(effect.Draw) * 0.85
@@ -454,16 +473,50 @@ func estimateCardEffect(card CombatCardState, availableEnergy int) estimatedCard
 		return estimatedCardEffect{Utility: 0.3}
 	case strings.Contains(key, "WOUND"), strings.Contains(key, "DAZED"), strings.Contains(key, "BURN"), strings.Contains(key, "VOID"):
 		return estimatedCardEffect{Utility: 0.1}
-	case strings.Contains(name, "defend"), strings.Contains(name, "block"):
+	case strings.Contains(key, "INFLAME"), strings.Contains(key, "DEMON_FORM"):
+		return estimatedCardEffect{Utility: 3.5}
+	case strings.Contains(key, "METALLICIZE"):
+		return estimatedCardEffect{Block: 3, Utility: 2.5}
+	case strings.Contains(key, "BLUDGEON"):
+		return estimatedCardEffect{Damage: 32, Utility: 0.9}
+	case strings.Contains(key, "BLOOD_FOR_BLOOD"):
+		return estimatedCardEffect{Damage: 18, Utility: 0.8}
+	case strings.Contains(key, "UPPERCUT"):
+		return estimatedCardEffect{Damage: 13, ApplyVulnerable: 1, Utility: 1.1}
+	case strings.Contains(key, "BODY_SLAM"):
+		return estimatedCardEffect{Utility: 1.0}
+	case strings.Contains(key, "HAVOC"):
+		return estimatedCardEffect{Utility: 0.8}
+	case strings.Contains(key, "OFFERING"):
+		return estimatedCardEffect{Draw: 3, Utility: 1.5}
+	case strings.Contains(key, "BATTLE_TRANCE"):
+		return estimatedCardEffect{Draw: 3, Utility: 1.2}
+	case strings.Contains(key, "FLEX"):
+		return estimatedCardEffect{Utility: 0.6}
+	case strings.Contains(key, "DISARM"):
+		return estimatedCardEffect{Utility: 1.5}
+	case strings.Contains(key, "DARK_SHACKLES"):
+		return estimatedCardEffect{Utility: 1.3}
+	case strings.Contains(key, "GHOSTLY_ARMOR"), strings.Contains(key, "IMPERVIOUS"):
+		return estimatedCardEffect{Block: 13, Utility: 1.0}
+	case strings.Contains(key, "SENTINEL"):
+		return estimatedCardEffect{Block: 5, Utility: 0.9}
+	case strings.Contains(name, "defend"), strings.Contains(name, "block"),
+		strings.Contains(name, "防御"), strings.Contains(name, "格挡"):
 		return estimatedCardEffect{Block: 5}
 	case card.RequiresTarget:
-		damage := 5
+		// Unknown targeted card: estimate damage from cost
+		damage := 6
 		if card.EnergyCost > 1 {
-			damage += (card.EnergyCost - 1) * 3
+			damage += (card.EnergyCost - 1) * 4
 		}
 		return estimatedCardEffect{Damage: damage}
 	default:
-		return estimatedCardEffect{Utility: 0.4}
+		// Unknown untargeted card: might be skill or power
+		if card.EnergyCost >= 2 {
+			return estimatedCardEffect{Block: 3, Utility: 1.0}
+		}
+		return estimatedCardEffect{Utility: 0.5}
 	}
 }
 
