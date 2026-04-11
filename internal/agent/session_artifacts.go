@@ -22,7 +22,7 @@ func (s *Session) reflectIfNeeded(state *game.StateSnapshot) {
 		return
 	}
 
-	reflection := BuildAttemptReflection(s.currentStoryAttemptForState(state), state, s.todo, s.compact)
+	reflection := BuildAttemptReflection(s.currentStoryAttemptForState(state), state, s.todo, s.compact, s.knowledge)
 	if reflection == nil {
 		return
 	}

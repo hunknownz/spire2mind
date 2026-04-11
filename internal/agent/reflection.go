@@ -42,7 +42,7 @@ type ReflectionLessonBuckets struct {
 	Runtime        []string `json:"runtime,omitempty"`
 }
 
-func BuildAttemptReflection(attempt int, state *game.StateSnapshot, todo *TodoManager, compact *CompactMemory) *AttemptReflection {
+func BuildAttemptReflection(attempt int, state *game.StateSnapshot, todo *TodoManager, compact *CompactMemory, knowledge ...*KnowledgeRetriever) *AttemptReflection {
 	if state == nil {
 		return nil
 	}
@@ -71,6 +71,12 @@ func BuildAttemptReflection(attempt int, state *game.StateSnapshot, todo *TodoMa
 	reflection.Successes = buildReflectionSuccesses(state, reflection)
 	reflection.Risks = buildReflectionRisks(state, reflection)
 	reflection.LessonBuckets = buildReflectionLessonBuckets(state, reflection)
+
+	// Add knowledge-based insights if available
+	if len(knowledge) > 0 && knowledge[0] != nil {
+		addKnowledgeBasedLessons(state, reflection, knowledge[0])
+	}
+
 	reflection.TacticalMistakes, reflection.RuntimeNoise, reflection.ResourceMistakes = classifyReflectionFindings(reflection)
 	reflection.Lessons = reflection.LessonBuckets.Flatten(10)
 	reflection.NextPlan = buildReflectionNextPlan(reflection)
@@ -616,4 +622,90 @@ func classifyReflectionFindings(reflection *AttemptReflection) ([]string, []stri
 	}
 
 	return tactical, runtime, resource
+}
+
+// addKnowledgeBasedLessons enriches reflections with insights from the
+// offline knowledge base — deck archetype analysis, card synergy gaps,
+// and specific improvement recommendations.
+func addKnowledgeBasedLessons(state *game.StateSnapshot, reflection *AttemptReflection, kr *KnowledgeRetriever) {
+	if state == nil || reflection == nil || kr == nil {
+		return
+	}
+	kr.EnsureLoaded()
+	if state.Run == nil || len(state.Run.Deck) == 0 {
+		return
+	}
+
+	// Analyze deck composition using knowledge
+	var attacks, defenses, scaling int
+	archetypeCounts := make(map[string]int)
+	for _, card := range state.Run.Deck {
+		analysis, ok := kr.cards[strings.ToUpper(card.CardID)]
+		if !ok {
+			continue
+		}
+		switch analysis.Role {
+		case "attack":
+			attacks++
+		case "defense":
+			defenses++
+		case "scaling":
+			scaling++
+		}
+		for _, arch := range analysis.Archetypes {
+			archetypeCounts[arch]++
+		}
+	}
+
+	deckSize := len(state.Run.Deck)
+	bestArch := ""
+	bestCount := 0
+	for arch, count := range archetypeCounts {
+		if count > bestCount {
+			bestArch = arch
+			bestCount = count
+		}
+	}
+
+	// Generate specific deck-aware lessons
+	if strings.EqualFold(reflection.Outcome, "defeat") {
+		// Archetype commitment check
+		if bestArch != "" && bestCount < deckSize/3 {
+			reflection.LessonBuckets.add("reward_choice",
+				fmt.Sprintf("Deck direction unclear: %d/%d cards lean toward %s but commitment is weak. Commit to an archetype by floor 6 or pivot.",
+					bestCount, deckSize, bestArch))
+		}
+
+		// Defense ratio check
+		if defenses*3 < attacks && defenses < 4 {
+			reflection.LessonBuckets.add("reward_choice",
+				fmt.Sprintf("Defense critically low: only %d defense cards vs %d attack cards. Prioritize block cards at next reward.",
+					defenses, attacks))
+		}
+
+		// Scaling check
+		floor := 0
+		if reflection.Floor != nil {
+			floor = *reflection.Floor
+		}
+		if floor >= 10 && scaling == 0 {
+			reflection.LessonBuckets.add("reward_choice",
+				"No scaling cards in deck past floor 10. Need at least one power or scaling source (Demon Form, Inflame, etc.) to handle late-game threats.")
+		}
+
+		// Gold waste with specific shop advice
+		if state.Run.Gold >= 100 {
+			basicStrikes := 0
+			for _, card := range state.Run.Deck {
+				if strings.Contains(strings.ToUpper(card.CardID), "STRIKE") {
+					basicStrikes++
+				}
+			}
+			if basicStrikes >= 3 {
+				reflection.LessonBuckets.add("shop_economy",
+					fmt.Sprintf("Died with %d gold and %d basic Strikes still in deck. Should have removed Strikes at shop to improve draw quality.",
+						state.Run.Gold, basicStrikes))
+			}
+		}
+	}
 }

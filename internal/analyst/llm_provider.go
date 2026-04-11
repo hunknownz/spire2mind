@@ -35,7 +35,7 @@ func newLLMProvider(cfg config.Config) (LLMProvider, error) {
 		baseURL: strings.TrimRight(baseURL, "/"),
 		model:   model,
 		apiKey:  cfg.APIKey,
-		client:  &http.Client{Timeout: 5 * time.Minute},
+		client:  &http.Client{Timeout: 10 * time.Minute},
 	}, nil
 }
 

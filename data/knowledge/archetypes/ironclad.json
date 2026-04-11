@@ -1,0 +1,174 @@
+{
+  "block_build": {
+    "id": "block_build",
+    "name": "格挡流",
+    "character": "IRONCLAD",
+    "description": "基于现有 STS1 机制推演。通过格挡（Block）生存，配合反击（Counterattack）机制或高血量卡牌进行持久战，适合应对精英怪。",
+    "core_cards": [
+      "Defend",
+      "Iron Wave",
+      "Power Bash",
+      "Rend",
+      "Iron Stance",
+      "Heavy Blade"
+    ],
+    "support_cards": [
+      "Hone",
+      "Flex",
+      "Fortify",
+      "Guardian",
+      "Armored",
+      "Steel Talon"
+    ],
+    "avoid_cards": [
+      "Burn",
+      "Blood Pact",
+      "Exhaust",
+      "Bash",
+      "Strike",
+      "Fire Breathing"
+    ],
+    "key_relics": [
+      "Orichalcum",
+      "Infernal Mask",
+      "Power Totem",
+      "Candlestick"
+    ],
+    "strengths": "生存能力极强，容错率高，能应对大量攻击和精英怪。",
+    "weaknesses": "输出效率低，清场慢，容易在后期因能量不足被耗死。",
+    "early_priority": "1-5 层：确保格挡值稳定，避免掉血过多，收集防御牌。",
+    "mid_priority": "6-10 层：增加格挡上限和恢复，确保能量循环。",
+    "late_priority": "11+ 层：提升输出效率，防止格子被堵死。",
+    "pathing_advice": "优先走战斗房间，选择能增加防御的商店路线。",
+    "transition_floor": 6
+  },
+  "energy_flow": {
+    "id": "energy_flow",
+    "name": "能量循环流",
+    "character": "IRONCLAD",
+    "description": "基于现有 STS1 机制推演。专注于能量（Energy）获取，利用多回合行动和卡牌组合打出超频攻击。",
+    "core_cards": [
+      "Offensive Stance",
+      "Rage",
+      "Focus",
+      "Power Through",
+      "War Paint",
+      "Raiding"
+    ],
+    "support_cards": [
+      "Evasion",
+      "Focus",
+      "Ritual Dagger",
+      "Sword Boomerang",
+      "Tactical",
+      "Warrior's Will"
+    ],
+    "avoid_cards": [
+      "Defend",
+      "Shiv",
+      "Block",
+      "Strike",
+      "Bash",
+      "Hate"
+    ],
+    "key_relics": [
+      "Golden Idol",
+      "Infernal Mask",
+      "Ritual Dagger",
+      "Power Totem"
+    ],
+    "strengths": "行动回合数多，爆发和灵活性极高，能快速清理多个小怪。",
+    "weaknesses": "续航依赖回血，若能量卡不够易陷入死路，后期能量消耗大。",
+    "early_priority": "1-5 层：寻找能量牌，建立能量循环的基础。",
+    "mid_priority": "6-10 层：优化能量消耗，加入少量防御牌防止卡手。",
+    "late_priority": "11+ 层：最大化能量使用效率，快速清场。",
+    "pathing_advice": "优先拿能量牌，避免拿高费牌，选择能量获取商店。",
+    "transition_floor": 3
+  },
+  "exhaust_build": {
+    "id": "exhaust_build",
+    "name": "清除流",
+    "character": "IRONCLAD",
+    "description": "基于现有 STS1 机制推演。通过移除废弃（Exhaust）卡牌来减少手牌体积，配合高频率攻击实现爆发，类似“无限流”雏形。",
+    "core_cards": [
+      "Exhaust",
+      "Bash",
+      "Punch",
+      "Sword Boomerang",
+      "Flame Tongue",
+      "Heavy Blade"
+    ],
+    "support_cards": [
+      "Exhaust",
+      "Discard",
+      "Power Bash",
+      "Rend",
+      "Warrior's Will",
+      "Tactical"
+    ],
+    "avoid_cards": [
+      "Defend",
+      "Block",
+      "Strike",
+      "Heal",
+      "Ritual",
+      "Thawing"
+    ],
+    "key_relics": [
+      "Infernal Mask",
+      "Golden Idol",
+      "Power Totem",
+      "Ritual Dagger"
+    ],
+    "strengths": "手牌体积小，过牌快，后期爆发惊人，能有效应对多怪局。",
+    "weaknesses": "前期手牌易卡手，依赖特定卡牌组合，容错率低。",
+    "early_priority": "1-5 层：确保清除牌和输出牌比例，减少垃圾牌。",
+    "mid_priority": "6-10 层：稳定清除机制，增加少量防御牌防止卡手。",
+    "late_priority": "11+ 层：最大化清除效果和爆发，快速过关卡。",
+    "pathing_advice": "优先拿清除牌，选择能减少手牌成本的商店。",
+    "transition_floor": 5
+  },
+  "strength_build": {
+    "id": "strength_build",
+    "name": "力量流",
+    "character": "IRONCLAD",
+    "description": "基于现有 STS1 机制推演。利用力量（Strength）加成使单次攻击造成巨额伤害，通过卡牌如“打击”“力量强化”叠加，配合遗物实现秒级清场。",
+    "core_cards": [
+      "Bash",
+      "Iron Wave",
+      "Sword Boomerang",
+      "Flame Tongue",
+      "Power Through",
+      "Strength Stance"
+    ],
+    "support_cards": [
+      "Rage",
+      "Second Wind",
+      "Focus",
+      "Warcry",
+      "Brutality",
+      "Intimidate"
+    ],
+    "avoid_cards": [
+      "Defend",
+      "Shiv",
+      "Block",
+      "Heal",
+      "Ritual",
+      "Thawing"
+    ],
+    "key_relics": [
+      "Golden Idol",
+      "Infernal Mask",
+      "Power Totem",
+      "Ritual Dagger"
+    ],
+    "strengths": "单体爆发极高，后期单点清除 Boss 速度快，叠力量后成型快。",
+    "weaknesses": "续航能力弱，对格挡要求高，容易在前期死亡，缺乏多目标处理。",
+    "early_priority": "1-5 层：寻找力量卡牌和能量获取，确保前期伤害够高。",
+    "mid_priority": "6-10 层：稳定力量来源，减少伤害输出波动，加入少量回血。",
+    "late_priority": "11+ 层：最大化单次伤害，利用力量流快速通关。",
+    "pathing_advice": "避开高费攻击，多拿力量相关，选择能提供力量获取的商店。",
+    "transition_floor": 4
+  }
+}
