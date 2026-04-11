@@ -247,7 +247,7 @@ type EventOption struct {
 // ── Character Select ──────────────────────────────────────────
 
 type CharSelectState struct {
-	SelectedCharacter string             `json:"selectedCharacter"`
+	SelectedCharacter string             `json:"selectedCharacterId"`
 	Characters        []CharSelectOption `json:"characters"`
 	CanEmbark         bool               `json:"canEmbark"`
 }

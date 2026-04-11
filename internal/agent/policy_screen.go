@@ -24,16 +24,22 @@ func characterAlreadySelected(state *game.StateSnapshot) bool {
 		return false
 	}
 
+	// Primary check: SelectedCharacter ID matches a character
 	selectedID := state.CharacterSelect.SelectedCharacter
-	if selectedID == "" {
-		return false
+	if selectedID != "" {
+		for _, option := range state.CharacterSelect.Characters {
+			if option.CharID != selectedID {
+				continue
+			}
+			return option.IsSelected || !option.IsLocked
+		}
 	}
 
+	// Fallback: any non-locked, non-random character marked IsSelected
 	for _, option := range state.CharacterSelect.Characters {
-		if option.CharID != selectedID {
-			continue
+		if option.IsSelected && !option.IsLocked && !option.IsRandom {
+			return true
 		}
-		return option.IsSelected || !option.IsLocked
 	}
 
 	return false
