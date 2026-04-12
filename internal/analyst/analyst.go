@@ -81,3 +81,9 @@ func (a *Analyst) RunAll(ctx context.Context) error {
 	fmt.Println("=== All analysis complete ===")
 	return nil
 }
+
+// ReviewLatestRun reviews the most recent completed run.
+func (a *Analyst) ReviewLatestRun(ctx context.Context) error {
+	_, err := a.ReviewRun(ctx, "latest")
+	return err
+}

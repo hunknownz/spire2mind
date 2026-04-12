@@ -105,10 +105,18 @@ func runAnalyze(ctx context.Context, cfg config.Config, args []string) error {
 		return a.AnalyzeEnemies(ctx)
 	case "archetypes":
 		return a.AnalyzeArchetypes(ctx)
+	case "run":
+		// analyze run [run_id_or_dir]  — defaults to latest run
+		hint := ""
+		if len(args) > 1 {
+			hint = args[1]
+		}
+		_, err := a.ReviewRun(ctx, hint)
+		return err
 	case "all":
 		return a.RunAll(ctx)
 	default:
-		return fmt.Errorf("unknown analyze target %q (use: cards, enemies, archetypes, all)", target)
+		return fmt.Errorf("unknown analyze target %q (use: cards, enemies, archetypes, run [id], all)", target)
 	}
 }
 
