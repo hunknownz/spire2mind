@@ -11,7 +11,7 @@ param(
     [string]$BaseUrl = "http://127.0.0.1:11434",
     [string]$FallbackModel = "qwen3:4b",
     [switch]$ForceModelEval = $true,
-    [switch]$ReplaceExisting = $true
+    [string]$ReplaceExisting = "1"
 )
 
 $ErrorActionPreference = "Stop"

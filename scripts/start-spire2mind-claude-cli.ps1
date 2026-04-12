@@ -8,7 +8,7 @@ param(
     [string]$Language = "zh",
     [string]$FastMode = "instant",
     [string]$Planner = "mcts",
-    [switch]$ReplaceExisting = $true
+    [string]$ReplaceExisting = "1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -98,7 +98,7 @@ function Stop-ExistingSpire2MindInstances {
     }
 }
 
-if ($ReplaceExisting) {
+if ($ReplaceExisting -match '^(1|true|yes|on)$') {
     Stop-ExistingSpire2MindInstances -CurrentPid $PID
 }
 

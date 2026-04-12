@@ -16,7 +16,7 @@ param(
     [string]$ApiDecisionMode = "structured",
     [switch]$ForceModelEval,
     [switch]$PullModel,
-    [switch]$ReplaceExisting = $true
+    [string]$ReplaceExisting = "1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -242,7 +242,7 @@ $headlessSmokeScript = Join-Path $scriptRoot "headless-smoke.ps1"
 $longSoakScript = Join-Path $scriptRoot "long-soak.ps1"
 $apiStartScript = Join-Path $scriptRoot "start-spire2mind-api.ps1"
 
-if ($ReplaceExisting) {
+if ($ReplaceExisting -match '^(1|true|yes|on)$') {
     Stop-ExistingSpire2MindInstances -CurrentPid $PID
 }
 

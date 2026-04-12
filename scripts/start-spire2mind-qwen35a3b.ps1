@@ -12,7 +12,7 @@ param(
     [string]$FallbackModel = "qwen3:8b",
     [int]$ModelContext = 32768,
     [switch]$ForceModelEval = $true,
-    [switch]$ReplaceExisting = $true
+    [string]$ReplaceExisting = "1"
 )
 
 $ErrorActionPreference = "Stop"

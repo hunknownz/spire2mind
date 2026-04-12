@@ -10,7 +10,7 @@ param(
     [string]$Planner = "mcts",
     [string]$BaseUrl = "http://127.0.0.1:11434",
     [switch]$ForceModelEval = $true,
-    [switch]$ReplaceExisting = $true
+    [string]$ReplaceExisting = "1"
 )
 
 $ErrorActionPreference = "Stop"
