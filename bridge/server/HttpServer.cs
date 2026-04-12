@@ -182,13 +182,13 @@ internal sealed class HttpServer : IDisposable
 
     private static int ResolvePort()
     {
-        var rawValue = Environment.GetEnvironmentVariable("STS2_API_PORT");
+        var rawValue = ResolveMultiScope("STS2_API_PORT");
         return int.TryParse(rawValue, out var port) ? port : BridgeDefaults.DefaultPort;
     }
 
     private static string ResolveHost()
     {
-        var rawValue = Environment.GetEnvironmentVariable("STS2_API_HOST");
+        var rawValue = ResolveMultiScope("STS2_API_HOST");
         if (string.IsNullOrWhiteSpace(rawValue))
         {
             return "127.0.0.1";
@@ -201,6 +201,42 @@ internal sealed class HttpServer : IDisposable
         }
 
         return trimmed;
+    }
+
+    /// <summary>
+    /// Reads an env var from Process, then User, then Machine scope. The registry-backed
+    /// User/Machine reads bypass the game process's inherited env block, which matters
+    /// when Steam (the usual game launcher) was started before the variable was set.
+    /// </summary>
+    private static string? ResolveMultiScope(string name)
+    {
+        var process = Environment.GetEnvironmentVariable(name);
+        if (!string.IsNullOrWhiteSpace(process))
+        {
+            return process;
+        }
+
+        try
+        {
+            var user = Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.User);
+            if (!string.IsNullOrWhiteSpace(user))
+            {
+                return user;
+            }
+        }
+        catch
+        {
+            // registry access denied — fall through
+        }
+
+        try
+        {
+            return Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Machine);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static HttpListener StartListenerWithRetry(string prefix)
