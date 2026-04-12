@@ -204,16 +204,25 @@ internal sealed class HttpServer : IDisposable
     }
 
     /// <summary>
-    /// Reads an env var from Process, then User, then Machine scope. The registry-backed
-    /// User/Machine reads bypass the game process's inherited env block, which matters
-    /// when Steam (the usual game launcher) was started before the variable was set.
+    /// Reads an env var from Machine scope, then User scope, then the inherited Process env.
+    /// Registry-backed Machine/User reads come first so that authoritative config written
+    /// via `setx` / SetEnvironmentVariable(...,"Machine"|"User") always wins over a stale
+    /// Process env block — which matters when Steam (the usual game launcher) was started
+    /// long before the variable was updated and still holds an old snapshot.
     /// </summary>
     private static string? ResolveMultiScope(string name)
     {
-        var process = Environment.GetEnvironmentVariable(name);
-        if (!string.IsNullOrWhiteSpace(process))
+        try
         {
-            return process;
+            var machine = Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Machine);
+            if (!string.IsNullOrWhiteSpace(machine))
+            {
+                return machine;
+            }
+        }
+        catch
+        {
+            // registry access denied — fall through
         }
 
         try
@@ -229,14 +238,7 @@ internal sealed class HttpServer : IDisposable
             // registry access denied — fall through
         }
 
-        try
-        {
-            return Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Machine);
-        }
-        catch
-        {
-            return null;
-        }
+        return Environment.GetEnvironmentVariable(name);
     }
 
     private static HttpListener StartListenerWithRetry(string prefix)
