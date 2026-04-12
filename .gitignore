@@ -3,6 +3,8 @@ bridge/obj/
 bridge/build/
 .tools/
 spire2mind.exe
+/spire2mind
+/agent-run.log
 .cache/
 research/airi/
 research/MeloTTS/

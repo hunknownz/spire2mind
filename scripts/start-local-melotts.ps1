@@ -8,7 +8,7 @@ param(
     [string]$Speaker = "ZH",
     [double]$Speed = 1.0,
     [switch]$Visible,
-    [switch]$ReplaceExisting = $true
+    [string]$ReplaceExisting = "1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -51,7 +51,7 @@ function Stop-ExistingMeloTTSServer {
     }
 }
 
-if ($ReplaceExisting) {
+if ($ReplaceExisting -match '^(1|true|yes|on)$') {
     Stop-ExistingMeloTTSServer -CurrentPid $PID
 }
 

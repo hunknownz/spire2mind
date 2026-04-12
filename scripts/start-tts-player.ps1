@@ -10,7 +10,7 @@ param(
     [string]$Voice = "",
     [string]$Speed = "",
     [string]$Profile = "",
-    [switch]$ReplaceExisting = $true,
+    [string]$ReplaceExisting = "1",
     [switch]$Visible,
     [switch]$DryRun
 )
@@ -78,7 +78,7 @@ if (-not (Test-Path $entry)) {
     throw "TTS sidecar entry not found: $entry"
 }
 
-if ($ReplaceExisting) {
+if ($ReplaceExisting -match '^(1|true|yes|on)$') {
     Stop-ExistingTTSPlayer -CurrentPid $PID
 }
 

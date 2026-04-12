@@ -96,7 +96,7 @@ function Start-TTSPlayerIfEnabled {
     $ttsArgs = @(
         "-ExecutionPolicy", "Bypass",
         "-File", $launcher,
-        "-ReplaceExisting"
+        "-ReplaceExisting", "1"
     )
     if ($env:SPIRE2MIND_TTS_PROVIDER) { $ttsArgs += @("-Provider", $env:SPIRE2MIND_TTS_PROVIDER) }
     if ($env:SPIRE2MIND_TTS_FALLBACK_PROVIDER) { $ttsArgs += @("-FallbackProvider", $env:SPIRE2MIND_TTS_FALLBACK_PROVIDER) }
