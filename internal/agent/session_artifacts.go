@@ -1,9 +1,12 @@
 package agentruntime
 
 import (
+	"context"
 	"strings"
 	"time"
 
+	"spire2mind/internal/analyst"
+	"spire2mind/internal/config"
 	"spire2mind/internal/game"
 )
 
@@ -37,6 +40,17 @@ func (s *Session) reflectIfNeeded(state *game.StateSnapshot) {
 	s.persistSessionResume(state)
 	s.writeRunArtifacts(state)
 	s.refreshGuidebook(true)
+
+	// Async deep run review — does not block the agent loop.
+	go func(runDir string, cfg config.Config) {
+		a, err := analyst.New(cfg)
+		if err != nil {
+			return
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+		_, _ = a.ReviewRun(ctx, runDir)
+	}(s.cfg.ArtifactsDir, s.cfg)
 
 	s.emit(SessionEvent{
 		Time:    time.Now(),
