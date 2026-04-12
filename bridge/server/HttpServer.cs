@@ -32,8 +32,53 @@ internal sealed class HttpServer : IDisposable
             return;
         }
 
-        _listener = StartListenerWithRetry($"http://{Host}:{Port}/");
+        var candidates = BuildPrefixCandidates(Host, Port);
+        Exception? lastException = null;
+        foreach (var prefix in candidates)
+        {
+            Console.Error.WriteLine($"[Spire2Mind.Bridge] Trying prefix: {prefix}");
+            try
+            {
+                _listener = StartListenerWithRetry(prefix);
+                Console.Error.WriteLine($"[Spire2Mind.Bridge] Bound prefix: {prefix}");
+                ActivePrefix = prefix;
+                break;
+            }
+            catch (Exception ex)
+            {
+                lastException = ex;
+                Console.Error.WriteLine($"[Spire2Mind.Bridge] Prefix {prefix} failed: {ex.GetType().Name}: {ex.Message}");
+            }
+        }
+
+        if (_listener == null)
+        {
+            throw new InvalidOperationException(
+                $"All listener prefixes failed (tried {candidates.Count}). See earlier [Spire2Mind.Bridge] log entries.",
+                lastException);
+        }
+
         _acceptLoop = Task.Run(() => AcceptLoopAsync(_listener, _cts.Token), _cts.Token);
+    }
+
+    public string? ActivePrefix { get; private set; }
+
+    private static List<string> BuildPrefixCandidates(string host, int port)
+    {
+        var list = new List<string> { $"http://{host}:{port}/" };
+
+        if (!string.Equals(host, "+", StringComparison.Ordinal)
+            && !string.Equals(host, "127.0.0.1", StringComparison.Ordinal))
+        {
+            list.Add($"http://+:{port}/");
+        }
+
+        if (!string.Equals(host, "127.0.0.1", StringComparison.Ordinal))
+        {
+            list.Add($"http://127.0.0.1:{port}/");
+        }
+
+        return list;
     }
 
     public void Dispose()
