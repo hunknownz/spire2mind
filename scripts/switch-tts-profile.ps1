@@ -36,5 +36,5 @@ Write-Host "Speed: $($resolved.speed)"
 Write-Host "Streamer style: $($resolved.streamerStyle)"
 
 if ($RestartPlayer) {
-    & powershell.exe -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "start-tts-player.ps1") -ReplaceExisting
+    & powershell.exe -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "start-tts-player.ps1") -ReplaceExisting "1"
 }
