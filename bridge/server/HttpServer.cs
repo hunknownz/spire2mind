@@ -16,9 +16,12 @@ internal sealed class HttpServer : IDisposable
     {
         _handler = handler;
         Port = ResolvePort();
+        Host = ResolveHost();
     }
 
     public int Port { get; }
+
+    public string Host { get; }
 
     public bool IsRunning => _listener?.IsListening == true;
 
@@ -29,7 +32,7 @@ internal sealed class HttpServer : IDisposable
             return;
         }
 
-        _listener = StartListenerWithRetry($"http://127.0.0.1:{Port}/");
+        _listener = StartListenerWithRetry($"http://{Host}:{Port}/");
         _acceptLoop = Task.Run(() => AcceptLoopAsync(_listener, _cts.Token), _cts.Token);
     }
 
@@ -94,6 +97,23 @@ internal sealed class HttpServer : IDisposable
     {
         var rawValue = Environment.GetEnvironmentVariable("STS2_API_PORT");
         return int.TryParse(rawValue, out var port) ? port : BridgeDefaults.DefaultPort;
+    }
+
+    private static string ResolveHost()
+    {
+        var rawValue = Environment.GetEnvironmentVariable("STS2_API_HOST");
+        if (string.IsNullOrWhiteSpace(rawValue))
+        {
+            return "127.0.0.1";
+        }
+
+        var trimmed = rawValue.Trim();
+        if (string.Equals(trimmed, "0.0.0.0", StringComparison.Ordinal))
+        {
+            return "+";
+        }
+
+        return trimmed;
     }
 
     private static HttpListener StartListenerWithRetry(string prefix)

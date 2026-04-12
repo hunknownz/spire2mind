@@ -100,6 +100,25 @@ function Ensure-BridgeLanFirewallRule {
     return "updated"
 }
 
+function Ensure-BridgeUrlAcl {
+    param(
+        [int]$LocalPort
+    )
+
+    $url = "http://+:$LocalPort/"
+    $existing = & netsh http show urlacl url=$url 2>$null
+    if ($LASTEXITCODE -eq 0 -and ($existing -match [regex]::Escape($url))) {
+        return "present"
+    }
+
+    $current = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+    $result = & netsh http add urlacl url=$url user=$current 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to add URL ACL for $url ($current): $result"
+    }
+    return "added"
+}
+
 function Get-LanEndpoints {
     $addresses = @(Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue | Where-Object {
         $_.IPAddress -and
@@ -148,6 +167,10 @@ if (-not $SkipFirewall) {
     if ($PSCmdlet.ShouldProcess("Windows Firewall", "Allow inbound TCP $Port from $RemoteAddress")) {
         $result = Ensure-BridgeLanFirewallRule -DisplayName $RuleName -LocalPort $Port -Address $RemoteAddress
         Write-Host "Firewall rule ${result}: $RuleName"
+    }
+    if ($PSCmdlet.ShouldProcess("HTTP.sys URL ACL", "Reserve http://+:$Port/ for $([Security.Principal.WindowsIdentity]::GetCurrent().Name)")) {
+        $aclResult = Ensure-BridgeUrlAcl -LocalPort $Port
+        Write-Host "URL ACL ${aclResult}: http://+:$Port/"
     }
 }
 else {
