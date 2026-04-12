@@ -32,29 +32,37 @@ internal sealed class HttpServer : IDisposable
             return;
         }
 
+        var envHost = Environment.GetEnvironmentVariable("STS2_API_HOST");
+        var envPort = Environment.GetEnvironmentVariable("STS2_API_PORT");
+        Diag($"Start() called. STS2_API_HOST={ReprEnv(envHost)} STS2_API_PORT={ReprEnv(envPort)} ResolvedHost={Host} ResolvedPort={Port}");
+
         var candidates = BuildPrefixCandidates(Host, Port);
+        Diag($"Candidates ({candidates.Count}): {string.Join(", ", candidates)}");
+
         Exception? lastException = null;
         foreach (var prefix in candidates)
         {
-            Console.Error.WriteLine($"[Spire2Mind.Bridge] Trying prefix: {prefix}");
+            Diag($"Trying {prefix}");
             try
             {
                 _listener = StartListenerWithRetry(prefix);
-                Console.Error.WriteLine($"[Spire2Mind.Bridge] Bound prefix: {prefix}");
+                Diag($"Bound {prefix}");
                 ActivePrefix = prefix;
                 break;
             }
             catch (Exception ex)
             {
                 lastException = ex;
-                Console.Error.WriteLine($"[Spire2Mind.Bridge] Prefix {prefix} failed: {ex.GetType().Name}: {ex.Message}");
+                var he = ex as HttpListenerException;
+                Diag($"Failed {prefix}: {ex.GetType().Name}: {ex.Message}{(he != null ? $" (ErrorCode={he.ErrorCode})" : "")}");
             }
         }
 
         if (_listener == null)
         {
+            var last = lastException?.Message ?? "(no exception captured)";
             throw new InvalidOperationException(
-                $"All listener prefixes failed (tried {candidates.Count}). See earlier [Spire2Mind.Bridge] log entries.",
+                $"All {candidates.Count} listener prefix(es) failed. Last error: {last}",
                 lastException);
         }
 
@@ -62,6 +70,40 @@ internal sealed class HttpServer : IDisposable
     }
 
     public string? ActivePrefix { get; private set; }
+
+    private static readonly string DiagLogPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "SlayTheSpire2",
+        "spire2mind-bridge-diag.log");
+
+    private static readonly object DiagLock = new();
+
+    private static void Diag(string message)
+    {
+        try
+        {
+            var line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}{Environment.NewLine}";
+            lock (DiagLock)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(DiagLogPath)!);
+                File.AppendAllText(DiagLogPath, line);
+            }
+        }
+        catch
+        {
+            // Best-effort only.
+        }
+    }
+
+    private static string ReprEnv(string? value)
+    {
+        if (value == null)
+        {
+            return "<null>";
+        }
+
+        return $"\"{value}\"";
+    }
 
     private static List<string> BuildPrefixCandidates(string host, int port)
     {
