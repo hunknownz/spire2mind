@@ -151,10 +151,10 @@ func (kr *KnowledgeRetriever) enemyStrategy(enemy *game.EnemyState) string {
 	}
 
 	// Try by ID (exact, then upper-cased)
-	if e, ok := kr.enemies[enemy.ID]; ok {
+	if e, ok := kr.enemies[enemy.EnemyID]; ok {
 		return e.Strategy
 	}
-	if e, ok := kr.enemies[strings.ToUpper(enemy.ID)]; ok {
+	if e, ok := kr.enemies[strings.ToUpper(enemy.EnemyID)]; ok {
 		return e.Strategy
 	}
 
