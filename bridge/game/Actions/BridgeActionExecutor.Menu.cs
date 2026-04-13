@@ -1,5 +1,6 @@
 using Godot;
 using System.Reflection;
+using MegaCrit.Sts2.Core.Nodes;
 using MegaCrit.Sts2.Core.Nodes.Screens.CharacterSelect;
 using MegaCrit.Sts2.Core.Nodes.Screens.MainMenu;
 using MegaCrit.Sts2.Core.Nodes.Screens.ScreenContext;
@@ -121,10 +122,11 @@ internal static partial class BridgeActionExecutor
         }
 
         // StS 2 shows a run-mode selection screen (Standard / Daily / Custom) after
-        // clicking SingleplayerButton. Detect it and auto-select Standard Mode (index 0)
-        // before the CharacterSelect screen appears.
+        // clicking SingleplayerButton. The mode selection appears as a submenu within
+        // MAIN_MENU, not as a separate screen. We need to detect and auto-click Standard.
         var deadline = DateTime.UtcNow + BridgeDefaults.CombatActionTimeout;
         var modeSelectionHandled = false;
+        var singleplayerClicked = false;
 
         while (DateTime.UtcNow < deadline)
         {
@@ -138,13 +140,23 @@ internal static partial class BridgeActionExecutor
                 return BuildResult(ActionIds.OpenCharacterSelect, true);
             }
 
-            // If we land on an intermediate screen that has selectable buttons (mode selection),
-            // auto-click Standard (first visible available button) and keep polling.
-            // Only fire when the screen is UNKNOWN to avoid accidentally clicking main-menu
-            // buttons during the brief transition frame before the mode screen appears.
-            if (!modeSelectionHandled && screenId == ScreenIds.Unknown && TryClickFirstVisibleButton(currentScreen))
+            // After the initial click, the mode selection submenu may appear within MAIN_MENU
+            // or as an UNKNOWN screen. Look for available buttons and click the first one
+            // (Standard Mode) if we haven't already handled the mode selection.
+            // Skip buttons that look like the main Singleplayer button to avoid re-clicking it.
+            if (!modeSelectionHandled)
             {
-                modeSelectionHandled = true;
+                // Wait at least one frame after the click before checking for mode buttons
+                if (!singleplayerClicked)
+                {
+                    singleplayerClicked = true;
+                    continue;
+                }
+
+                if (TryClickModeSelectionButton(currentScreen))
+                {
+                    modeSelectionHandled = true;
+                }
             }
         }
 
@@ -152,11 +164,11 @@ internal static partial class BridgeActionExecutor
     }
 
     /// <summary>
-    /// Finds and clicks the first visible available button on any screen.
-    /// Used to auto-advance past the run-mode selection screen (Standard / Daily / Custom)
-    /// that appears between the main menu and the actual character select.
+    /// Finds and clicks a button on the mode selection screen (Standard / Daily / Custom).
+    /// Returns true if a button was clicked, false otherwise.
+    /// Skips main menu navigation buttons to avoid re-clicking SingleplayerButton.
     /// </summary>
-    private static bool TryClickFirstVisibleButton(object? currentScreen)
+    private static bool TryClickModeSelectionButton(object? currentScreen)
     {
         if (currentScreen == null)
         {
@@ -168,11 +180,21 @@ internal static partial class BridgeActionExecutor
             return false;
         }
 
+        // Get the main menu to identify its navigation buttons
+        var mainMenu = NGame.Instance?.MainMenu;
+        var singleplayerButton = mainMenu != null ? GameUiAccess.GetMainMenuSingleplayerButton(mainMenu) : null;
+        var continueButton = mainMenu != null ? GameUiAccess.GetMainMenuContinueButton(mainMenu) : null;
+        var multiplayerButton = mainMenu != null ? GameUiAccess.GetMainMenuMultiplayerButton(mainMenu) : null;
+
         var candidates = ReflectionUtils.Descendants(root)
             .Where(candidate =>
                 GodotObject.IsInstanceValid(candidate) &&
                 ReflectionUtils.IsAvailable(candidate) &&
-                IsButtonLike(candidate))
+                IsButtonLike(candidate) &&
+                // Skip main menu navigation buttons
+                candidate != singleplayerButton &&
+                candidate != continueButton &&
+                candidate != multiplayerButton)
             .OrderBy(candidate => candidate.GetPath().ToString().Length)
             .ToList();
 
