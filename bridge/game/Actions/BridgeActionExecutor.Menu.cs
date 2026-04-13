@@ -120,11 +120,74 @@ internal static partial class BridgeActionExecutor
             mainMenu.SubmenuStack!.Push(characterSelectScreen);
         }
 
-        var stable = await WaitUntilAsync(
-            () => ScreenClassifier.Classify(ActiveScreenContext.Instance.GetCurrentScreen()) == ScreenIds.CharacterSelect,
-            BridgeDefaults.CombatActionTimeout);
+        // StS 2 shows a run-mode selection screen (Standard / Daily / Custom) after
+        // clicking SingleplayerButton. Detect it and auto-select Standard Mode (index 0)
+        // before the CharacterSelect screen appears.
+        var deadline = DateTime.UtcNow + BridgeDefaults.CombatActionTimeout;
+        var modeSelectionHandled = false;
 
-        return BuildResult(ActionIds.OpenCharacterSelect, stable);
+        while (DateTime.UtcNow < deadline)
+        {
+            await WaitForNextFrameAsync();
+
+            var currentScreen = ActiveScreenContext.Instance.GetCurrentScreen();
+            var screenId = ScreenClassifier.Classify(currentScreen);
+
+            if (screenId == ScreenIds.CharacterSelect)
+            {
+                return BuildResult(ActionIds.OpenCharacterSelect, true);
+            }
+
+            // If we land on an intermediate screen that has selectable buttons (mode selection),
+            // auto-click Standard (first visible available button) and keep polling.
+            // Only fire when the screen is UNKNOWN to avoid accidentally clicking main-menu
+            // buttons during the brief transition frame before the mode screen appears.
+            if (!modeSelectionHandled && screenId == ScreenIds.Unknown && TryClickFirstVisibleButton(currentScreen))
+            {
+                modeSelectionHandled = true;
+            }
+        }
+
+        throw StateUnavailable(ActionIds.OpenCharacterSelect, "CharacterSelect screen did not appear after opening character select.");
+    }
+
+    /// <summary>
+    /// Finds and clicks the first visible available button on any screen.
+    /// Used to auto-advance past the run-mode selection screen (Standard / Daily / Custom)
+    /// that appears between the main menu and the actual character select.
+    /// </summary>
+    private static bool TryClickFirstVisibleButton(object? currentScreen)
+    {
+        if (currentScreen == null)
+        {
+            return false;
+        }
+
+        if (currentScreen is not Node root)
+        {
+            return false;
+        }
+
+        var candidates = ReflectionUtils.Descendants(root)
+            .Where(candidate =>
+                GodotObject.IsInstanceValid(candidate) &&
+                ReflectionUtils.IsAvailable(candidate) &&
+                IsButtonLike(candidate))
+            .OrderBy(candidate => candidate.GetPath().ToString().Length)
+            .ToList();
+
+        if (candidates.Count == 0)
+        {
+            return false;
+        }
+
+        ClickControl(candidates[0]);
+        return true;
+    }
+
+    private static bool IsButtonLike(object candidate)
+    {
+        return candidate is Godot.BaseButton || candidate.GetType().Name.Contains("Button", StringComparison.OrdinalIgnoreCase);
     }
 
     private static async Task<BridgeActionResult> ExecuteSelectCharacterAsync(BridgeActionRequest request)
