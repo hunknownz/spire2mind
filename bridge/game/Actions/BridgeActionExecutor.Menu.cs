@@ -107,103 +107,49 @@ internal static partial class BridgeActionExecutor
         EnsureActionAvailable(ActionIds.OpenCharacterSelect);
 
         var mainMenu = RequireMainMenu(ActionIds.OpenCharacterSelect);
-        var button = GameUiAccess.GetMainMenuSingleplayerButton(mainMenu);
 
-        // Debug: log button state
-        MegaCrit.Sts2.Core.Logging.Log.Info($"[Spire2Mind] SingleplayerButton: found={button != null}, available={UiControlHelper.IsAvailable(button)}");
-
-        if (UiControlHelper.IsAvailable(button))
+        // Follow STS2-Agent's approach: directly push CharacterSelectScreen via SubmenuStack
+        // This bypasses the need to click the SingleplayerButton and handles mode selection automatically
+        var characterSelectScreen = mainMenu.SubmenuStack?.GetSubmenuType<NCharacterSelectScreen>();
+        if (characterSelectScreen == null)
         {
-            button!.ForceClick();
-            MegaCrit.Sts2.Core.Logging.Log.Info("[Spire2Mind] Clicked SingleplayerButton via ForceClick");
-        }
-        else
-        {
-            // Try fallback: find any button that looks like "singleplayer" by text
-            var fallbackButton = FindButtonByText(mainMenu, "singleplayer", "single", "solo", "单人");
-            if (fallbackButton != null && UiControlHelper.IsAvailable(fallbackButton))
-            {
-                ClickControl(fallbackButton);
-                MegaCrit.Sts2.Core.Logging.Log.Info("[Spire2Mind] Clicked fallback Singleplayer button");
-            }
-            else
-            {
-                var characterSelectScreen = mainMenu.SubmenuStack?.GetSubmenuType<NCharacterSelectScreen>();
-                if (characterSelectScreen != null)
-                {
-                    characterSelectScreen.InitializeSingleplayer();
-                    mainMenu.SubmenuStack!.Push(characterSelectScreen);
-                    MegaCrit.Sts2.Core.Logging.Log.Info("[Spire2Mind] Pushed CharacterSelectScreen via submenu");
-                }
-                else
-                {
-                    MegaCrit.Sts2.Core.Logging.Log.Warn($"[Spire2Mind] No way to open character select. Button={button != null}, Submenu={mainMenu.SubmenuStack != null}");
-                    throw StateUnavailable(ActionIds.OpenCharacterSelect, "Cannot open character select: button unavailable and no submenu.");
-                }
-            }
+            throw StateUnavailable(ActionIds.OpenCharacterSelect, "CharacterSelectScreen not found in SubmenuStack.");
         }
 
-        // StS 2 shows a run-mode selection screen (Standard / Daily / Custom) after
-        // clicking SingleplayerButton. The mode selection appears as a submenu within
-        // MAIN_MENU, not as a separate screen. We need to detect and auto-click Standard.
-        var deadline = DateTime.UtcNow + BridgeDefaults.CombatActionTimeout;
-        var modeSelectionHandled = false;
+        characterSelectScreen.InitializeSingleplayer();
+        mainMenu.SubmenuStack!.Push(characterSelectScreen);
 
+        // Wait for CharacterSelect screen to become active
+        var deadline = DateTime.UtcNow + BridgeDefaults.TransitionTimeout;
         while (DateTime.UtcNow < deadline)
         {
             await WaitForNextFrameAsync();
 
             var currentScreen = ActiveScreenContext.Instance.GetCurrentScreen();
-            var screenId = ScreenClassifier.Classify(currentScreen);
-
-            MegaCrit.Sts2.Core.Logging.Log.Info($"[Spire2Mind] Polling: screen={screenId}, modeHandled={modeSelectionHandled}");
-
-            if (screenId == ScreenIds.CharacterSelect)
+            if (currentScreen is NCharacterSelectScreen)
             {
-                MegaCrit.Sts2.Core.Logging.Log.Info("[Spire2Mind] CharacterSelect reached!");
                 return BuildResult(ActionIds.OpenCharacterSelect, true);
             }
 
-            // Try to click mode selection button
-            if (!modeSelectionHandled)
+            // Also check via classifier for the CHARACTER_SELECT screen ID
+            var screenId = ScreenClassifier.Classify(currentScreen);
+            if (screenId == ScreenIds.CharacterSelect)
             {
-                // Debug: log what buttons we can see
-                if (currentScreen is Node screenNode)
-                {
-                    var allButtons = ReflectionUtils.Descendants(screenNode)
-                        .Where(n => GodotObject.IsInstanceValid(n) && IsButtonLike(n))
-                        .Take(10)
-                        .Select(n => new { name = n.Name.ToString(), available = ReflectionUtils.IsAvailable(n) })
-                        .ToList();
-                    MegaCrit.Sts2.Core.Logging.Log.Info($"[Spire2Mind] Found {allButtons.Count} buttons on {screenId}: {string.Join(", ", allButtons.Select(b => $"{b.name}(av={b.available})"))}");
-                }
-
-                if (TryClickModeSelectionButton(currentScreen, mainMenu))
-                {
-                    modeSelectionHandled = true;
-                    MegaCrit.Sts2.Core.Logging.Log.Info("[Spire2Mind] Clicked mode selection button");
-                }
-                else
-                {
-                    // If TryClickModeSelectionButton failed, try clicking ANY available button
-                    // This is a fallback for the mode selection screen
-                    if (screenId == ScreenIds.Unknown && currentScreen is Node unknownScreen)
-                    {
-                        var anyButton = ReflectionUtils.Descendants(unknownScreen)
-                            .FirstOrDefault(n => GodotObject.IsInstanceValid(n) && ReflectionUtils.IsAvailable(n) && IsButtonLike(n));
-                        if (anyButton != null)
-                        {
-                            ClickControl(anyButton);
-                            modeSelectionHandled = true;
-                            MegaCrit.Sts2.Core.Logging.Log.Info($"[Spire2Mind] Clicked fallback button on UNKNOWN: {anyButton.Name}");
-                        }
-                    }
-                }
+                return BuildResult(ActionIds.OpenCharacterSelect, true);
             }
+
+            // If we see UNKNOWN or any other screen, try to proceed anyway
+            // (the screen might be transitioning or in a mode-selection state)
         }
 
-        MegaCrit.Sts2.Core.Logging.Log.Warn($"[Spire2Mind] Timeout: CharacterSelect never appeared. Final screen={ScreenClassifier.Classify(ActiveScreenContext.Instance.GetCurrentScreen())}");
-        throw StateUnavailable(ActionIds.OpenCharacterSelect, "CharacterSelect screen did not appear after opening character select.");
+        // Final check
+        var finalScreen = ActiveScreenContext.Instance.GetCurrentScreen();
+        if (finalScreen is NCharacterSelectScreen || ScreenClassifier.Classify(finalScreen) == ScreenIds.CharacterSelect)
+        {
+            return BuildResult(ActionIds.OpenCharacterSelect, true);
+        }
+
+        throw StateUnavailable(ActionIds.OpenCharacterSelect, $"CharacterSelect screen did not appear. Current screen: {ScreenClassifier.Classify(ActiveScreenContext.Instance.GetCurrentScreen())}");
     }
 
     /// <summary>
