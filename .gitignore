@@ -5,6 +5,7 @@ bridge/build/
 spire2mind.exe
 /spire2mind
 /agent-run.log
+/.env.local
 .cache/
 research/airi/
 research/MeloTTS/

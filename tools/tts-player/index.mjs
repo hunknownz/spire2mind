@@ -17,6 +17,8 @@ const latestPath = path.join(ttsRoot, "latest.json");
 const audioDir = path.join(ttsRoot, "audio");
 const logPath = path.join(ttsRoot, "player.log");
 const playScript = path.join(repoRoot, "scripts", "tts-play.ps1");
+const IS_WINDOWS = os.platform() === "win32";
+const IS_MACOS = os.platform() === "darwin";
 const powershellExe =
   process.env.ComSpec?.toLowerCase().includes("cmd.exe")
     ? "powershell.exe"
@@ -156,11 +158,13 @@ async function startIntent(intent) {
   try {
     let child = null;
     if (config.dryRun) {
-      child = spawn(
-        powershellExe,
-        ["-NoProfile", "-Command", "Start-Sleep -Milliseconds 200"],
-        { stdio: "ignore", windowsHide: true }
-      );
+      child = IS_WINDOWS
+        ? spawn(
+            powershellExe,
+            ["-NoProfile", "-Command", "Start-Sleep -Milliseconds 200"],
+            { stdio: "ignore", windowsHide: true }
+          )
+        : spawn("sleep", ["0.2"], { stdio: "ignore" });
     } else {
       child = await spawnSpeechPlayback(intent);
     }
@@ -193,16 +197,7 @@ async function spawnSpeechPlayback(intent) {
   if (shouldUseAudioSpeechProvider()) {
     try {
       const wavPath = await synthesizeToAudio(intent);
-      return spawnPowerShell([
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        playScript,
-        "-Mode",
-        "wav",
-        "-WavPath",
-        wavPath,
-      ]);
+      return spawnWavPlayback(wavPath);
     } catch (error) {
       log("warn", "network tts failed, falling back", {
         provider: config.provider,
@@ -210,6 +205,12 @@ async function spawnSpeechPlayback(intent) {
         error: error?.message || String(error),
       });
     }
+  }
+
+  if (!IS_WINDOWS) {
+    throw new Error(
+      `no wav-based TTS provider configured and local speech synthesis is only supported on Windows (platform=${os.platform()})`
+    );
   }
 
   return spawnPowerShell([
@@ -226,6 +227,32 @@ async function spawnSpeechPlayback(intent) {
     "-Rate",
     String(config.speakRate),
   ]);
+}
+
+function spawnWavPlayback(wavPath) {
+  if (IS_WINDOWS) {
+    return spawnPowerShell([
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      playScript,
+      "-Mode",
+      "wav",
+      "-WavPath",
+      wavPath,
+    ]);
+  }
+  if (IS_MACOS) {
+    return spawn("afplay", [wavPath], { stdio: "ignore" });
+  }
+  for (const cmd of ["paplay", "aplay"]) {
+    try {
+      return spawn(cmd, [wavPath], { stdio: "ignore" });
+    } catch {
+      // try next
+    }
+  }
+  throw new Error(`no wav playback command available on platform ${os.platform()}`);
 }
 
 async function synthesizeToAudio(intent) {
