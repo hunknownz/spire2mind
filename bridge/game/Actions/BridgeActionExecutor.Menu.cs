@@ -108,17 +108,39 @@ internal static partial class BridgeActionExecutor
 
         var mainMenu = RequireMainMenu(ActionIds.OpenCharacterSelect);
         var button = GameUiAccess.GetMainMenuSingleplayerButton(mainMenu);
+
+        // Debug: log button state
+        MegaCrit.Sts2.Core.Logging.Log.Info($"[Spire2Mind] SingleplayerButton: found={button != null}, available={UiControlHelper.IsAvailable(button)}");
+
         if (UiControlHelper.IsAvailable(button))
         {
             button!.ForceClick();
+            MegaCrit.Sts2.Core.Logging.Log.Info("[Spire2Mind] Clicked SingleplayerButton via ForceClick");
         }
         else
         {
-            var characterSelectScreen = mainMenu.SubmenuStack?.GetSubmenuType<NCharacterSelectScreen>()
-                ?? throw StateUnavailable(ActionIds.OpenCharacterSelect, "Character select submenu is unavailable.");
-
-            characterSelectScreen.InitializeSingleplayer();
-            mainMenu.SubmenuStack!.Push(characterSelectScreen);
+            // Try fallback: find any button that looks like "singleplayer" by text
+            var fallbackButton = FindButtonByText(mainMenu, "singleplayer", "single", "solo", "单人");
+            if (fallbackButton != null && UiControlHelper.IsAvailable(fallbackButton))
+            {
+                ClickControl(fallbackButton);
+                MegaCrit.Sts2.Core.Logging.Log.Info("[Spire2Mind] Clicked fallback Singleplayer button");
+            }
+            else
+            {
+                var characterSelectScreen = mainMenu.SubmenuStack?.GetSubmenuType<NCharacterSelectScreen>();
+                if (characterSelectScreen != null)
+                {
+                    characterSelectScreen.InitializeSingleplayer();
+                    mainMenu.SubmenuStack!.Push(characterSelectScreen);
+                    MegaCrit.Sts2.Core.Logging.Log.Info("[Spire2Mind] Pushed CharacterSelectScreen via submenu");
+                }
+                else
+                {
+                    MegaCrit.Sts2.Core.Logging.Log.Warn($"[Spire2Mind] No way to open character select. Button={button != null}, Submenu={mainMenu.SubmenuStack != null}");
+                    throw StateUnavailable(ActionIds.OpenCharacterSelect, "Cannot open character select: button unavailable and no submenu.");
+                }
+            }
         }
 
         // StS 2 shows a run-mode selection screen (Standard / Daily / Custom) after
@@ -126,7 +148,6 @@ internal static partial class BridgeActionExecutor
         // MAIN_MENU, not as a separate screen. We need to detect and auto-click Standard.
         var deadline = DateTime.UtcNow + BridgeDefaults.CombatActionTimeout;
         var modeSelectionHandled = false;
-        var singleplayerClicked = false;
 
         while (DateTime.UtcNow < deadline)
         {
@@ -135,32 +156,52 @@ internal static partial class BridgeActionExecutor
             var currentScreen = ActiveScreenContext.Instance.GetCurrentScreen();
             var screenId = ScreenClassifier.Classify(currentScreen);
 
+            MegaCrit.Sts2.Core.Logging.Log.Info($"[Spire2Mind] Polling: screen={screenId}, modeHandled={modeSelectionHandled}");
+
             if (screenId == ScreenIds.CharacterSelect)
             {
+                MegaCrit.Sts2.Core.Logging.Log.Info("[Spire2Mind] CharacterSelect reached!");
                 return BuildResult(ActionIds.OpenCharacterSelect, true);
             }
 
-            // After the initial click, the mode selection submenu may appear within MAIN_MENU
-            // or as an UNKNOWN screen. Look for available buttons and click the first one
-            // (Standard Mode) if we haven't already handled the mode selection.
-            // Skip buttons that look like the main Singleplayer button to avoid re-clicking it.
+            // Try to click mode selection button
             if (!modeSelectionHandled)
             {
-                // Wait at least one frame after the click before checking for mode buttons
-                if (!singleplayerClicked)
-                {
-                    singleplayerClicked = true;
-                    continue;
-                }
-
-                if (TryClickModeSelectionButton(currentScreen))
+                if (TryClickModeSelectionButton(currentScreen, mainMenu))
                 {
                     modeSelectionHandled = true;
+                    MegaCrit.Sts2.Core.Logging.Log.Info("[Spire2Mind] Clicked mode selection button");
                 }
             }
         }
 
+        MegaCrit.Sts2.Core.Logging.Log.Warn($"[Spire2Mind] Timeout: CharacterSelect never appeared. Final screen={ScreenClassifier.Classify(ActiveScreenContext.Instance.GetCurrentScreen())}");
         throw StateUnavailable(ActionIds.OpenCharacterSelect, "CharacterSelect screen did not appear after opening character select.");
+    }
+
+    /// <summary>
+    /// Find a button by its displayed text (case-insensitive partial match).
+    /// </summary>
+    private static Node? FindButtonByText(Node parent, params string[] keywords)
+    {
+        var candidates = ReflectionUtils.Descendants(parent)
+            .Where(node =>
+                GodotObject.IsInstanceValid(node) &&
+                IsButtonLike(node))
+            .ToList();
+
+        foreach (var candidate in candidates)
+        {
+            var text = ReflectionUtils.LocalizedText(candidate) ?? "";
+            var name = candidate.Name.ToString();
+            var combined = $"{text} {name}".ToLowerInvariant();
+            if (keywords.Any(k => combined.Contains(k.ToLowerInvariant())))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -168,7 +209,7 @@ internal static partial class BridgeActionExecutor
     /// Returns true if a button was clicked, false otherwise.
     /// Skips main menu navigation buttons to avoid re-clicking SingleplayerButton.
     /// </summary>
-    private static bool TryClickModeSelectionButton(object? currentScreen)
+    private static bool TryClickModeSelectionButton(object? currentScreen, NMainMenu? mainMenu)
     {
         if (currentScreen == null)
         {
@@ -181,7 +222,6 @@ internal static partial class BridgeActionExecutor
         }
 
         // Get the main menu to identify its navigation buttons
-        var mainMenu = NGame.Instance?.MainMenu;
         var singleplayerButton = mainMenu != null ? GameUiAccess.GetMainMenuSingleplayerButton(mainMenu) : null;
         var continueButton = mainMenu != null ? GameUiAccess.GetMainMenuContinueButton(mainMenu) : null;
         var multiplayerButton = mainMenu != null ? GameUiAccess.GetMainMenuMultiplayerButton(mainMenu) : null;
