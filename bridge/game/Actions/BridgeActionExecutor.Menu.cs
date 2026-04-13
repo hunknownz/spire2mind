@@ -167,10 +167,37 @@ internal static partial class BridgeActionExecutor
             // Try to click mode selection button
             if (!modeSelectionHandled)
             {
+                // Debug: log what buttons we can see
+                if (currentScreen is Node screenNode)
+                {
+                    var allButtons = ReflectionUtils.Descendants(screenNode)
+                        .Where(n => GodotObject.IsInstanceValid(n) && IsButtonLike(n))
+                        .Take(10)
+                        .Select(n => new { name = n.Name.ToString(), available = ReflectionUtils.IsAvailable(n) })
+                        .ToList();
+                    MegaCrit.Sts2.Core.Logging.Log.Info($"[Spire2Mind] Found {allButtons.Count} buttons on {screenId}: {string.Join(", ", allButtons.Select(b => $"{b.name}(av={b.available})"))}");
+                }
+
                 if (TryClickModeSelectionButton(currentScreen, mainMenu))
                 {
                     modeSelectionHandled = true;
                     MegaCrit.Sts2.Core.Logging.Log.Info("[Spire2Mind] Clicked mode selection button");
+                }
+                else
+                {
+                    // If TryClickModeSelectionButton failed, try clicking ANY available button
+                    // This is a fallback for the mode selection screen
+                    if (screenId == ScreenIds.Unknown && currentScreen is Node unknownScreen)
+                    {
+                        var anyButton = ReflectionUtils.Descendants(unknownScreen)
+                            .FirstOrDefault(n => GodotObject.IsInstanceValid(n) && ReflectionUtils.IsAvailable(n) && IsButtonLike(n));
+                        if (anyButton != null)
+                        {
+                            ClickControl(anyButton);
+                            modeSelectionHandled = true;
+                            MegaCrit.Sts2.Core.Logging.Log.Info($"[Spire2Mind] Clicked fallback button on UNKNOWN: {anyButton.Name}");
+                        }
+                    }
                 }
             }
         }
