@@ -11,3 +11,6 @@
 [submodule "research/bubbletea"]
 	path = research/bubbletea
 	url = https://github.com/charmbracelet/bubbletea
+[submodule "combat"]
+	path = combat
+	url = git@github.com:hunknownz/spire2mind-combat.git
