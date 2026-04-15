@@ -10,6 +10,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/joho/godotenv"
 	agentruntime "spire2mind/internal/agent"
 	"spire2mind/internal/analyst"
 	"spire2mind/internal/config"
@@ -17,6 +18,9 @@ import (
 )
 
 func main() {
+	// Load .env.local if it exists (silently ignore if not found)
+	_ = godotenv.Overload(".env.local")
+
 	ctx := context.Background()
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -70,6 +74,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "run tui: %v\n", err)
 			os.Exit(1)
 		}
+	case "evolve":
+		if err := runEvolve(ctx, cfg, args[1:]); err != nil {
+			fmt.Fprintf(os.Stderr, "evolve failed: %v\n", err)
+			os.Exit(1)
+		}
 	default:
 		usage()
 		os.Exit(1)
@@ -85,6 +94,8 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "                                 Play the game with AI agent")
 	fmt.Fprintln(os.Stderr, "  analyze <target>               Offline knowledge analysis")
 	fmt.Fprintln(os.Stderr, "    targets: cards, enemies, archetypes, all")
+	fmt.Fprintln(os.Stderr, "  evolve [--cycles N] [--games N] [--baseline N] [--checkpoint N]")
+	fmt.Fprintln(os.Stderr, "                                 Run self-evolution loop")
 }
 
 func runAnalyze(ctx context.Context, cfg config.Config, args []string) error {
@@ -175,4 +186,100 @@ func parsePlayArgs(args []string) (bool, int, int, error) {
 	}
 
 	return headless, attempts, maxCycles, nil
+}
+
+func parseEvolveArgs(args []string) (cycles, gamesPerExp, baselineWindow, checkpointEvery int, err error) {
+	cycles = 5
+	gamesPerExp = 10
+	baselineWindow = 10
+	checkpointEvery = 10
+
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--cycles":
+			if i+1 >= len(args) {
+				return 0, 0, 0, 0, fmt.Errorf("--cycles requires a value")
+			}
+			cycles, err = strconv.Atoi(args[i+1])
+			if err != nil || cycles <= 0 {
+				return 0, 0, 0, 0, fmt.Errorf("invalid --cycles value %q", args[i+1])
+			}
+			i++
+		case "--games":
+			if i+1 >= len(args) {
+				return 0, 0, 0, 0, fmt.Errorf("--games requires a value")
+			}
+			gamesPerExp, err = strconv.Atoi(args[i+1])
+			if err != nil || gamesPerExp <= 0 {
+				return 0, 0, 0, 0, fmt.Errorf("invalid --games value %q", args[i+1])
+			}
+			i++
+		case "--baseline":
+			if i+1 >= len(args) {
+				return 0, 0, 0, 0, fmt.Errorf("--baseline requires a value")
+			}
+			baselineWindow, err = strconv.Atoi(args[i+1])
+			if err != nil || baselineWindow <= 0 {
+				return 0, 0, 0, 0, fmt.Errorf("invalid --baseline value %q", args[i+1])
+			}
+			i++
+		case "--checkpoint":
+			if i+1 >= len(args) {
+				return 0, 0, 0, 0, fmt.Errorf("--checkpoint requires a value")
+			}
+			checkpointEvery, err = strconv.Atoi(args[i+1])
+			if err != nil || checkpointEvery <= 0 {
+				return 0, 0, 0, 0, fmt.Errorf("invalid --checkpoint value %q", args[i+1])
+			}
+			i++
+		default:
+			return 0, 0, 0, 0, fmt.Errorf("unknown argument %q", args[i])
+		}
+	}
+
+	return cycles, gamesPerExp, baselineWindow, checkpointEvery, nil
+}
+
+func runEvolve(ctx context.Context, cfg config.Config, args []string) error {
+	cycles, gamesPerExp, baselineWindow, checkpointEvery, err := parseEvolveArgs(args)
+	if err != nil {
+		return fmt.Errorf("parse evolve args: %w", err)
+	}
+
+	fmt.Printf("Spire2Mind Self-Evolution\n")
+	fmt.Printf("  Cycles: %d | Games/experiment: %d | Baseline window: %d | Checkpoint every: %d\n",
+		cycles, gamesPerExp, baselineWindow, checkpointEvery)
+
+	evCfg := agentruntime.DefaultEvolutionConfig(cfg.RepoRoot)
+	evCfg.Cycles = cycles
+	evCfg.GamesPerExperiment = gamesPerExp
+	evCfg.BaselineWindow = baselineWindow
+	evCfg.CheckpointEvery = checkpointEvery
+
+	// Initialize LLM provider for evolution edits
+	if cfg.HasModelConfig() {
+		llmProvider, err := analyst.NewLLMProvider(cfg)
+		if err != nil {
+			fmt.Printf("  Warning: LLM provider init failed: %v (using template-based edits)\n", err)
+		} else {
+			evCfg.LLMProvider = llmProvider
+			fmt.Printf("  LLM Provider: %s\n", cfg.Model)
+		}
+	} else {
+		fmt.Printf("  No LLM configured (using template-based edits)\n")
+	}
+
+	loop, err := agentruntime.NewEvolutionLoop(evCfg)
+	if err != nil {
+		return fmt.Errorf("create evolution loop: %w", err)
+	}
+	defer loop.Close()
+	loop.SetStdout(os.Stdout)
+
+	binary, err := agentruntime.BuildEvolverBinary(cfg.RepoRoot)
+	if err != nil {
+		return fmt.Errorf("find binary: %w", err)
+	}
+
+	return loop.Run(ctx, cycles, binary)
 }

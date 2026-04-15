@@ -11,7 +11,7 @@ import (
 )
 
 func BuildCyclePrompt(state *game.StateSnapshot, todo *TodoManager, skills *SkillLibrary, compact *CompactMemory, planner *CombatPlan, language i18n.Language) string {
-	return NewPromptAssemblyPipeline().Build(PromptModeCycle, state, todo, skills, compact, planner, nil, language).Text
+	return NewPromptAssemblyPipeline().Build(PromptModeCycle, state, todo, skills, compact, planner, nil, language, nil).Text
 }
 
 func RunHeadless(ctx context.Context, cfg config.Config, output io.Writer) error {

@@ -66,9 +66,8 @@ type RecoveryHotspot struct {
 	Score        float64 `json:"score,omitempty"`
 }
 
-func NewGuidebookStore(artifactsRoot string) (*GuidebookStore, error) {
-	scratchRoot := filepath.Dir(filepath.Clean(artifactsRoot))
-	root := filepath.Join(scratchRoot, "guidebook")
+func NewGuidebookStore(repoRoot string) (*GuidebookStore, error) {
+	root := filepath.Join(repoRoot, "combat", "knowledge", "guidebook")
 	if err := os.MkdirAll(root, 0o755); err != nil {
 		return nil, err
 	}
@@ -131,17 +130,39 @@ func (g *GuidebookStore) Refresh(artifactsRoot string, excludeDir string, langua
 		return nil, err
 	}
 
-	if err := writeUTF8TextFile(g.guidebookPath, renderGuidebookSnapshot(snapshot, language)); err != nil {
+	if err := writeGuidebookFilePreservingEvolutionRules(g.guidebookPath, renderGuidebookSnapshot(snapshot, language)); err != nil {
 		return nil, err
 	}
-	if err := writeUTF8TextFile(g.combatPlaybook, renderCombatPlaybookSnapshot(snapshot, language)); err != nil {
+	if err := writeGuidebookFilePreservingEvolutionRules(g.combatPlaybook, renderCombatPlaybookSnapshot(snapshot, language)); err != nil {
 		return nil, err
 	}
-	if err := writeUTF8TextFile(g.eventPlaybook, renderEventPlaybookSnapshot(snapshot, language)); err != nil {
+	if err := writeGuidebookFilePreservingEvolutionRules(g.eventPlaybook, renderEventPlaybookSnapshot(snapshot, language)); err != nil {
 		return nil, err
 	}
 
 	return snapshot, nil
+}
+
+// writeGuidebookFilePreservingEvolutionRules writes newContent to path,
+// but preserves any existing "## Evolution Rules" section from the current file.
+// This ensures that evolution-added rules survive GuidebookStore.Refresh() calls.
+func writeGuidebookFilePreservingEvolutionRules(path, newContent string) error {
+	existing, _ := os.ReadFile(path)
+	if rules := extractEvolutionRules(string(existing)); rules != "" {
+		newContent += rules
+	}
+	return writeUTF8TextFile(path, newContent)
+}
+
+// extractEvolutionRules extracts the "## Evolution Rules" section from existing content.
+// Returns "" if no such section exists.
+func extractEvolutionRules(content string) string {
+	const marker = "\n## Evolution Rules\n"
+	idx := strings.Index(content, marker)
+	if idx < 0 {
+		return ""
+	}
+	return content[idx:]
 }
 
 func buildGuidebookSnapshot(artifactsRoot string, excludeDir string) (*GuidebookSnapshot, error) {

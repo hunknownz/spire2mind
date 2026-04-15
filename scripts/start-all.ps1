@@ -12,13 +12,53 @@ param(
     [string]$TTSProfile = "melotts-default",
     # Agent model preset: qwen35a3b-coding-nvfp4, qwen35a3b, qwen8b, qwen4b, claude-cli
     [string]$AgentPreset = "qwen35a3b-coding-nvfp4",
-    [string]$BaseUrl = "http://192.168.3.23:11434",
+    [string]$BaseUrl = "",
     [string]$ReplaceExisting = "1"
 )
 
 $ErrorActionPreference = "Stop"
 $scriptRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $repoRoot = Split-Path -Parent $scriptRoot
+
+function Import-EnvLocalFile {
+    param(
+        [string]$FilePath
+    )
+
+    if (-not (Test-Path $FilePath)) {
+        return
+    }
+
+    foreach ($line in Get-Content -Path $FilePath) {
+        $trimmed = $line.Trim()
+        if ([string]::IsNullOrWhiteSpace($trimmed) -or $trimmed.StartsWith("#")) {
+            continue
+        }
+
+        $separatorIndex = $trimmed.IndexOf("=")
+        if ($separatorIndex -le 0) {
+            continue
+        }
+
+        $name = $trimmed.Substring(0, $separatorIndex).Trim()
+        if ([string]::IsNullOrWhiteSpace($name)) {
+            continue
+        }
+
+        $value = $trimmed.Substring($separatorIndex + 1)
+        if ($value.Length -ge 2) {
+            $firstChar = $value[0]
+            $lastChar = $value[$value.Length - 1]
+            if (($firstChar -eq '"' -and $lastChar -eq '"') -or ($firstChar -eq "'" -and $lastChar -eq "'")) {
+                $value = $value.Substring(1, $value.Length - 2)
+            }
+        }
+
+        [Environment]::SetEnvironmentVariable($name, $value, "Process")
+    }
+}
+
+Import-EnvLocalFile -FilePath (Join-Path $repoRoot ".env.local")
 
 $ttsUtilsPath = Join-Path $scriptRoot "tts-profile-utils.ps1"
 if (Test-Path $ttsUtilsPath) {

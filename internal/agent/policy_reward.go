@@ -96,79 +96,140 @@ func scoreRewardCardChoice(state *game.StateSnapshot, card map[string]any) float
 		activeKnowledge.EnsureLoaded()
 		if analysis, ok := activeKnowledge.cards[cardID]; ok {
 			// Use knowledge-base score as primary (scale 1-10 → game score range)
-			score := analysis.Score * 1.5 // Scale to ~0-15 range
+			multiplier := 1.5
+			if globalRewardWeights != nil {
+				multiplier = globalRewardWeights.GetKnowledgeScoreMultiplier()
+			}
+			score := analysis.Score * multiplier
 
 			// Apply situational modifiers
 			floor := runFloor(state)
 			hp := hpRatio(state)
 
-			// Timing modifier
-			switch analysis.Timing {
-			case "early":
-				if floor <= 5 {
-					score += 2.0
-				} else if floor >= 12 {
+			// Timing modifiers from weights
+			if globalRewardWeights != nil {
+				earlyThresh, lateThresh, earlyEarlyBonus, earlyLatePenalty, lateLateBonus, lateEarlyPenalty :=
+					globalRewardWeights.GetTimingModifiers()
+
+				switch analysis.Timing {
+				case "early":
+					if float64(floor) <= earlyThresh {
+						score += earlyEarlyBonus
+					} else if float64(floor) >= lateThresh+2 {
+						score += earlyLatePenalty
+					}
+				case "late":
+					if float64(floor) >= lateThresh {
+						score += lateLateBonus
+					} else if float64(floor) <= earlyThresh {
+						score += lateEarlyPenalty
+					}
+				}
+
+				// HP-based modifiers from weights
+				lowHPThresh, defenseBonus, scalingPenalty := globalRewardWeights.GetDefenseModifiers()
+				if hp < lowHPThresh && (analysis.Role == "defense" || analysis.Role == "utility") {
+					score += defenseBonus
+				}
+				if hp < lowHPThresh && analysis.Tier == "S" && analysis.Role == "scaling" {
+					score += scalingPenalty
+				}
+
+				// Basic card penalty from weights
+				if containsAny(cardID, "DEFEND", "STRIKE") {
+					score += globalRewardWeights.GetBasicCardPenalty()
+				}
+
+				// Card-specific bonuses from weights
+				score += globalRewardWeights.GetCardSpecificBonus(cardID)
+			} else {
+				// Fallback to hardcoded values if weights not loaded
+				switch analysis.Timing {
+				case "early":
+					if floor <= 5 {
+						score += 2.0
+					} else if floor >= 12 {
+						score -= 2.0
+					}
+				case "late":
+					if floor >= 10 {
+						score += 2.0
+					} else if floor <= 5 {
+						score -= 3.0
+					}
+				}
+
+				if hp < 0.50 && (analysis.Role == "defense" || analysis.Role == "utility") {
+					score += 3.0
+				}
+				if hp < 0.50 && analysis.Tier == "S" && analysis.Role == "scaling" {
 					score -= 2.0
 				}
-			case "late":
-				if floor >= 10 {
-					score += 2.0
-				} else if floor <= 5 {
-					score -= 3.0
+
+				if containsAny(cardID, "DEFEND", "STRIKE") {
+					score -= 2.0
 				}
-			}
-
-			// HP-based modifier for defensive cards
-			if hp < 0.50 && (analysis.Role == "defense" || analysis.Role == "utility") {
-				score += 3.0
-			}
-			if hp < 0.50 && analysis.Tier == "S" && analysis.Role == "scaling" {
-				score -= 2.0 // Don't pick slow scaling when dying
-			}
-
-			// Basic card penalty
-			if containsAny(cardID, "DEFEND", "STRIKE") {
-				score -= 2.0
 			}
 
 			return score
 		}
 	}
 
-	// Fallback: original hardcoded scoring
+	// Fallback: original hardcoded scoring with weights
 	score := estimateRewardCardDepth(state, card).Score
 	floor := runFloor(state)
 	hp := hpRatio(state)
 
-	if floor <= 6 {
-		score += earlyActCardBonus(cardID, name)
-	}
-	if hp < 0.55 {
-		score += survivalCardBonus(cardID, name)
-	}
-	if floor <= 12 {
-		score += immediatePowerBonus(cardID, name)
+	if globalRewardWeights != nil {
+		// Early act bonuses from weights
+		if float64(floor) <= globalRewardWeights.GetEarlyActFloorThreshold() {
+			score += globalRewardWeights.GetEarlyActBonus(cardID, name)
+		}
+		// Survival bonuses from weights
+		if hp < globalRewardWeights.GetSurvivalHPThreshold() {
+			score += globalRewardWeights.GetSurvivalBonus(cardID, name)
+		}
+		// Immediate power bonuses from weights
+		if float64(floor) <= globalRewardWeights.GetImmediatePowerFloorThreshold() {
+			score += globalRewardWeights.GetImmediatePowerBonus(cardID, name)
+		}
+	} else {
+		// Fallback to hardcoded values
+		if floor <= 6 {
+			score += earlyActCardBonus(cardID, name)
+		}
+		if hp < 0.55 {
+			score += survivalCardBonus(cardID, name)
+		}
+		if floor <= 12 {
+			score += immediatePowerBonus(cardID, name)
+		}
 	}
 
-	switch {
-	case containsAny(cardID, "SHRUG_IT_OFF", "IRON_WAVE", "POMMEL_STRIKE", "THUNDERCLAP", "SWORD_BOOMERANG", "CLOTHESLINE", "HEADBUTT", "TRUE_GRIT"):
-		score += 5.0
-	case containsAny(cardID, "ARMAMENTS", "BATTLE_TRANCE", "RAGE", "SPOT_WEAKNESS"):
-		score += 1.5
-	}
+	// Card-specific bonuses from weights (fallback to hardcoded if not loaded)
+	if globalRewardWeights != nil {
+		score += globalRewardWeights.GetCardSpecificBonus(cardID)
+	} else {
+		switch {
+		case containsAny(cardID, "SHRUG_IT_OFF", "IRON_WAVE", "POMMEL_STRIKE", "THUNDERCLAP", "SWORD_BOOMERANG", "CLOTHESLINE", "HEADBUTT", "TRUE_GRIT"):
+			score += 5.0
+		case containsAny(cardID, "ARMAMENTS", "BATTLE_TRANCE", "RAGE", "SPOT_WEAKNESS"):
+			score += 1.5
+		}
 
-	switch {
-	case containsAny(cardID, "LIMIT_BREAK", "BARRICADE", "JUGGERNAUT", "FIRE_BREATHING", "SENTRY"):
-		score -= 5.0
-	case containsAny(cardID, "PERFECTED_STRIKE", "SEARING_BLOW"):
-		score -= 3.0
-	}
+		switch {
+		case containsAny(cardID, "LIMIT_BREAK", "BARRICADE", "JUGGERNAUT", "FIRE_BREATHING", "SENTRY"):
+			score -= 5.0
+		case containsAny(cardID, "PERFECTED_STRIKE", "SEARING_BLOW"):
+			score -= 3.0
+		}
 
-	if containsAny(cardID, "DEFEND", "STRIKE") {
-		score -= 1.0
-	}
-	if hp < 0.50 && containsAny(cardID, "LIMIT_BREAK", "BARRICADE", "JUGGERNAUT", "DEMON_FORM") {
-		score -= 3.5
+		if containsAny(cardID, "DEFEND", "STRIKE") {
+			score -= 1.0
+		}
+		if hp < 0.50 && containsAny(cardID, "LIMIT_BREAK", "BARRICADE", "JUGGERNAUT", "DEMON_FORM") {
+			score -= 3.5
+		}
 	}
 
 	return score

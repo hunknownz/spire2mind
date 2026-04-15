@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"spire2mind/internal/analyst"
 	"spire2mind/internal/config"
 	"spire2mind/internal/game"
 	"spire2mind/internal/i18n"
@@ -59,15 +60,16 @@ type SessionEvent struct {
 }
 
 type Session struct {
-	cfg      config.Config
-	runtime  *Runtime
-	store    *RunStore
-	guide    *GuidebookStore
-	catalog  *codexCatalog
-	planner  CombatPlanner
-	resolver *ActionResolutionPipeline
-	gate     *StableStateGate
-	streamer *StreamerDirector
+	cfg         config.Config
+	runtime     *Runtime
+	store       *RunStore
+	guide       *GuidebookStore
+	catalog     *codexCatalog
+	planner     CombatPlanner
+	resolver    *ActionResolutionPipeline
+	gate        *StableStateGate
+	streamer    *StreamerDirector
+	llmProvider analyst.LLMProvider
 
 	events chan SessionEvent
 	errs   chan error
@@ -96,6 +98,7 @@ type Session struct {
 	providerState          string
 	knowledge              *KnowledgeRetriever
 	promptBuilder          *PromptAssemblyPipeline
+	playerSkill            *PlayerSkillStore
 	gamePrefsPath          string
 	gameFastMode           string
 	gameFastModeChanged    bool
@@ -129,7 +132,7 @@ func StartSession(ctx context.Context, cfg config.Config) (*Session, error) {
 		return nil, err
 	}
 
-	guide, err := NewGuidebookStore(cfg.ArtifactsDir)
+	guide, err := NewGuidebookStore(cfg.RepoRoot)
 	if err != nil {
 		_ = store.Close()
 		runtime.Close()
@@ -142,6 +145,19 @@ func StartSession(ctx context.Context, cfg config.Config) (*Session, error) {
 		return nil, err
 	}
 
+
+		llmProvider, _ := analyst.NewLLMProvider(cfg)
+
+	// Load player skill store (non-fatal)
+	playerSkill, _ := NewPlayerSkillStore(cfg.RepoRoot)
+
+	// Load reward weights (non-fatal)
+	rewardWeightsPath := filepath.Join(cfg.RepoRoot, "combat", "knowledge", "reward-weights.json")
+	rewardWeights, _ := LoadRewardWeights(rewardWeightsPath)
+	if rewardWeights != nil {
+		globalRewardWeights = rewardWeights
+	}
+
 	session := &Session{
 		cfg:                  cfg,
 		runtime:              runtime,
@@ -152,8 +168,10 @@ func StartSession(ctx context.Context, cfg config.Config) (*Session, error) {
 		resolver:             NewActionResolutionPipeline(),
 		gate:                 NewStableStateGate(runtime.Client),
 		streamer:             NewStreamerDirector(cfg, runtime),
+		llmProvider:          llmProvider,
 		knowledge:            NewKnowledgeRetriever(cfg.RepoRoot),
 		promptBuilder:        NewPromptAssemblyPipeline(),
+		playerSkill:          playerSkill,
 		events:               make(chan SessionEvent, 128),
 		errs:                 make(chan error, 1),
 		todo:                 NewTodoManager(),
@@ -438,7 +456,7 @@ func (s *Session) loop(ctx context.Context) error {
 				Kind:    SessionEventStop,
 				Cycle:   s.cycle,
 				Attempt: s.currentAttemptForState(state),
-				Message: s.say("run reached GAME_OVER", "閺堫剝鐤嗗鎻掑煂 GAME_OVER"),
+								Message: s.say("run reached GAME_OVER", "游戏结束，到达 GAME_OVER"),
 				Screen:  state.Screen,
 				RunID:   state.RunID,
 				State:   state,
@@ -497,7 +515,7 @@ func (s *Session) loop(ctx context.Context) error {
 		if s.usesStructuredDecisionMode() {
 			promptMode = PromptModeStructured
 		}
-		assembly := s.promptPipeline().Build(promptMode, state, s.todo, s.skills, s.compact, plan, s.knowledge, s.cfg.Language)
+		assembly := s.promptPipeline().Build(promptMode, state, s.todo, s.skills, s.compact, plan, s.knowledge, s.cfg.Language, s.playerSkill)
 		prompt := assembly.Text
 		if err := s.store.RecordPrompt(s.cycle, prompt); err != nil {
 			return err

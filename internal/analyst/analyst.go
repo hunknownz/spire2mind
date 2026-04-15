@@ -48,7 +48,7 @@ func New(cfg config.Config) (*Analyst, error) {
 		bridgeURL = "http://127.0.0.1:8080"
 	}
 
-	llm, err := newLLMProvider(cfg)
+	llm, err := NewLLMProvider(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("init LLM provider: %w", err)
 	}

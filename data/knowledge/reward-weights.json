@@ -1,0 +1,103 @@
+{
+  "knowledge_score_multiplier": 1.5,
+  "timing_modifiers": {
+    "early_floor_threshold": 5,
+    "late_floor_threshold": 10,
+    "early_card_early_floor_bonus": 2.0,
+    "early_card_late_floor_penalty": -2.0,
+    "late_card_late_floor_bonus": 2.0,
+    "late_card_early_floor_penalty": -3.0
+  },
+  "defense_modifiers": {
+    "low_hp_threshold": 0.50,
+    "defense_low_hp_bonus": 3.0,
+    "scaling_low_hp_penalty": -2.0
+  },
+  "basic_card_penalty": -2.0,
+  "card_specific_bonuses": {
+    "strong_commons": {
+      "cards": ["SHRUG_IT_OFF", "IRON_WAVE", "POMMEL_STRIKE", "THUNDERCLAP", "SWORD_BOOMERANG", "CLOTHESLINE", "HEADBUTT", "TRUE_GRIT"],
+      "bonus": 5.0
+    },
+    "utility_commons": {
+      "cards": ["ARMAMENTS", "BATTLE_TRANCE", "RAGE", "SPOT_WEAKNESS"],
+      "bonus": 1.5
+    },
+    "scaling_anti_synergy": {
+      "cards": ["LIMIT_BREAK", "BARRICADE", "JUGGERNAUT", "FIRE_BREATHING", "SENTRY"],
+      "bonus": -5.0
+    },
+    "build_around": {
+      "cards": ["PERFECTED_STRIKE", "SEARING_BLOW"],
+      "bonus": -3.0
+    },
+    "scaling_low_hp_extra_penalty": {
+      "cards": ["LIMIT_BREAK", "BARRICADE", "JUGGERNAUT", "DEMON_FORM"],
+      "bonus": -3.5
+    }
+  },
+  "early_act_bonuses": {
+    "floor_threshold": 6,
+    "card_bonuses": {
+      "SHRUG_IT_OFF": 9.0,
+      "IRON_WAVE": 8.0,
+      "POMMEL_STRIKE": 8.0,
+      "THUNDERCLAP": 8.0,
+      "SWORD_BOOMERANG": 8.0,
+      "CLOTHESLINE": 6.5,
+      "HEADBUTT": 6.5,
+      "TRUE_GRIT": 6.5,
+      "ARMAMENTS": 3.0,
+      "LIMIT_BREAK": -6.0,
+      "BARRICADE": -6.0,
+      "JUGGERNAUT": -6.0,
+      "FIRE_BREATHING": -6.0,
+      "SEARING_BLOW": -6.0
+    },
+    "keyword_bonuses": {
+      "block": 2.0,
+      "damage": 2.0
+    }
+  },
+  "survival_bonuses": {
+    "hp_threshold": 0.55,
+    "card_bonuses": {
+      "SHRUG_IT_OFF": 4.0,
+      "IRON_WAVE": 4.0,
+      "TRUE_GRIT": 4.0,
+      "CLOTHESLINE": 4.0,
+      "ARMAMENTS": 1.5,
+      "POMMEL_STRIKE": 1.5,
+      "HEADBUTT": 1.5
+    },
+    "keyword_bonuses": {
+      "block": 2.0
+    }
+  },
+  "immediate_power_bonuses": {
+    "floor_threshold": 12,
+    "card_bonuses": {
+      "SHRUG_IT_OFF": 2.5,
+      "IRON_WAVE": 2.5,
+      "POMMEL_STRIKE": 2.5,
+      "THUNDERCLAP": 2.5,
+      "HEADBUTT": 2.5,
+      "CLOTHESLINE": 2.5,
+      "TRUE_GRIT": 2.5,
+      "BATTLE_TRANCE": 0.8,
+      "ARMAMENTS": 0.8,
+      "RAGE": 0.8,
+      "SPOT_WEAKNESS": 0.8,
+      "LIMIT_BREAK": -2.5,
+      "BARRICADE": -2.5,
+      "JUGGERNAUT": -2.5,
+      "DEMON_FORM": -2.5,
+      "SEARING_BLOW": -2.5
+    },
+    "keyword_bonuses": {
+      "draw": 0.5,
+      "block": 0.5,
+      "damage": 0.5
+    }
+  }
+}

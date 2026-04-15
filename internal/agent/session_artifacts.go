@@ -30,6 +30,9 @@ func (s *Session) reflectIfNeeded(state *game.StateSnapshot) {
 		return
 	}
 
+	// Enrich with LLM deep analysis (synchronous, blocks until complete)
+	reflection = s.enrichReflectionWithLLM(reflection, state)
+
 	if runID != "" {
 		s.reflectedRunIDs[runID] = true
 	}

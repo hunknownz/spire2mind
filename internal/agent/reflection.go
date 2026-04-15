@@ -18,6 +18,12 @@ type AttemptReflection struct {
 	Screen          string                  `json:"screen"`
 	Floor           *int                    `json:"floor,omitempty"`
 	CharacterID     string                  `json:"character_id,omitempty"`
+	// Quantitative metrics for multi-dimensional ratchet evaluation
+	FinalHP         int                     `json:"final_hp,omitempty"`
+	MaxHP           int                     `json:"max_hp,omitempty"`
+	GoldAtDeath     int                     `json:"gold_at_death,omitempty"`
+	BasicCardsLeft  int                     `json:"basic_cards_left,omitempty"`
+	ReachedAct2     bool                    `json:"reached_act2,omitempty"`
 	Headline        string                  `json:"headline,omitempty"`
 	TacticalHints   []string                `json:"tactical_hints,omitempty"`
 	FinalRoomDetail []string                `json:"final_room_detail,omitempty"`
@@ -57,6 +63,22 @@ func BuildAttemptReflection(attempt int, state *game.StateSnapshot, todo *TodoMa
 		CharacterID:   reflectionCharacterID(state),
 		Headline:      reflectionHeadline(state),
 		TacticalHints: append([]string(nil), buildReflectionTacticalHints(state)...),
+	}
+
+	// Populate quantitative metrics
+	if state.Run != nil {
+		reflection.FinalHP = state.Run.CurrentHp
+		reflection.MaxHP = state.Run.MaxHp
+		reflection.GoldAtDeath = state.Run.Gold
+		reflection.ReachedAct2 = state.Run.Floor >= 17
+		basicCount := 0
+		for _, card := range state.Run.Deck {
+			id := strings.ToUpper(card.CardID)
+			if strings.Contains(id, "STRIKE") || strings.Contains(id, "DEFEND") {
+				basicCount++
+			}
+		}
+		reflection.BasicCardsLeft = basicCount
 	}
 	if detail := buildReflectionRoomDetail(state); len(detail) > 0 {
 		reflection.FinalRoomDetail = append([]string(nil), detail...)

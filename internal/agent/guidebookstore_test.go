@@ -10,13 +10,14 @@ import (
 )
 
 func TestGuidebookStoreRefreshAggregatesRecentRuns(t *testing.T) {
-	root := t.TempDir()
+	repoRoot := t.TempDir()
+	artifactsRoot := repoRoot // For simplicity in tests, use same directory
 
-	first, err := NewRunStore(root, "guidebook-a")
+	first, err := NewRunStore(artifactsRoot, "guidebook-a")
 	if err != nil {
 		t.Fatalf("new first run store: %v", err)
 	}
-	second, err := NewRunStore(root, "guidebook-b")
+	second, err := NewRunStore(artifactsRoot, "guidebook-b")
 	if err != nil {
 		t.Fatalf("new second run store: %v", err)
 	}
@@ -128,12 +129,12 @@ func TestGuidebookStoreRefreshAggregatesRecentRuns(t *testing.T) {
 	_ = first.Close()
 	_ = second.Close()
 
-	guidebook, err := NewGuidebookStore(root)
+	guidebook, err := NewGuidebookStore(repoRoot)
 	if err != nil {
 		t.Fatalf("new guidebook store: %v", err)
 	}
 
-	snapshot, err := guidebook.Refresh(root, "", i18n.LanguageEnglish)
+	snapshot, err := guidebook.Refresh(artifactsRoot, "", i18n.LanguageEnglish)
 	if err != nil {
 		t.Fatalf("refresh guidebook: %v", err)
 	}

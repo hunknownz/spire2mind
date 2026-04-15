@@ -53,7 +53,7 @@ func NewPromptAssemblyPipeline() *PromptAssemblyPipeline {
 	return &PromptAssemblyPipeline{}
 }
 
-func (p *PromptAssemblyPipeline) Build(mode PromptMode, state *game.StateSnapshot, todo *TodoManager, skills *SkillLibrary, compact *CompactMemory, planner *CombatPlan, knowledge *KnowledgeRetriever, language i18n.Language) PromptAssembly {
+func (p *PromptAssemblyPipeline) Build(mode PromptMode, state *game.StateSnapshot, todo *TodoManager, skills *SkillLibrary, compact *CompactMemory, planner *CombatPlan, knowledge *KnowledgeRetriever, language i18n.Language, playerSkill *PlayerSkillStore) PromptAssembly {
 	loc := i18n.New(language)
 	blocks := make([]promptBlock, 0, 10)
 
@@ -65,6 +65,11 @@ func (p *PromptAssemblyPipeline) Build(mode PromptMode, state *game.StateSnapsho
 		)
 		if block := strings.TrimSpace(p.runObjectiveBlock(state, loc)); block != "" {
 			blocks = append(blocks, promptBlock{Name: "run_objective", Text: block})
+		}
+		if playerSkill != nil {
+			if block := strings.TrimSpace(playerSkill.PromptBlock()); block != "" {
+				blocks = append(blocks, promptBlock{Name: "player_skill", Text: "## Player Identity\n" + block})
+			}
 		}
 		if block := strings.TrimSpace(p.structuredScreenGuidance(state, loc)); block != "" {
 			blocks = append(blocks, promptBlock{Name: "screen_guidance", Text: block})
@@ -153,19 +158,19 @@ func (p *PromptAssemblyPipeline) structuredPromptBudget(state *game.StateSnapsho
 	case "COMBAT":
 		return promptBudget{
 			MaxBytes:      11000,
-			DropOrder:     []string{"entity_knowledge", "todo", "card_knowledge", "tactical_hints"},
+			DropOrder:     []string{"entity_knowledge", "todo", "card_knowledge", "tactical_hints", "player_skill"},
 			TruncateOrder: []string{"planner", "screen_summary", "minimal_state"},
 		}
 	case "MAP", "EVENT", "SHOP", "REWARD", "CARD_SELECTION", "REST":
 		return promptBudget{
 			MaxBytes:      8000,
-			DropOrder:     []string{"entity_knowledge", "compact_memory", "card_knowledge", "todo"},
+			DropOrder:     []string{"entity_knowledge", "compact_memory", "card_knowledge", "todo", "player_skill"},
 			TruncateOrder: []string{"screen_summary", "minimal_state"},
 		}
 	default:
 		return promptBudget{
 			MaxBytes:      6500,
-			DropOrder:     []string{"entity_knowledge", "compact_memory", "todo"},
+			DropOrder:     []string{"entity_knowledge", "compact_memory", "todo", "player_skill"},
 			TruncateOrder: []string{"screen_summary", "minimal_state"},
 		}
 	}

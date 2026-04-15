@@ -21,7 +21,7 @@ type openAIProvider struct {
 	client  *http.Client
 }
 
-func newLLMProvider(cfg config.Config) (LLMProvider, error) {
+func NewLLMProvider(cfg config.Config) (LLMProvider, error) {
 	baseURL := cfg.APIBaseURL
 	if baseURL == "" {
 		baseURL = "http://127.0.0.1:11434"

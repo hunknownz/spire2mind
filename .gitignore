@@ -18,9 +18,4 @@ research/WatcherMod/
 research/sts2-quickRestart/
 tools/local-tts/__pycache__/
 scratch/*
-!scratch/guidebook/
-scratch/guidebook/*
-!scratch/guidebook/combat-playbook.md
-!scratch/guidebook/event-playbook.md
-!scratch/guidebook/guidebook.md
-!scratch/guidebook/living-codex.json
+# Knowledge assets now live in combat/knowledge/ submodule
