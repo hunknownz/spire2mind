@@ -14,3 +14,9 @@
 [submodule "combat"]
 	path = combat
 	url = git@github.com:hunknownz/spire2mind-combat.git
+[submodule "research/autoresearch"]
+	path = research/autoresearch
+	url = https://github.com/karpathy/autoresearch
+[submodule "research/darwin-skill"]
+	path = research/darwin-skill
+	url = https://github.com/alchaincyf/darwin-skill
